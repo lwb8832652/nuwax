@@ -8,6 +8,7 @@ export enum IMPlatformEnum {
   Dingtalk = 'dingtalk',
   Wework = 'wework',
   WechatIlink = 'wechat_ilink',
+  QQ = 'qq',
 }
 
 /**
@@ -18,6 +19,7 @@ export const IM_PLATFORM_LABEL_MAP: Record<IMPlatformEnum, string> = {
   [IMPlatformEnum.Dingtalk]: dict('PC.Constants.ImChannel.platformDingtalk'),
   [IMPlatformEnum.Wework]: dict('PC.Constants.ImChannel.platformWework'),
   [IMPlatformEnum.WechatIlink]: dict('PC.Constants.ImChannel.platformWechat'),
+  [IMPlatformEnum.QQ]: 'QQ',
 };
 
 /**
@@ -28,4 +30,5 @@ export const IM_PLATFORM_ICON_MAP: Record<IMPlatformEnum, string> = {
   [IMPlatformEnum.Dingtalk]: '/icon/brand/dingtalk.png',
   [IMPlatformEnum.Wework]: '/icon/brand/wework.png',
   [IMPlatformEnum.WechatIlink]: '/icon/brand/wechat_ilink.png',
+  [IMPlatformEnum.QQ]: '',
 };

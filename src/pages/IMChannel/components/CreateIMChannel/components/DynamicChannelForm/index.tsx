@@ -157,6 +157,26 @@ const DynamicChannelForm: React.FC<DynamicChannelFormProps> = ({
     );
   }
 
+  // QQ 官方机器人
+  if (platform === IMPlatformEnum.QQ) {
+    return (
+      <>
+        <ProFormText
+          name={['configData', 'botAppId']}
+          label="AppID"
+          rules={commonRules}
+          fieldProps={maxProps}
+        />
+        <ProFormText.Password
+          name={['configData', 'botToken']}
+          label="AppSecret"
+          rules={commonRules}
+          fieldProps={maxProps}
+        />
+      </>
+    );
+  }
+
   // 微信
   if (platform === IMPlatformEnum.WechatIlink) {
     return null;

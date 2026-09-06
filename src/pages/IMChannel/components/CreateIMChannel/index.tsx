@@ -96,7 +96,8 @@ const CreateIMChannel: React.FC<CreateIMChannelProps> = ({
           enabled: true,
           outputMode:
             platform === IMPlatformEnum.Wework ||
-            platform === IMPlatformEnum.WechatIlink
+            platform === IMPlatformEnum.WechatIlink ||
+            platform === IMPlatformEnum.QQ
               ? 'once'
               : 'stream',
         });
@@ -171,7 +172,9 @@ const CreateIMChannel: React.FC<CreateIMChannelProps> = ({
       robotType === IMChannelTypeEnum.Bot) ||
     (platform === IMPlatformEnum.Dingtalk &&
       robotType === IMChannelTypeEnum.Bot) ||
-    (platform === IMPlatformEnum.Wework && robotType === IMChannelTypeEnum.App);
+    (platform === IMPlatformEnum.Wework &&
+      robotType === IMChannelTypeEnum.App) ||
+    platform === IMPlatformEnum.QQ;
 
   const getTitle = () => {
     const pName = platform
@@ -189,6 +192,7 @@ const CreateIMChannel: React.FC<CreateIMChannelProps> = ({
   };
 
   const isWechat = platform === IMPlatformEnum.WechatIlink;
+  const isQq = platform === IMPlatformEnum.QQ;
 
   return (
     <XModalForm
@@ -251,7 +255,7 @@ const CreateIMChannel: React.FC<CreateIMChannelProps> = ({
             value: 'once',
           },
         ]}
-        disabled={platform === IMPlatformEnum.Wework || isWechat}
+        disabled={platform === IMPlatformEnum.Wework || isWechat || isQq}
       />
       <ProFormSwitch
         name="enabled"
