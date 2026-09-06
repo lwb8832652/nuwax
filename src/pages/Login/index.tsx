@@ -14,6 +14,7 @@ import {
   isWeakNumber,
   validatePassword,
 } from '@/utils/common';
+import { syncTicketCookie } from '@/utils/syncTicketCookie';
 import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import {
   Button,
@@ -141,6 +142,7 @@ const Login: React.FC = () => {
         localStorage.setItem(ACCESS_TOKEN, token);
         localStorage.setItem(EXPIRE_DATE, expireDate);
         localStorage.setItem(PHONE, params[0].phoneOrEmail);
+        syncTicketCookie();
         try {
           const latestUserInfo = await UserService.refreshUserInfo();
           await syncLangFromUserInfo(latestUserInfo);

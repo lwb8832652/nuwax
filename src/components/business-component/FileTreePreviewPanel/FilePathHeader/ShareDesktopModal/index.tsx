@@ -168,7 +168,7 @@ const ShareDesktopModal: React.FC<ShareDesktopModalProps> = ({
       const { data: shareData, code } = await apiAgentConversationShare(data);
 
       if (code === SUCCESS_CODE) {
-        const baseUrl = window?.location?.origin || '';
+        const baseUrl = process.env.BASE_URL || window?.location?.origin || '';
         const path = '/static/desktop-preview.html';
 
         const query = new URLSearchParams();
@@ -211,7 +211,7 @@ const ShareDesktopModal: React.FC<ShareDesktopModalProps> = ({
 
       const { data: shareData, code } = await apiAgentConversationShare(data);
       if (code === SUCCESS_CODE) {
-        const baseUrl = window?.location?.origin || '';
+        const baseUrl = process.env.BASE_URL || window?.location?.origin || '';
         const path = '/static/file-preview.html';
 
         const query = new URLSearchParams();

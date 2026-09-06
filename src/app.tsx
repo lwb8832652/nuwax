@@ -20,6 +20,13 @@ import { unifiedThemeService } from './services/unifiedThemeService';
 import { UserService } from './services/userService';
 import type { MenuItemDto } from './types/interfaces/menu';
 import { getAntdLocale } from './utils/i18nAdapters';
+import { syncTicketCookie } from './utils/syncTicketCookie';
+
+// 跨域部署（页面源 ≠ API 源）时，把登录票据同步成 ticket Cookie，使 <img>/<a> 资源请求能通过鉴权。
+// 同源部署由登录接口的 HttpOnly Set-Cookie 兜底，此处自动跳过。逻辑需打进生产 bundle，
+// 故不做 NODE_ENV 判断（见 utils/syncTicketCookie.ts 注释）。
+syncTicketCookie();
+
 /**
  * 全局初始状态类型
  */

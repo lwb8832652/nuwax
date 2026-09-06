@@ -28,6 +28,22 @@ export function normalizeTerminalWsUrl(base: string): string {
 }
 
 /**
+ * 解析后端入口地址
+ * - 配置了 BASE_URL 时（跨域联调 / dev 包独立部署）用 BASE_URL
+ * - 未配置时回落到当前页面地址（同源部署，如 production）
+ */
+function resolveBackendOrigin(): string {
+  const base = process.env.BASE_URL;
+  if (base) {
+    return base;
+  }
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return '';
+}
+
+/**
  * 构建 ttyd 终端 WebSocket 地址
  * @param conversationId 会话 ID
  */
@@ -36,17 +52,18 @@ export function buildTtydTerminalWsUrl(conversationId?: number): string {
     return '';
   }
 
-  if (typeof window !== 'undefined') {
-    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
-
-    // 当前域名
-    const host = window.location.host;
-
-    const url = normalizeTerminalWsUrl(
-      `${wsScheme}://${host}/computer/terminal/${conversationId}/ws`,
-    );
-    // console.log('buildTtydTerminalWsUrl', url);
-    return url;
+  const origin = resolveBackendOrigin();
+  if (!origin) {
+    return normalizeTerminalWsUrl(DEV_TTYD_WS_FALLBACK(conversationId));
   }
-  return normalizeTerminalWsUrl(DEV_TTYD_WS_FALLBACK(conversationId));
+
+  try {
+    const u = new URL(origin);
+    const wsScheme = u.protocol === 'https:' ? 'wss' : 'ws';
+    return normalizeTerminalWsUrl(
+      `${wsScheme}://${u.host}/computer/terminal/${conversationId}/ws`,
+    );
+  } catch {
+    return normalizeTerminalWsUrl(DEV_TTYD_WS_FALLBACK(conversationId));
+  }
 }
