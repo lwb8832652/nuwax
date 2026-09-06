@@ -83,6 +83,43 @@ export interface WeworkAppConfig {
 }
 
 /**
+ * QQ 官方机器人配置
+ */
+export interface QqConfig {
+  botAppId: string;
+  botToken: string;
+  botId?: string;
+}
+
+/**
+ * QQ 渠道 WebSocket 连接状态（后端单连接，同一平台下所有卡片共用）
+ */
+export interface QqChannelStatus {
+  /** 客户端是否已启动 */
+  running: boolean;
+  /** WebSocket 是否已打开 */
+  connected: boolean;
+  /** 是否已鉴权成功（收到 READY） */
+  authenticated: boolean;
+  /** 是否存在已启用的 QQ 渠道配置 */
+  hasEnabledConfig: boolean;
+  /** 当前生效的机器人 AppID */
+  botAppId?: string;
+  /** QQ 网关下发的会话 ID */
+  sessionId?: string;
+  /** 最近一次收到网关消息的时间戳（毫秒） */
+  lastEventAt?: number;
+  /** 最近一次 WebSocket 打开的时间戳（毫秒） */
+  lastConnectedAt?: number;
+  /** 自启动以来的重连次数 */
+  reconnectCount?: number;
+  /** 最近一次错误信息 */
+  lastError?: string;
+  /** 当前订阅的 intent 位掩码 */
+  intents?: number;
+}
+
+/**
  * 添加 IM 渠道配置参数
  */
 export interface AddIMChannelParams {

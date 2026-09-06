@@ -10,15 +10,22 @@ import {
 import { dict } from '@/services/i18nRuntime';
 import {
   apiDeleteIMConfigChannel,
+  apiGetQqChannelStatus,
   apiIMConfigChannelList,
+  apiStartQqChannel,
+  apiStopQqChannel,
 } from '@/services/imChannel';
-import { IMChannelInfo, IMChannelTypeEnum } from '@/types/interfaces/imChannel';
+import {
+  IMChannelInfo,
+  IMChannelTypeEnum,
+  QqChannelStatus,
+} from '@/types/interfaces/imChannel';
 import {
   DeleteOutlined,
   EditOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import { Button, message, Modal, Tag, Tooltip } from 'antd';
+import { Button, message, Modal, Switch, Tag, Tooltip } from 'antd';
 import classNames from 'classnames';
 import dayjs from 'dayjs';
 import {
@@ -97,6 +104,17 @@ const ConfigFieldValue: React.FC<{ record: IMChannelInfo }> = ({ record }) => {
     );
   }
 
+  if (platform === IMPlatformEnum.QQ) {
+    return (
+      <span
+        style={{ color: '#828894', fontSize: 12 }}
+        className="text-ellipsis"
+      >
+        AppID: {configData.botAppId || '-'}
+      </span>
+    );
+  }
+
   return null;
 };
 
@@ -106,7 +124,10 @@ const IMChannelCardList = forwardRef<
 >(({ onEdit, onDeleteSuccess, platform, spaceId, keyword = '' }, ref) => {
   const [loading, setLoading] = useState(false);
   const [allRobots, setAllRobots] = useState<IMChannelInfo[]>([]);
-  // const [switchingIds, setSwitchingIds] = useState<number[]>([]);
+  // QQ 渠道后端为单连接，同一平台下所有卡片共用同一份连接状态
+  const [qqStatus, setQqStatus] = useState<QqChannelStatus | null>(null);
+  const [qqSwitching, setQqSwitching] = useState(false);
+  const isQqPlatform = platform === IMPlatformEnum.QQ;
 
   const fetchData = useCallback(async () => {
     if (!platform) return; // 暂无平台，不请求列表
@@ -126,6 +147,28 @@ const IMChannelCardList = forwardRef<
       setLoading(false);
     }
   }, [platform, spaceId]);
+
+  const fetchQqStatus = useCallback(async () => {
+    try {
+      const res = await apiGetQqChannelStatus();
+      if (res.code === SUCCESS_CODE) {
+        setQqStatus(res.data ?? null);
+      }
+    } catch (error) {
+      console.error('Fetch QQ channel status failed:', error);
+    }
+  }, []);
+
+  // 仅在当前平台为 QQ 时开启 10 秒轮询，避免其他平台产生无意义请求
+  useEffect(() => {
+    if (!isQqPlatform) {
+      setQqStatus(null);
+      return;
+    }
+    fetchQqStatus();
+    const timer = setInterval(fetchQqStatus, 10000);
+    return () => clearInterval(timer);
+  }, [isQqPlatform, fetchQqStatus]);
 
   const filteredRobotList = useMemo(() => {
     if (!keyword) return allRobots;
@@ -170,6 +213,76 @@ const IMChannelCardList = forwardRef<
   //     setSwitchingIds((prev) => prev.filter((id) => id !== record.id));
   //   }
   // };
+
+  const handleToggleQqConnection = async (checked: boolean) => {
+    setQqSwitching(true);
+    try {
+      const res = checked
+        ? await apiStartQqChannel()
+        : await apiStopQqChannel();
+      if (res.code === SUCCESS_CODE) {
+        message.success(
+          checked
+            ? dict('PC.Pages.IMChannel.CardList.qqConnectSuccess')
+            : dict('PC.Pages.IMChannel.CardList.qqDisconnectSuccess'),
+        );
+        setQqStatus(res.data ?? null);
+        await fetchQqStatus();
+      } else {
+        message.error(
+          res.message || dict('PC.Pages.IMChannel.CardList.qqConnectFailed'),
+        );
+      }
+    } catch (error) {
+      console.error('Toggle QQ connection failed:', error);
+      message.error(dict('PC.Pages.IMChannel.CardList.qqConnectFailed'));
+    } finally {
+      setQqSwitching(false);
+    }
+  };
+
+  const renderQqStatusTag = () => {
+    if (!qqStatus) return null;
+    if (!qqStatus.hasEnabledConfig) {
+      return (
+        <Tag color="default" style={{ marginRight: 0, flexShrink: 0 }}>
+          {dict('PC.Pages.IMChannel.CardList.qqStatusNoConfig')}
+        </Tag>
+      );
+    }
+    if (qqStatus.connected && qqStatus.authenticated) {
+      return (
+        <Tag color="success" style={{ marginRight: 0, flexShrink: 0 }}>
+          {dict('PC.Pages.IMChannel.CardList.qqStatusConnected')}
+        </Tag>
+      );
+    }
+    if (qqStatus.connected) {
+      return (
+        <Tag color="processing" style={{ marginRight: 0, flexShrink: 0 }}>
+          {dict('PC.Pages.IMChannel.CardList.qqStatusConnecting')}
+        </Tag>
+      );
+    }
+    if (qqStatus.running) {
+      const count = qqStatus.reconnectCount ?? 0;
+      return (
+        <Tooltip title={qqStatus.lastError}>
+          <Tag color="warning" style={{ marginRight: 0, flexShrink: 0 }}>
+            {dict('PC.Pages.IMChannel.CardList.qqStatusReconnecting')}
+            {count > 0 ? ` (${count})` : ''}
+          </Tag>
+        </Tooltip>
+      );
+    }
+    return (
+      <Tooltip title={qqStatus.lastError}>
+        <Tag style={{ marginRight: 0, flexShrink: 0 }}>
+          {dict('PC.Pages.IMChannel.CardList.qqStatusDisconnected')}
+        </Tag>
+      </Tooltip>
+    );
+  };
 
   const handleDelete = (id: number, channel: string, title: string) => {
     Modal.confirm({
@@ -230,6 +343,7 @@ const IMChannelCardList = forwardRef<
                   : dict('PC.Pages.IMChannel.CardList.app')}
               </Tag>
             )}
+            {record.channel === IMPlatformEnum.QQ && renderQqStatusTag()}
           </div>
         }
         name={record.name}
@@ -248,14 +362,23 @@ const IMChannelCardList = forwardRef<
           <div className={cx(styles.footer)}>
             <ConfigFieldValue record={record} />
 
-            {/* <Tooltip title={isEnabled ? '禁用' : '启用'}>
+            {record.channel === IMPlatformEnum.QQ && (
+              <Tooltip
+                title={
+                  qqStatus?.hasEnabledConfig
+                    ? dict('PC.Pages.IMChannel.CardList.qqConnection')
+                    : dict('PC.Pages.IMChannel.CardList.qqStatusNoConfig')
+                }
+              >
                 <Switch
                   size="small"
-                  checked={isEnabled}
-                  loading={switchingIds.includes(record.id)}
-                  onChange={(checked) => handleToggleStatus(record, checked)}
+                  checked={Boolean(qqStatus?.running)}
+                  loading={qqSwitching}
+                  disabled={!qqStatus?.hasEnabledConfig}
+                  onChange={(checked) => handleToggleQqConnection(checked)}
                 />
-              </Tooltip> */}
+              </Tooltip>
+            )}
             <div className={cx(styles.actions)}>
               <Tooltip title={dict('PC.Pages.IMChannel.CardList.edit')}>
                 <Button

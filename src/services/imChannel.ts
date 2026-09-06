@@ -1,6 +1,7 @@
 import type {
   AddIMChannelParams,
   IMChannelInfo,
+  QqChannelStatus,
 } from '@/types/interfaces/imChannel';
 import type { RequestResponse } from '@/types/interfaces/request';
 import { request } from 'umi';
@@ -100,6 +101,39 @@ export async function apiIMConfigChannelStatistics(data: {
   return request('/api/im-config/channel/statistics', {
     method: 'POST',
     data,
+  });
+}
+
+/**
+ * 查询 QQ 渠道连接状态
+ */
+export async function apiGetQqChannelStatus(): Promise<
+  RequestResponse<QqChannelStatus>
+> {
+  return request('/api/im-config/qq/status', {
+    method: 'GET',
+  });
+}
+
+/**
+ * 启动 QQ 渠道连接
+ */
+export async function apiStartQqChannel(): Promise<
+  RequestResponse<QqChannelStatus>
+> {
+  return request('/api/im-config/qq/start', {
+    method: 'POST',
+  });
+}
+
+/**
+ * 停止 QQ 渠道连接
+ */
+export async function apiStopQqChannel(): Promise<
+  RequestResponse<QqChannelStatus>
+> {
+  return request('/api/im-config/qq/stop', {
+    method: 'POST',
   });
 }
 
