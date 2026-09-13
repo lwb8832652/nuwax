@@ -102,7 +102,7 @@ const LoginLangSwitcher: React.FC = () => {
         overlayClassName="login-lang-dropdown"
       >
         <div className={styles.trigger}>
-          <GlobalOutlined style={{ fontSize: 16 }} />
+          <GlobalOutlined style={{ fontSize: 13 }} />
           <span>{currentLangName}</span>
         </div>
       </Dropdown>

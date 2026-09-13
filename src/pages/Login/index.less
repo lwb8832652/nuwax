@@ -1,148 +1,45 @@
 @import '@/styles/token';
-
-@zero-value: 0;
-@icon-padding-top: 5px;
-@icon-padding-bottom: 5px;
-@icon-padding-right: 15px;
-@icon-border-color: rgba(12, 20, 102, 12%);
-@icon-text-color: rgba(0, 0, 0, 70%);
-@divider-height: 20px;
-@divider-width: 1px;
+@import './login-theme.less';
 
 .login-form-box {
-  // width: 100%; /* 宽度自适应 */
-  width: 420px;
+  width: 384px;
   max-width: 100%;
   box-sizing: border-box;
-  max-height: none;
-  min-height: 540px;
-  height: auto;
-  padding: 40px 32px;
-  border-radius: 14px;
-  border: 1px solid var(--nx-line);
-  background: var(--nx-paper);
-  box-shadow: var(--nx-shadow-raised);
+  padding: 20px 26px 25px;
+  border: 1px solid @login-line;
+  border-radius: 12px;
+  background: @login-bg;
 
-  overflow: auto;
-
-  .phone-input-compact {
-    border-radius: @borderRadius;
-    background-color: @colorFillTertiary;
-    display: flex;
-    align-items: center;
-
-    .icon {
-      position: relative;
-      padding: @icon-padding-top @icon-padding-right @icon-padding-bottom
-        @padding;
-      color: @icon-text-color;
-      border-right: @zero-value !important;
-
-      &::after {
-        content: '';
-        position: absolute;
-        right: @zero-value;
-        top: 50%;
-        transform: translateY(-50%);
-        width: @divider-width;
-        height: @divider-height;
-        background-color: @icon-border-color;
-      }
-    }
-
-    .current-input {
-      flex: 1;
-      border: none !important;
-      background-color: transparent !important;
-      padding: @paddingXs @padding !important;
-      border-radius: 0 @borderRadius @borderRadius 0 !important;
-      box-shadow: none !important;
-
-      :global {
-        .ant-input {
-          background-color: transparent !important;
-        }
-      }
-    }
-  }
-
-  .current-input {
-    padding: @zero-value !important;
-  }
-
-  :global {
-    .ant-input-group-addon,
-    .ant-input,
-    .ant-btn {
-      border: 0 !important;
-      border-radius: 8px;
-      padding: 8px;
-
-      &:focus {
-        border: 0 !important;
-        box-shadow: none !important;
-      }
-    }
-
-    .ant-input-group-addon {
-      padding-right: 0;
-      background: transparent !important;
-    }
-
-    // 输入框自动填充样式
-    input:-webkit-autofill {
-      -webkit-text-fill-color: var(--nx-ink) !important; /* 保证字体颜色正常 */
-      box-shadow: 0 0 0 1000px transparent inset !important; /* 背景覆盖成透明 */
-      transition: background-color 5000s ease-in-out 0s;
-    }
-  }
-
-  .input {
-    padding: 8px 16px;
-    border: none !important;
-    border-radius: 8px !important;
-    background-color: @colorFillTertiary !important;
-
-    &:focus,
-    &:focus-within {
-      border: none !important;
-      outline: none !important;
-      box-shadow: none !important;
-    }
-
-    :global {
-      .ant-input {
-        background-color: transparent !important;
-      }
-    }
-  }
-
-  // Input 输入框样式定制
-  .form {
-    .login {
-      padding-top: 20px;
-    }
-
-    .icon {
-      display: inline-block;
-      padding: 5px 15px;
-      border-right: 1px solid rgba(12, 20, 102, 12%);
-      color: rgba(0, 0, 0, 70%);
-    }
-  }
-
+  // ===== Tab 切换 =====
   .segmented {
-    height: 38px;
+    height: 32px;
+    border-radius: 7px;
 
     :global {
+      .ant-segmented-group {
+        gap: 2px;
+      }
+
+      .ant-segmented-item {
+        border-radius: 5px;
+      }
+
+      .ant-segmented-item-selected {
+        border-radius: 5px;
+        box-shadow: 0 1px 2px 0 rgba(20, 20, 20, 5%);
+      }
+
       .ant-segmented-item-label {
-        line-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 28px;
+        padding: 0 8px;
+        line-height: 16.5px;
+        font-size: 11px;
+        font-weight: 550;
       }
     }
-  }
-
-  .btn {
-    height: 38px;
   }
 
   .segmented-item-text {
@@ -150,17 +47,277 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     width: 100%;
+    text-align: center;
   }
 
-  .protocol-wrapper {
-    display: flex !important;
-    align-items: flex-start !important;
+  // ===== WELCOME 区 =====
+  .welcome-box {
+    margin-top: 41px;
+
+    .welcome-badge {
+      margin: 0;
+      font-family: @login-font-mono;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: @login-muted;
+    }
+
+    .welcome-title {
+      margin: 9px 0 0;
+      font-size: 22px;
+      font-weight: 620;
+      line-height: 33px;
+      letter-spacing: -0.025em;
+      color: @login-ink;
+    }
+
+    .welcome-sub {
+      margin: 8px 0 0;
+      font-size: 11px;
+      line-height: 16.5px;
+      color: @login-muted;
+    }
+  }
+
+  // ===== 表单 =====
+  .form {
+    margin-top: 27px;
+
+    .field {
+      margin-bottom: 14px;
+
+      :global {
+        .ant-form-item-label {
+          padding: 0 0 6px;
+
+          > label {
+            height: auto;
+            font-size: 11px;
+            font-weight: 550;
+            line-height: 16.5px;
+            color: @login-sub;
+          }
+        }
+
+        .ant-form-item-explain-error {
+          padding-top: 4px;
+          font-size: 10px;
+        }
+      }
+    }
+
+    .input {
+      height: 40px;
+      padding: 0 12px;
+      border: 1px solid @login-line !important;
+      border-radius: 7px !important;
+      background-color: @login-fill !important;
+      box-sizing: border-box;
+      font-size: 12px;
+
+      &::placeholder {
+        color: @login-placeholder;
+        font-size: 12px;
+      }
+
+      &:hover {
+        border-color: @login-line-2 !important;
+        background-color: @login-fill !important;
+      }
+
+      &:focus,
+      &:focus-within {
+        border-color: @login-accent !important;
+        background-color: @login-bg !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+
+      :global {
+        .ant-input {
+          background-color: transparent !important;
+          font-size: 12px;
+
+          &::placeholder {
+            color: @login-placeholder;
+            font-size: 12px;
+          }
+        }
+
+        .ant-input-suffix {
+          color: @login-help;
+        }
+      }
+    }
+
+    // 手机号输入（+86 前缀）
+    .phone-input-compact {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      padding: 0;
+      border: 1px solid @login-line;
+      border-radius: 7px;
+      background-color: @login-fill;
+      box-sizing: border-box;
+      transition: border-color 0.2s ease;
+
+      &:hover {
+        border-color: @login-line-2;
+      }
+
+      &:focus-within {
+        border-color: @login-accent;
+        background-color: @login-bg;
+      }
+
+      .icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+        height: 22px;
+        padding: 0 10px 0 11px;
+        font-family: @login-font-mono;
+        font-size: 11px;
+        color: @login-sub;
+
+        &::after {
+          content: '';
+          position: absolute;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 1px;
+          height: 22px;
+          background-color: @login-line-2;
+        }
+      }
+
+      .current-input {
+        flex: 1;
+        min-width: 0;
+        height: 38px;
+        border: none !important;
+        border-radius: 0 7px 7px 0 !important;
+        background-color: transparent !important;
+        box-shadow: none !important;
+
+        &:hover,
+        &:focus,
+        &:focus-within {
+          border: none !important;
+          background-color: transparent !important;
+          box-shadow: none !important;
+        }
+      }
+    }
+
+    // 协议行
+    .protocol-item {
+      margin: 19px 0 0;
+
+      :global {
+        .ant-checkbox {
+          top: 0;
+
+          .ant-checkbox-inner {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+          }
+        }
+      }
+    }
+
+    .protocol-wrapper {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 10px;
+      line-height: 15px;
+
+      :global {
+        span {
+          font-size: 10px;
+          line-height: 15px;
+          color: @login-muted;
+        }
+
+        a {
+          font-size: 10px;
+          line-height: 15px;
+          color: @login-sub;
+          text-decoration: underline;
+          text-decoration-color: @login-link-line;
+          text-underline-offset: 2px;
+
+          &:hover {
+            color: @login-ink;
+          }
+        }
+      }
+    }
+
+    // 登录按钮
+    .login {
+      margin: 8px 0 0;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      height: 40px;
+      border: none;
+      border-radius: 7px;
+      background: @login-ink;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 18px;
+
+      &:hover,
+      &:focus {
+        background: @login-ink-2 !important;
+      }
+    }
+  }
+
+  // ===== 底部帮助行 =====
+  .help-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    margin-top: 22px;
+    font-size: 10px;
+    line-height: 15px;
+    color: @login-help;
+
+    .support-link {
+      color: @login-accent;
+      cursor: pointer;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  // 输入框自动填充样式
+  :global {
+    input:-webkit-autofill {
+      -webkit-text-fill-color: @login-ink !important;
+      box-shadow: 0 0 0 1000px transparent inset !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
   }
 }
 
 @media (max-width: 480px) {
   .login-form-box {
-    padding: 28px 20px;
-    min-height: 500px;
+    padding: 20px 18px;
   }
 }

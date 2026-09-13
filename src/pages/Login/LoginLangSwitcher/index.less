@@ -1,39 +1,33 @@
 @import '@/styles/token';
+@import '../login-theme.less';
 
 .switcherContainer {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: 1001;
   display: flex;
   align-items: center;
 
   .trigger {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    background: rgba(255, 255, 255, 60%);
-    border: 1px solid rgba(255, 255, 255, 80%);
-    border-radius: 8px;
-    backdrop-filter: blur(8px);
+    gap: 6px;
+    height: 30px;
+    padding: 0 9px;
+    box-sizing: border-box;
+    background: @login-bg;
+    border: 1px solid @login-line;
+    border-radius: 7px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    color: @colorText;
-    font-size: 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 5%);
+    transition: border-color 0.2s ease, color 0.2s ease;
+    color: #555552;
+    font-size: 12px;
 
     &:hover {
-      background: rgba(255, 255, 255, 90%);
-      border-color: @colorPrimary;
-      color: @colorPrimary;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 10%);
-      transform: translateY(-1px);
+      border-color: @login-line-2;
+      color: @login-ink;
     }
   }
 }
 
-:global {
+::global {
   .login-lang-dropdown {
     min-width: 140px !important;
     padding: 4px !important;

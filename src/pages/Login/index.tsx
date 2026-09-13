@@ -1,5 +1,4 @@
 import AliyunCaptcha, { AliyunCaptchaRef } from '@/components/AliyunCaptcha';
-import SiteFooter from '@/components/SiteFooter';
 import { ACCESS_TOKEN, EXPIRE_DATE, PHONE } from '@/constants/home.constants';
 import useRequestPromiseBridge from '@/hooks/useRequestPromiseBridge';
 import { apiLogin } from '@/services/account';
@@ -15,7 +14,11 @@ import {
   validatePassword,
 } from '@/utils/common';
 import { syncTicketCookie } from '@/utils/syncTicketCookie';
-import { DownOutlined, ExclamationCircleFilled } from '@ant-design/icons';
+import {
+  ArrowRightOutlined,
+  DownOutlined,
+  ExclamationCircleFilled,
+} from '@ant-design/icons';
 import {
   Button,
   Checkbox,
@@ -26,19 +29,14 @@ import {
   Modal,
   Segmented,
   Space,
-  theme,
   Tooltip,
-  Typography,
 } from 'antd';
 import classNames from 'classnames';
 import React, { useEffect, useRef, useState } from 'react';
 import { history, useModel, useSearchParams } from 'umi';
 import BasicLayout from './BasicLayout';
 import styles from './index.less';
-import LoginLangSwitcher from './LoginLangSwitcher';
 import SiteProtocol from './SiteProtocol';
-
-const { Title } = Typography;
 
 type SegmentedItemType = { label: React.ReactNode; value: string };
 
@@ -482,7 +480,6 @@ const Login: React.FC = () => {
     setLoginType(Number(value));
     loginTypeRef.current = Number(value);
   };
-  const { token } = theme.useToken();
   const options: SegmentedItemType[] = [
     {
       label: (
@@ -502,170 +499,167 @@ const Login: React.FC = () => {
     },
   ];
 
+  const isEmailAuth = tenantConfigInfo?.authType === 3;
+
   return (
     <ConfigProvider
       theme={{
         token: {},
         components: {
           Segmented: {
-            itemSelectedColor: token.colorPrimary,
+            itemSelectedColor: '#292928',
+            itemSelectedBg: '#FFFFFF',
             itemHoverBg: 'transparent',
             itemActiveBg: 'transparent',
-            trackBg: token.colorFillTertiary,
-            itemColor: token.colorTextTertiary,
-            itemHoverColor: token.colorPrimary,
+            trackBg: '#F6F6F4',
+            itemColor: '#8A8A87',
+            itemHoverColor: '#292928',
+          },
+          Checkbox: {
+            colorPrimary: '#5E6AD2',
+            colorPrimaryHover: '#5E6AD2',
           },
         },
       }}
     >
-      <LoginLangSwitcher />
       <BasicLayout>
-        <div>
-          {loadEnd && (
-            <div className={cx(styles['login-form-box'])}>
-              <Segmented
-                className={cx(styles.segmented)}
-                options={options}
-                value={loginType + ''}
-                onChange={handleChangeType}
-                block
-              />
-              <Form
-                form={form}
-                validateTrigger="onBlur"
-                initialValues={{ areaCode: '86' }}
-                rootClassName={cx(styles.form, 'flex', 'flex-col')}
-                name="login"
-                onFinish={onFinish}
+        {loadEnd && (
+          <div className={cx(styles['login-form-box'])}>
+            <Segmented
+              className={cx(styles.segmented)}
+              options={options}
+              value={loginType + ''}
+              onChange={handleChangeType}
+              block
+            />
+            <div className={cx(styles['welcome-box'])}>
+              <p className={cx(styles['welcome-badge'])}>
+                {dict('PC.Pages.Login.welcomeBadge')}
+              </p>
+              <h2 className={cx(styles['welcome-title'])}>
+                {dict('PC.Pages.Login.welcomeTitle')}
+              </h2>
+              <p className={cx(styles['welcome-sub'])}>
+                {loginType === LoginTypeEnum.Password
+                  ? dict('PC.Pages.Login.welcomeSubPassword')
+                  : dict('PC.Pages.Login.welcomeSubCode')}
+              </p>
+            </div>
+            <Form
+              form={form}
+              layout="vertical"
+              requiredMark={false}
+              validateTrigger="onBlur"
+              initialValues={{ areaCode: '86' }}
+              rootClassName={cx(styles.form)}
+              name="login"
+              onFinish={onFinish}
+            >
+              <Form.Item
+                className={cx(styles.field)}
+                label={
+                  isEmailAuth
+                    ? dict('PC.Pages.Login.emailLabel')
+                    : dict('PC.Pages.Login.phoneLabel')
+                }
               >
-                <Form.Item>
-                  <Title level={3} style={{ marginTop: 48 }}>
-                    {dict(
-                      'PC.Pages.Login.welcome',
-                      tenantConfigInfo?.siteName || '',
-                    )}
-                  </Title>
-                </Form.Item>
-                <Form.Item>
-                  {tenantConfigInfo?.authType === 3 ? (
+                {isEmailAuth ? (
+                  <Form.Item
+                    name="phoneOrEmail"
+                    noStyle
+                    rules={getPhoneOrEmailRules()}
+                  >
+                    <Input
+                      rootClassName={cx(styles.input)}
+                      placeholder={dict('PC.Pages.Login.inputEmailPlaceholder')}
+                    />
+                  </Form.Item>
+                ) : (
+                  <Space.Compact
+                    block
+                    className={cx(styles['phone-input-compact'])}
+                  >
+                    <div className={cx(styles.icon)}>
+                      +86
+                      <DownOutlined style={{ marginLeft: 4, fontSize: 10 }} />
+                    </div>
                     <Form.Item
                       name="phoneOrEmail"
                       noStyle
                       rules={getPhoneOrEmailRules()}
                     >
                       <Input
-                        rootClassName={cx(styles.input)}
                         placeholder={dict(
-                          'PC.Pages.Login.inputEmailPlaceholder',
+                          'PC.Pages.Login.inputPhonePlaceholder',
+                        )}
+                        rootClassName={cx(
+                          styles.input,
+                          styles['current-input'],
                         )}
                       />
                     </Form.Item>
-                  ) : (
-                    <Space.Compact
-                      block
-                      className={cx(styles['phone-input-compact'])}
-                    >
-                      <div
-                        className={cx(
-                          styles.icon,
-                          'flex',
-                          'flex-row',
-                          'items-center',
-                        )}
-                      >
-                        +86
-                        <DownOutlined
-                          style={{ marginLeft: 6, fontSize: '14px' }}
-                        />
-                      </div>
-                      <Form.Item
-                        name="phoneOrEmail"
-                        noStyle
-                        rules={getPhoneOrEmailRules()}
-                      >
-                        <Input
-                          placeholder={dict(
-                            'PC.Pages.Login.inputPhonePlaceholder',
-                          )}
-                          rootClassName={cx(
-                            styles.input,
-                            styles['current-input'],
-                          )}
-                        />
-                      </Form.Item>
-                    </Space.Compact>
-                  )}
-                </Form.Item>
-                {loginType === LoginTypeEnum.Password && (
-                  <Form.Item name="password" rules={passwordRules}>
-                    <Input.Password
-                      rootClassName={cx(styles.input)}
-                      autoComplete="off"
-                      placeholder={dict(
-                        'PC.Pages.Login.inputPasswordPlaceholder',
-                      )}
-                    />
-                  </Form.Item>
+                  </Space.Compact>
                 )}
-
-                <Form.Item className={cx(styles.login)}>
-                  <Button
-                    className={cx(styles.btn)}
-                    block
-                    type="primary"
-                    htmlType="submit"
-                    loading={loading}
-                  >
-                    {loginType === LoginTypeEnum.Password
-                      ? dict('PC.Pages.Login.login')
-                      : dict('PC.Pages.Login.nextStep')}
-                  </Button>
-                </Form.Item>
+              </Form.Item>
+              {loginType === LoginTypeEnum.Password && (
                 <Form.Item
-                  className={cx('mb-16')}
-                  style={{ marginTop: '-10px' }}
+                  className={cx(styles.field)}
+                  name="password"
+                  label={dict('PC.Pages.Login.passwordLabel')}
+                  rules={passwordRules}
                 >
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'items-start',
-                      styles['protocol-wrapper'],
+                  <Input.Password
+                    rootClassName={cx(styles.input)}
+                    autoComplete="off"
+                    placeholder={dict(
+                      'PC.Pages.Login.inputPasswordPlaceholder',
                     )}
-                  >
-                    <Checkbox
-                      checked={checked}
-                      style={{ marginRight: 5 }}
-                      onChange={(e) => setChecked(e.target.checked)}
-                    />
-                    <SiteProtocol onToggle={() => setChecked(!checked)} />
-                  </div>
+                  />
                 </Form.Item>
-              </Form>
+              )}
 
-              <div
-                style={{
-                  position: 'absolute',
-                  bottom: 0,
-                  left: 0,
-                  padding: '0 64px',
-                  width: '100%',
-                }}
-              >
-                <SiteFooter
-                  text={tenantConfigInfo?.pageFooterText}
-                ></SiteFooter>
-                <Button id="aliyun-captcha-login" style={{ display: 'none' }} />
-                <AliyunCaptcha
-                  config={tenantConfigInfo}
-                  onVerify={handleCaptchaVerify}
-                  elementId="aliyun-captcha-login"
-                  ref={captchaRef}
-                />
-              </div>
+              <Form.Item className={cx(styles['protocol-item'])}>
+                <div className={cx(styles['protocol-wrapper'])}>
+                  <Checkbox
+                    checked={checked}
+                    onChange={(e) => setChecked(e.target.checked)}
+                  />
+                  <SiteProtocol onToggle={() => setChecked(!checked)} />
+                </div>
+              </Form.Item>
+
+              <Form.Item className={cx(styles.login)}>
+                <Button
+                  className={cx(styles.btn)}
+                  block
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                >
+                  {loginType === LoginTypeEnum.Password
+                    ? dict('PC.Pages.Login.login')
+                    : dict('PC.Pages.Login.nextStep')}
+                  <ArrowRightOutlined />
+                </Button>
+              </Form.Item>
+            </Form>
+
+            <div className={cx(styles['help-row'])}>
+              <span>{dict('PC.Pages.Login.needHelp')}</span>
+              <span className={cx(styles['support-link'])}>
+                {dict('PC.Pages.Login.contactSupport')}
+              </span>
             </div>
-          )}
-        </div>
+
+            <Button id="aliyun-captcha-login" style={{ display: 'none' }} />
+            <AliyunCaptcha
+              config={tenantConfigInfo}
+              onVerify={handleCaptchaVerify}
+              elementId="aliyun-captcha-login"
+              ref={captchaRef}
+            />
+          </div>
+        )}
       </BasicLayout>
     </ConfigProvider>
   );
