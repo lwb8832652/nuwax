@@ -2,13 +2,17 @@
 @import '@/styles/token';
 
 .header {
+  min-height: 52px;
+  background: var(--nx-paper);
+  border-bottom: 1px solid var(--nx-line);
+  margin-bottom: 12px;
   padding: @paddingSm @padding @paddingSm 0;
   overflow-x: auto;
 
   .icon-backward {
     padding: @paddingXxs @paddingXs;
     margin-right: @marginXxs;
-    color: @navFirstMenuTextSecondary;
+    color: var(--nx-ink);
   }
 
   .avatar {
@@ -27,16 +31,16 @@
     .h-title {
       max-width: 360px;
       margin-right: @marginSm;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: @fontWeightStrong;
       line-height: 24px;
-      color: @navFirstMenuTextSecondary;
+      color: var(--nx-ink);
       white-space: nowrap;
     }
 
     .edit-ico {
-      color: @navFirstMenuTextSecondary;
-      font-size: 16px;
+      color: var(--nx-ink);
+      font-size: 14px;
     }
 
     .agent-rel-info {
@@ -55,14 +59,14 @@
 
       .space-name {
         max-width: 200px;
-        color: @navFirstMenuTextSecondary;
+        color: var(--nx-ink);
       }
     }
   }
 
   .save-time-box {
     gap: @paddingXs;
-    color: @navFirstMenuTextSecondary;
+    color: var(--nx-ink);
 
     .save-time {
       font-size: 12px;
@@ -90,7 +94,7 @@
 
     .fold-btn {
       gap: @paddingXs;
-      color: @navFirstMenuTextSecondary;
+      color: var(--nx-ink);
       font-size: @fontSize;
     }
   }

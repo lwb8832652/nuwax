@@ -2,8 +2,9 @@
 @import '@/styles/token';
 
 .container {
-  max-width: 300px;
-  max-height: 500px;
+  width: 266px;
+  max-width: calc(100vw - 48px);
+  max-height: min(500px, 75vh);
 
   .p-header {
     gap: @marginXs;
@@ -13,7 +14,7 @@
     }
 
     .title {
-      font-size: @fontSize;
+      font-size: 12px;
       color: @colorText;
     }
   }
@@ -32,15 +33,17 @@
   }
 
   .empty-search {
-    height: 32px;
-    padding: 0 22px;
+    min-height: 36px;
+    padding: 0 8px;
+    font-size: 12px;
     color: @colorTextSecondary;
     font-size: @fontSizeSm;
   }
 
   .team-info {
-    height: 32px;
-    padding: 0 22px;
+    min-height: 36px;
+    padding: 0 8px;
+    font-size: 12px;
     gap: @marginXxs;
     color: @colorText;
     cursor: pointer;

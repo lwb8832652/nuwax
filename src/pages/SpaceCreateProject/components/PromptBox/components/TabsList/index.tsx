@@ -1,3 +1,10 @@
+import { AgentComponentTypeEnum } from '@/types/enums/agent';
+import {
+  ApiOutlined,
+  CodeOutlined,
+  RobotOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
 import classNames from 'classnames';
 import React from 'react';
 import styles from './index.less';
@@ -16,11 +23,20 @@ interface TabsListProps {
   onChange: (key: string) => void;
 }
 
+const tabIcons: Record<string, React.ReactNode> = {
+  [AgentComponentTypeEnum.Agent]: <RobotOutlined />,
+  [AgentComponentTypeEnum.PageApp]: <CodeOutlined />,
+  [AgentComponentTypeEnum.Skill]: <ThunderboltOutlined />,
+  [AgentComponentTypeEnum.Plugin]: <ApiOutlined />,
+};
+
 const TabsList: React.FC<TabsListProps> = ({ tabs, activeTab, onChange }) => {
   return (
     <div className={cx(styles['tabs-list'])}>
       {tabs.map((tab) => (
-        <div
+        <button
+          type="button"
+          aria-pressed={activeTab === tab.key}
           key={tab.key}
           className={cx(styles['tab-item'], {
             [styles['tab-active']]: activeTab === tab.key,
@@ -29,8 +45,9 @@ const TabsList: React.FC<TabsListProps> = ({ tabs, activeTab, onChange }) => {
             onChange(tab.key);
           }}
         >
+          {tabIcons[tab.key]}
           {tab.label}
-        </div>
+        </button>
       ))}
     </div>
   );

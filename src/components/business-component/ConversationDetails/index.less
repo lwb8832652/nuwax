@@ -22,15 +22,17 @@
   }
 
   .title-box {
-    background-color: transparent;
+    background-color: var(--nx-paper);
+    border-bottom: 1px solid var(--nx-line);
+    margin-bottom: 12px;
 
     .title-container {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 32px;
-      padding: @paddingXs 12px @paddingXs 20px;
-      box-sizing: content-box;
+      height: 52px;
+      padding: 0 20px;
+      box-sizing: border-box;
 
       // 应用智能体模式下，显示内容导航按钮
       &.app-title-container {

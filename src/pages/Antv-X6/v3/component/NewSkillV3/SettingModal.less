@@ -3,12 +3,17 @@
 
 .modal-container {
   width: 760px !important;
+  max-width: calc(100vw - 32px);
 }
 
 .container {
   height: 650px;
-  border-radius: 10px;
-  background: #fff;
+  max-height: calc(100vh - 48px);
+  border: 1px solid var(--nx-line);
+  border-radius: 14px;
+  background: var(--nx-paper);
+  box-shadow: var(--nx-shadow-modal);
+  color: var(--nx-ink);
   pointer-events: auto;
 
   .left {
@@ -25,11 +30,34 @@
 
   .right {
     padding: 0;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--nx-line) transparent;
   }
 
   .close {
     position: absolute;
     right: 20px;
     top: 20px;
+    color: var(--nx-sub);
+  }
+
+  :global {
+    .ant-input,
+    .ant-select-selector {
+      color: var(--nx-ink);
+      background: var(--nx-paper);
+      border-color: var(--nx-line);
+      border-radius: 6px;
+    }
+
+    .ant-btn-primary {
+      color: var(--nx-paper);
+      background: var(--nx-ink);
+      border-color: var(--nx-ink);
+      border-radius: 6px;
+      box-shadow: none;
+    }
   }
 }

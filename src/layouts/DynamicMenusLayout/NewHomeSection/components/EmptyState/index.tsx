@@ -8,10 +8,10 @@ import styles from './index.less';
 const cx = classNames.bind(styles);
 
 interface EmptyStateProps {
-  keyword: string;
+  keyword?: string;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ keyword }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ keyword = '' }) => {
   const noSearchResultText = dict(
     'PC.Components.HistoryConversationList.noSearchResult',
   );

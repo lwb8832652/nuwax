@@ -11,7 +11,7 @@ import { history, useLocation, useModel, useParams } from 'umi';
 // 导入特殊内容组件
 import { PATH_URL } from '@/constants/home.constants';
 import { RoleEnum } from '@/types/enums/common';
-import { AllowDevelopEnum, SpaceTypeEnum } from '@/types/enums/space';
+import { AllowDevelopEnum } from '@/types/enums/space';
 import { message } from 'antd';
 import {
   handleOpenUrl,
@@ -26,6 +26,8 @@ import {
 export interface DynamicSecondMenuProps {
   /** 父级菜单的 code */
   parentCode: string;
+  /** 已按导航信息架构过滤的树；省略时沿用菜单模型。 */
+  menus?: MenuItemDto[];
 }
 
 /**
@@ -35,6 +37,7 @@ export interface DynamicSecondMenuProps {
  */
 const DynamicSecondMenu: React.FC<DynamicSecondMenuProps> = ({
   parentCode,
+  menus,
 }) => {
   const location = useLocation();
   const params = useParams();
@@ -62,7 +65,7 @@ const DynamicSecondMenu: React.FC<DynamicSecondMenuProps> = ({
   const { tenantConfigInfo } = useModel('tenantConfigInfo');
 
   // 获取二级菜单, 用于渲染菜单
-  const secondMenus: MenuItemDto[] = getSecondLevelMenus(parentCode);
+  const secondMenus: MenuItemDto[] = menus || getSecondLevelMenus(parentCode);
 
   // 是否开启订阅功能
   const isEnableSubscription = tenantConfigInfo?.enableSubscription !== 0;
@@ -666,10 +669,9 @@ const DynamicSecondMenu: React.FC<DynamicSecondMenuProps> = ({
           ? 3 * 16 + 10 // 第3级的缩进值：58
           : level * 16 + 11;
 
-      // 个人空间时，不显示"成员与设置"(编码：member_setting) , 普通用户也不显示"成员与设置"
+      // 普通成员没有空间成员与设置权限，拥有个人空间的用户仍可进入该页。
       if (
-        (currentSpaceInfo?.type === SpaceTypeEnum.Personal ||
-          currentSpaceInfo?.currentUserRole === RoleEnum.User) &&
+        currentSpaceInfo?.currentUserRole === RoleEnum.User &&
         menuCode === 'member_setting'
       ) {
         return null;

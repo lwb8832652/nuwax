@@ -1,35 +1,152 @@
-import { SETTING_ACTIONS } from '@/constants/menus.constants';
+import { WorkspaceLayoutContext } from '@/components/WorkspaceLayout/EmbeddedContext';
+import ApiKeyPage from '@/pages/MorePage/ApiKey';
+import MyComputerManage from '@/pages/MyComputerManage';
 import { dict } from '@/services/i18nRuntime';
 import { getTenantThemeConfig } from '@/services/tenant';
 import { SettingActionEnum } from '@/types/enums/menus';
+import type { MenuItemDto } from '@/types/interfaces/menu';
 import { TenantThemeConfig } from '@/types/tenant';
-import { CloseOutlined } from '@ant-design/icons';
-import { Button, Modal } from 'antd';
+import {
+  ApiOutlined,
+  BarChartOutlined,
+  BgColorsOutlined,
+  CloseOutlined,
+  CodeOutlined,
+  DeploymentUnitOutlined,
+  DesktopOutlined,
+  GlobalOutlined,
+  InfoCircleOutlined,
+  LinkOutlined,
+  LockOutlined,
+  MoreOutlined,
+  RobotOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
+import { Button, message, Modal } from 'antd';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
-import { useModel } from 'umi';
+import React, { useEffect, useMemo, useState } from 'react';
+import { history, useLocation, useModel, useParams } from 'umi';
+import {
+  handleOpenUrl,
+  isHttpMenuPath,
+  isOpenIframePath,
+  navigateOpenIframePath,
+  updatePathUrlToLocalStorage,
+} from '../DynamicMenusLayout/utils';
 import DeveloperProfile from './DeveloperProfile';
+import IMBotSettings from './IMBotSettings';
 import styles from './index.less';
 import LanguageSwitchPanel from './LanguageSwitchPanel';
+import ModelSettings from './ModelSettings';
 import ResetPassword from './ResetPassword';
 import SettingAccount from './SettingAccount';
 import SettingEmail from './SettingEmail';
+import {
+  canManageModelsInSpace,
+  canUseIMSpace,
+  getCurrentSettingsSpace,
+  getEnabledSettingsMenus,
+  getMoreSettingsMenus,
+  isApiKeySettingsMenu,
+  isComputerSettingsMenu,
+  isIMSettingsMenu,
+  isSpaceModelSettingsMenu,
+} from './settingsNavigation';
 import SystemVersionPanel from './SystemVersionPanel';
 import ThemeSwitchPanel from './ThemeSwitchPanel';
 import UsageStatistics from './UsageStatistics';
 
 const cx = classNames.bind(styles);
 
+type SettingsAction =
+  | SettingActionEnum
+  | 'computer'
+  | 'models'
+  | 'apiKeys'
+  | 'imBots';
+interface SettingsNavItem {
+  type: SettingsAction;
+  icon: React.ReactNode;
+}
+
 const Setting: React.FC = () => {
   const { openSetting, setOpenSetting, isMobile } = useModel('layout');
   const { tenantConfigInfo } = useModel('tenantConfigInfo');
+  const { menuTree } = useModel('menuModel');
+  const { currentSpaceInfo, getSpaceId, spaceList } = useModel('spaceModel');
+  const location = useLocation();
+  const params = useParams();
+  const enabledMenus = useMemo(
+    () => getEnabledSettingsMenus(menuTree),
+    [menuTree],
+  );
+  const moreMenus = useMemo(() => getMoreSettingsMenus(menuTree), [menuTree]);
+  const hasComputers = enabledMenus.some(isComputerSettingsMenu);
+  const hasApiKeys = enabledMenus.some(isApiKeySettingsMenu);
+  const modelMenus = useMemo(
+    () => enabledMenus.filter(isSpaceModelSettingsMenu),
+    [enabledMenus],
+  );
+  const settingsSpace = getCurrentSettingsSpace(
+    spaceList,
+    currentSpaceInfo,
+    params.spaceId,
+    getSpaceId(),
+  );
+  const canManageModels = canManageModelsInSpace(modelMenus, settingsSpace);
+  const imMenus = useMemo(
+    () => enabledMenus.filter(isIMSettingsMenu),
+    [enabledMenus],
+  );
+  const canManageIMBots =
+    !!settingsSpace && canUseIMSpace(imMenus, settingsSpace.id);
   const isEnableSubscription = tenantConfigInfo?.enableSubscription !== 0;
-  const [action, setAction] = useState<SettingActionEnum>(
+  const [action, setAction] = useState<SettingsAction>(
     SettingActionEnum.Account,
   );
   const [tenantThemeConfig, setTenantThemeConfig] =
     useState<TenantThemeConfig | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Route actions inside embedded pages (such as API call logs) retain their
+  // original navigation and dismiss this overlay to expose the destination.
+  useEffect(() => {
+    setOpenSetting(false);
+  }, [location.pathname, location.search]);
+
+  const activeAction: SettingsAction =
+    (action === 'computer' && !hasComputers) ||
+    (action === 'models' && !canManageModels) ||
+    (action === 'apiKeys' && !hasApiKeys) ||
+    (action === 'imBots' && !canManageIMBots) ||
+    (action === SettingActionEnum.Developer_Profile && !isEnableSubscription)
+      ? SettingActionEnum.Account
+      : action;
+
+  const navItems: SettingsNavItem[] = [
+    { type: SettingActionEnum.Account, icon: <UserOutlined /> },
+    { type: SettingActionEnum.Email_Bind, icon: <LinkOutlined /> },
+    { type: SettingActionEnum.Reset_Password, icon: <LockOutlined /> },
+    ...(hasComputers
+      ? [{ type: 'computer' as const, icon: <DesktopOutlined /> }]
+      : []),
+    ...(canManageModels
+      ? [{ type: 'models' as const, icon: <DeploymentUnitOutlined /> }]
+      : []),
+    { type: SettingActionEnum.Theme_Switch, icon: <BgColorsOutlined /> },
+    { type: SettingActionEnum.Language_Switch, icon: <GlobalOutlined /> },
+    { type: SettingActionEnum.Usage_Statistics, icon: <BarChartOutlined /> },
+    ...(hasApiKeys
+      ? [{ type: 'apiKeys' as const, icon: <ApiOutlined /> }]
+      : []),
+    ...(canManageIMBots
+      ? [{ type: 'imBots' as const, icon: <RobotOutlined /> }]
+      : []),
+    ...(isEnableSubscription
+      ? [{ type: SettingActionEnum.Developer_Profile, icon: <CodeOutlined /> }]
+      : []),
+    { type: SettingActionEnum.System_Version, icon: <InfoCircleOutlined /> },
+  ];
 
   // 获取租户主题配置
   useEffect(() => {
@@ -50,13 +167,21 @@ const Setting: React.FC = () => {
     fetchTenantThemeConfig();
   }, [action, tenantThemeConfig]);
 
-  const handlerClick = (type: SettingActionEnum) => {
+  const handlerClick = (type: SettingsAction) => {
     setAction(type);
   };
 
   /** 渲染内容 */
   const renderContent = () => {
-    switch (action) {
+    switch (activeAction) {
+      case 'computer':
+        return <MyComputerManage />;
+      case 'models':
+        return <ModelSettings menus={modelMenus} space={settingsSpace} />;
+      case 'apiKeys':
+        return <ApiKeyPage />;
+      case 'imBots':
+        return <IMBotSettings menus={imMenus} space={settingsSpace} />;
       case SettingActionEnum.Account:
         return <SettingAccount />;
       case SettingActionEnum.Email_Bind:
@@ -96,8 +221,16 @@ const Setting: React.FC = () => {
   const authType = localStorage.getItem('AUTH_TYPE') === '1';
 
   /** 获取操作标签 */
-  const getActionLabel = (type: SettingActionEnum) => {
+  const getActionLabel = (type: SettingsAction) => {
     switch (type) {
+      case 'computer':
+        return dict('PC.Pages.Setting.myComputer');
+      case 'models':
+        return dict('PC.Pages.SpaceModelManage.pageTitle');
+      case 'apiKeys':
+        return dict('PC.Pages.Setting.apiKeys');
+      case 'imBots':
+        return dict('PC.Pages.Setting.imBots');
       case SettingActionEnum.Account:
         return dict('PC.Pages.Setting.accountTitle');
       case SettingActionEnum.Email_Bind:
@@ -123,6 +256,36 @@ const Setting: React.FC = () => {
         return '';
     }
   };
+  const handleMoreMenu = (menu: MenuItemDto) => {
+    if (isHttpMenuPath(menu.path || '')) {
+      handleOpenUrl(menu, 'more_page');
+      setOpenSetting(false);
+      return;
+    }
+
+    const spaceId = params.spaceId || getSpaceId();
+    const targetPath = (menu.path || '').replace(
+      /:spaceId/g,
+      String(spaceId || ''),
+    );
+    if (!targetPath || /:[A-Za-z]/.test(targetPath)) {
+      message.warning(
+        dict(
+          'PC.Layouts.DynamicMenusLayout.DynamicSecondMenu.pathResolveFailed',
+        ),
+      );
+      return;
+    }
+    updatePathUrlToLocalStorage('more_page', targetPath);
+    setOpenSetting(false);
+    if (isOpenIframePath(targetPath)) {
+      navigateOpenIframePath(targetPath, { menuCode: menu.code });
+    } else {
+      history.push(targetPath, { _t: Date.now(), menuCode: menu.code });
+    }
+  };
+  const embedded = typeof activeAction === 'string';
+
   return (
     <Modal
       centered
@@ -136,39 +299,79 @@ const Setting: React.FC = () => {
             [styles['container-mobile']]: isMobile,
           })}
         >
-          <div className={cx(styles.left)}>
-            <h3>{dict('PC.Pages.Setting.profileTitle')}</h3>
-            <ul>
-              {SETTING_ACTIONS.filter((item) => {
-                if (item.type === SettingActionEnum.Developer_Profile) {
-                  return isEnableSubscription;
-                }
-                return true;
-              }).map((item) => (
-                <li
+          <nav
+            className={cx(styles.left)}
+            aria-label={dict('PC.Pages.Setting.title')}
+          >
+            <h3>{dict('PC.Pages.Setting.title')}</h3>
+            <div
+              className={styles.navList}
+              role="tablist"
+              aria-orientation="vertical"
+            >
+              {navItems.map((item) => (
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={activeAction === item.type}
+                  aria-controls="settings-content"
                   key={item.type}
-                  className={cx(styles.item, 'cursor-pointer', {
-                    [styles.checked]: action === item.type,
+                  className={cx(styles.item, {
+                    [styles.checked]: activeAction === item.type,
                   })}
                   onClick={() => handlerClick(item.type)}
                 >
-                  {getActionLabel(item.type)}
-                </li>
+                  <span className={styles.navIcon}>{item.icon}</span>
+                  <span>{getActionLabel(item.type)}</span>
+                </button>
               ))}
-            </ul>
-          </div>
+            </div>
+            {!!moreMenus.length && (
+              <div className={styles.moreGroup}>
+                <h4>{dict('PC.Pages.Setting.moreSettings')}</h4>
+                {moreMenus.map((menu) => (
+                  <button
+                    type="button"
+                    key={menu.id}
+                    className={styles.item}
+                    onClick={() => handleMoreMenu(menu)}
+                  >
+                    <span className={styles.navIcon}>
+                      <MoreOutlined />
+                    </span>
+                    <span>{menu.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </nav>
           <Button
             type="text"
+            aria-label={dict('PC.Common.Global.close')}
             className={cx(styles.close, 'cursor-pointer')}
             icon={<CloseOutlined />}
             onClick={() => setOpenSetting(false)}
           />
-          <div className={cx('flex-1', 'overflow-hide', styles.right)}>
-            {renderContent()}
+          <div
+            id="settings-content"
+            role="tabpanel"
+            aria-label={getActionLabel(activeAction)}
+            className={cx('flex-1', styles.right, {
+              [styles.embeddedContent]: embedded,
+            })}
+          >
+            <WorkspaceLayoutContext.Provider
+              value={{
+                embedded,
+                title: embedded ? getActionLabel(activeAction) : undefined,
+              }}
+            >
+              {renderContent()}
+            </WorkspaceLayoutContext.Provider>
           </div>
         </div>
       )}
-    ></Modal>
+    />
   );
 };
 

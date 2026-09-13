@@ -1,86 +1,62 @@
-@import '@/styles/color';
-@import '@/styles/token';
-@import '@/styles/custom-variate';
+@import (reference) '@/styles/newx-editor.less';
 
 .container {
-  //padding: 19px 16px;
-  padding: 0 10px 10px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: var(--nx-paper);
+  color: var(--nx-ink);
+  .newx-editor-controls();
 
   .main-container {
     flex: 1;
-    //padding: 34px 37px;
-    margin: 10px 0;
-    padding: 10px;
+    min-height: 0;
+    margin: 0;
+    padding: 28px clamp(20px, 3vw, 48px) 36px;
+    .newx-editor-scrollbar();
 
     .title {
+      color: var(--nx-ink);
       font-size: 14px;
-      font-weight: normal;
-      line-height: 22px;
-      letter-spacing: 0;
-      font-variation-settings: 'opsz' auto;
-      font-feature-settings: 'kern' on;
-      color: #393e4f;
+      font-weight: 600;
+      line-height: 24px;
     }
-
     .desc {
-      margin-top: 4px;
-      font-size: 14px;
-      font-weight: normal;
-      line-height: 22px;
-      letter-spacing: 0;
-      font-variation-settings: 'opsz' auto;
-      font-feature-settings: 'kern' on;
-      color: #3d3d3d;
+      margin: 10px 0 0;
+      color: var(--nx-sub);
+      font-size: 13px;
+      line-height: 1.7;
       white-space: pre-wrap;
-      word-break: break-word;
+      overflow-wrap: anywhere;
     }
-
     .request-select {
-      width: 98px;
-      margin-right: 16px;
+      width: 112px;
+      margin-right: 10px;
     }
-
+    .copy-btn {
+      min-width: 120px;
+    }
     .table-wrap {
-      border-radius: @antdTableBorderRadius;
-      border: 1px solid @BLANK19;
-      margin-top: 12px;
-      margin-bottom: 50px;
-
-      th {
-        font-size: 12px;
-        font-weight: @fontWeightStrong;
-        line-height: 22px;
-        letter-spacing: 0;
-        color: #666e84;
-        padding: 12px;
-      }
-
-      td {
-        font-size: 14px;
-        font-weight: normal;
-        line-height: 22px;
-        letter-spacing: 0;
-        padding: 12px;
-        font-feature-settings: 'kern' on;
-        color: #3d3d3d;
-
-        &:nth-child(2) {
-          font-size: 12px;
-          font-weight: normal;
-          line-height: 18px;
-          letter-spacing: 0;
-        }
-      }
+      .newx-editor-table();
+      margin-top: 14px;
+      margin-bottom: 30px;
     }
-
     .select {
       width: 120px;
     }
   }
 
   .empty-container {
-    background-color: white;
-    padding: 16px 20px;
-    margin: 16px 0;
+    padding: 28px;
+    margin: 14px 0;
+    border: 1px solid var(--nx-line);
+    border-radius: var(--nx-radius-md);
+    background: var(--nx-surface);
+  }
+
+  @media (max-width: 768px) {
+    .main-container {
+      padding: 22px 16px;
+    }
   }
 }

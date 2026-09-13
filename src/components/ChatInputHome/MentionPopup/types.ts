@@ -6,7 +6,12 @@ import { AgentComponentTypeEnum } from '@/types/enums/agent';
 import { CoverImgSourceTypeEnum } from '@/types/enums/pageDev';
 import { PluginTypeEnum } from '@/types/enums/plugin';
 import { AgentTypeEnum } from '@/types/enums/space';
-import { AgentStatisticsInfo, CreatorInfo } from '@/types/interfaces/agent';
+import {
+  AgentManualComponentInfo,
+  AgentSelectedComponentInfo,
+  AgentStatisticsInfo,
+  CreatorInfo,
+} from '@/types/interfaces/agent';
 
 // 已收藏的技能列表接口 - 参数接口
 export interface SkillListForAtParams {
@@ -114,7 +119,19 @@ export interface MentionItem {
   paymentRequired?: boolean;
   /** 是否已订阅 */
   subscribed?: boolean;
+  /** 被引用资源的组件类型；旧的技能数据省略时按 Skill 处理 */
+  targetType?: AgentComponentTypeEnum;
+  /** 资源来自技能库还是当前会话已配置的手动组件 */
+  source?: 'skill' | 'manual';
+  /** 当前会话内该手动组件是否已经启用 */
+  active?: boolean;
 }
+
+/** 同一个数字 ID 可能存在于不同组件类型中，选择和删除均使用该组合键。 */
+export const getMentionItemKey = (item: MentionItem): string =>
+  `${item.source ?? 'skill'}:${
+    item.targetType ?? AgentComponentTypeEnum.Skill
+  }:${item.targetId}`;
 
 /**
  * Tab 类型枚举
@@ -165,8 +182,14 @@ export interface MentionPopupProps {
   onHeightChange?: (height: number) => void;
   /** 是否在 Tab 标签栏下方显示搜索输入框；为 true 时使用输入框关键字搜索列表，打开弹窗时自动聚焦 */
   showSearchInput?: boolean;
+  /** 是否允许从技能库选择，保留智能体 allowAtSkill 的权限语义 */
+  enableSkillMention?: boolean;
   /**可用值:PageApp,TaskAgent */
   usageScenarios?: AgentTypeEnum[];
+  /** 当前会话可手动启用的资源；非技能资源只从这里取数 */
+  manualComponents?: AgentManualComponentInfo[];
+  /** 当前已经启用的手动组件，用于在选择器中标明状态 */
+  selectedComponentList?: AgentSelectedComponentInfo[];
 }
 
 /**
@@ -219,12 +242,16 @@ export interface MentionEditorProps {
   inlinePrefixWidth?: number;
   /** 是否启用 @ 提及功能，默认 true */
   enableMention?: boolean;
+  /** 是否允许从技能库选择，保留智能体 allowAtSkill 的权限语义 */
+  enableSkillMention?: boolean;
   /** MentionPopup 弹窗的展示方向：auto | up | down，默认 auto */
   mentionPlacement?: 'auto' | 'up' | 'down';
   /** 用于回显的默认提及项列表（需同时传入 value 文本） */
   defaultMentions?: MentionItem[];
   /** 选择提及项时的回调 */
   onMentionSelect?: (item: MentionItem) => void;
+  /** 删除提及项时的回调 */
+  onMentionRemove?: (item: MentionItem) => void;
   /** 是否开启订阅功能（租户配置） */
   enableSubscription?: boolean;
   /** 选中未订阅的付费技能时的回调（插入 mention 后触发） */
@@ -237,6 +264,10 @@ export interface MentionEditorProps {
   maxRows?: number;
   /** 可用值:PageApp,TaskAgent */
   usageScenarios?: AgentTypeEnum[];
+  /** 当前会话可手动启用的资源 */
+  manualComponents?: AgentManualComponentInfo[];
+  /** 当前已经启用的手动组件 */
+  selectedComponentList?: AgentSelectedComponentInfo[];
 }
 
 /**

@@ -63,6 +63,22 @@ class UnifiedThemeService {
   private currentData: UnifiedThemeData;
   private listeners: Set<(data: UnifiedThemeData) => void> = new Set();
   private clearThemeFlag: boolean = false;
+
+  /**
+   * 旧默认主题色（NewX 改版前）一次性迁移
+   * 仅当存储值恰为旧默认 #5147ff 时改写为新默认色，
+   * 用户显式选择过的其他颜色一律保留
+   */
+  private migrateLegacyPrimaryColor(
+    color: string | undefined,
+    fallback: string,
+  ): string {
+    if (color && color.toLowerCase() === '#5147ff') {
+      return DEFAULT_THEME_CONFIG.PRIMARY_COLOR;
+    }
+    return color || fallback;
+  }
+
   constructor() {
     this.currentData = this.loadConfiguration();
     this.initializeEventHandlers();
@@ -162,7 +178,10 @@ class UnifiedThemeService {
   private normalizeUserConfig(config: any): UnifiedThemeData {
     const defaults = this.getDefaultConfiguration();
     return {
-      primaryColor: config.selectedThemeColor || defaults.primaryColor,
+      primaryColor: this.migrateLegacyPrimaryColor(
+        config.selectedThemeColor,
+        defaults.primaryColor,
+      ),
       antdTheme: config.antdTheme || defaults.antdTheme,
       navigationStyle: config.navigationStyleId || defaults.navigationStyle,
       layoutStyle: config.navigationStyle || defaults.layoutStyle,
@@ -179,7 +198,10 @@ class UnifiedThemeService {
   private normalizeGlobalSettings(settings: any): UnifiedThemeData {
     const defaults = this.getDefaultConfiguration();
     return {
-      primaryColor: settings.primaryColor || defaults.primaryColor,
+      primaryColor: this.migrateLegacyPrimaryColor(
+        settings.primaryColor,
+        defaults.primaryColor,
+      ),
       antdTheme: settings.theme || defaults.antdTheme,
       navigationStyle: defaults.navigationStyle,
       layoutStyle: defaults.layoutStyle,

@@ -9,6 +9,7 @@ import VersionHistory from '@/components/VersionHistory';
 import { ICON_ADD_TR } from '@/constants/images.constants';
 import { useInitProjectMetadata } from '@/hooks/useInitProjectMetadata';
 import usePluginConfig from '@/hooks/usePluginConfig';
+import { useUnifiedTheme } from '@/hooks/useUnifiedTheme';
 import { dataTypes } from '@/pages/Antv-X6/params';
 import { dict } from '@/services/i18nRuntime';
 import { apiPluginCodeUpdate, apiPluginInfo } from '@/services/plugin';
@@ -35,6 +36,7 @@ const cx = classNames.bind(styles);
  * 工作空间-组件库-测试插件组件（基于云端代码js、python创建）
  */
 const SpacePluginCloudTool: React.FC = () => {
+  const { isDarkMode } = useUnifiedTheme();
   const params = useParams();
   const spaceId = Number(params.spaceId);
   const location = useLocation();
@@ -537,6 +539,7 @@ const SpacePluginCloudTool: React.FC = () => {
                   )}
                 >
                   <CodeEditor
+                    theme={isDarkMode ? 'vs-dark' : 'vs'}
                     value={code}
                     height={'100%'}
                     onChange={setCode}

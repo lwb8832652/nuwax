@@ -71,7 +71,9 @@ const UserOperateArea: React.FC<UserOperateAreaType> = ({ menus, onClick }) => {
       }}
       title={item.name}
     >
-      <div
+      <button
+        type="button"
+        aria-label={item.name}
         className={cx(
           styles['user-icon'],
           'flex',
@@ -85,15 +87,22 @@ const UserOperateArea: React.FC<UserOperateAreaType> = ({ menus, onClick }) => {
         {item.code === 'notification' && unreadCount > 0 ? (
           <Badge count={unreadCount} size="small">
             <div className={cx(styles['active-icon-container'])}>
-              {item.icon ? <SvgIcon name={item.icon} /> : null}
+              <SvgIcon name={item.icon || 'icons-nav-notification'} />
             </div>
           </Badge>
         ) : (
           <div className={cx(styles['active-icon-container'])}>
-            <SvgIcon name={item.icon || 'icons-common-more'} />
+            <SvgIcon
+              name={
+                item.icon ||
+                (item.code === 'notification'
+                  ? 'icons-nav-notification'
+                  : 'icons-nav-doc')
+              }
+            />
           </div>
         )}
-      </div>
+      </button>
     </Tooltip>
   ));
 };

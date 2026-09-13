@@ -1,20 +1,88 @@
 @import '@/styles/color';
 @import '@/styles/token';
 
+// 工作台与会话页使用相同的原型输入框布局。
+.chat-container.workbench-composer {
+  max-width: none;
+  padding: 0 17px 9px;
+  border-color: var(--nx-line);
+  border-radius: var(--nx-radius-xl);
+  box-shadow: var(--nx-shadow-card);
+  overflow: visible;
+
+  &:focus-within {
+    border-color: var(--nx-muted);
+    box-shadow: var(--nx-shadow-raised);
+  }
+
+  :global([data-chat-editor]) {
+    box-sizing: border-box;
+    min-height: 102px !important;
+    padding: 23px 9px 11px;
+  }
+
+  :global([data-chat-editor][data-placeholder]::before) {
+    top: 23px;
+    right: 9px;
+    left: 9px;
+    color: var(--nx-muted);
+  }
+
+  :global([data-chat-selected-tag]) {
+    top: 23px;
+    left: 9px;
+  }
+
+  :global([data-chat-footer]) {
+    min-height: 52px;
+    padding-top: 7px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 10px 8px;
+
+    :global([data-chat-editor]) {
+      min-height: 96px !important;
+      padding: 18px 8px 8px;
+    }
+
+    :global([data-chat-editor][data-placeholder]::before) {
+      top: 18px;
+      right: 8px;
+      left: 8px;
+    }
+
+    :global([data-chat-selected-tag]) {
+      top: 18px;
+      left: 8px;
+    }
+
+    :global([data-chat-footer]) {
+      min-height: 44px;
+    }
+  }
+}
+
 .chat-container {
   width: 100%;
   margin: 0 auto;
   max-width: 800px;
-  gap: @marginXxs;
-  padding: @padding @padding 12px;
-  border-radius: 20px;
-  background: @colorBgContainer;
+  min-width: 0;
+  gap: 6px;
+  padding: 16px 18px 10px;
+  border-radius: 18px;
+  background: var(--nx-paper);
   box-sizing: border-box;
-  transition: box-shadow 0.3s, border-color 0.3s;
+  transition: box-shadow 0.18s, border-color 0.18s;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 13%);
-  box-shadow: 0 5px 16px -4px #00000012;
+  border: 1px solid var(--nx-line);
+  box-shadow: var(--nx-shadow-raised);
+
+  &:focus-within {
+    border-color: var(--nx-accent-border);
+    box-shadow: 0 0 0 3px var(--nx-accent-light), var(--nx-shadow-raised);
+  }
 
   &.drag-over {
     border-color: @colorPrimary;
@@ -43,7 +111,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 20px;
+    border-radius: inherit;
     opacity: 0.8;
     color: @colorPrimary;
     font-size: @fontSize;
@@ -69,21 +137,22 @@
 
   .selected-tag {
     position: absolute;
-    top: 4px;
-    left: @paddingSm;
+    top: 12px;
+    left: 14px;
     z-index: 2;
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
     max-width: 100%;
-    height: 22px;
-    padding: 0 6px 0 @paddingXs;
-    border: 1px solid @colorBorder;
-    border-radius: 6px;
-    background: rgba(0, 0, 0, 4%);
-    color: @colorTextSecondary;
-    font-size: 12px;
-    line-height: 20px;
+    height: 24px;
+    padding: 0 5px 0 7px;
+    border: 1px solid var(--nx-accent-border);
+    border-radius: var(--nx-radius-sm);
+    background: var(--nx-accent-light);
+    color: var(--nx-accent);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 22px;
   }
 
   .tag-close {
@@ -100,8 +169,8 @@
     border: 0;
     border-radius: 50%;
     background: transparent;
-    color: @colorTextSecondary;
-    opacity: 0.75;
+    color: currentcolor;
+    opacity: 0.7;
     cursor: pointer;
     pointer-events: auto;
     transition: all @motionDurationMid @motionEaseOut;
@@ -128,9 +197,13 @@
     }
 
     &:hover {
-      color: @colorText;
-      background: rgba(0, 0, 0, 8%);
+      background: rgba(94, 106, 210, 0.12);
       opacity: 1;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
     }
   }
 
@@ -151,46 +224,90 @@
   }
 
   .footer {
-    gap: 6px;
+    min-height: 34px;
+    gap: 5px;
+    flex-wrap: wrap;
     width: 100%;
     align-items: center;
 
     .svg-icon {
-      color: @colorTextDescription;
+      color: currentcolor;
+    }
+
+    .workbench-mode-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-shrink: 0;
+      height: 33px;
+      padding: 0 10px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--nx-surface2);
+      color: var(--nx-sub);
+      font-size: 13px;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover:not(:disabled) {
+        color: var(--nx-ink);
+        background: var(--nx-surface);
+      }
+
+      &:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+    }
+
+    .workbench-mode-caret {
+      margin-left: 1px;
+      color: var(--nx-muted);
+      font-size: 10px;
     }
 
     .clear {
-      color: @colorTextDescription;
-      font-size: @fontSize;
-      transition: color ease-in-out 0.2s;
+      color: var(--nx-sub);
+      font-size: 14px;
+      transition: color 0.15s, background 0.15s;
 
       &.disabled {
         cursor: not-allowed;
-        color: @colorTextDescription;
-        background-color: @colorBgContainerDisabled;
+        color: var(--nx-muted);
+        background-color: var(--nx-surface2);
       }
 
       &:hover {
-        background-color: @colorPrimaryBg;
+        background-color: var(--nx-surface2);
+        color: var(--nx-ink);
       }
     }
 
     .box {
-      padding: @paddingXs;
-      border-radius: @borderRadius;
-      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 31px;
+      height: 31px;
+      padding: 0;
+      border: 0;
+      border-radius: 7px;
+      background: transparent;
 
       &.plus-box {
-        color: @colorTextDescription;
-        font-size: @fontSize;
-        transition: color ease-in-out 0.2s;
-        border-radius: 50% !important;
-        height: 32px !important;
-        width: 32px !important;
-        border: 1px solid @colorSplit;
+        color: var(--nx-sub);
+        font-size: 14px;
+        transition: color 0.15s, background 0.15s;
+        border-radius: 7px;
+        height: 31px;
+        width: 31px;
+        border: 0;
 
         &:hover {
-          background-color: @colorPrimaryBg;
+          background-color: var(--nx-surface2);
+          color: var(--nx-ink);
         }
       }
 
@@ -198,16 +315,16 @@
         transition: all ease-in-out 0.2s;
 
         &.task-agent-active {
-          color: @colorPrimary;
-          border-color: @colorPrimary;
-          background-color: @colorPrimaryBg;
+          color: var(--nx-accent);
+          background-color: var(--nx-accent-light);
+          box-shadow: inset 0 0 0 1px var(--nx-accent-border);
         }
       }
 
       &.upload-box-disabled {
         cursor: not-allowed;
-        color: @colorIcon !important;
-        background-color: @colorBgContainerDisabled !important;
+        color: var(--nx-muted) !important;
+        background-color: var(--nx-surface2) !important;
       }
 
       .loading-box {
@@ -219,26 +336,32 @@
       }
 
       &.send-box {
-        font-size: @fontSizeSm;
-        transition: color ease-in-out 0.2s;
-        color: @colorWhite;
-        background-color: @colorPrimary;
-        width: 36px;
-        height: 36px;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        color: var(--nx-paper);
+        background-color: var(--nx-ink);
+        font-size: 14px;
+        transition: color 0.15s, background 0.15s, transform 0.15s;
+
+        &:hover:not(.disabled) {
+          background-color: var(--nx-sub);
+          transform: scale(1.03);
+        }
 
         &.disabled {
-          color: @colorIcon;
+          color: var(--nx-muted);
           cursor: not-allowed;
-          background-color: @colorBgContainerDisabled;
+          background-color: var(--nx-surface2);
         }
 
         // 会话活跃时的入队发送：与停止钮同色，避免主色蓝与停止态来回闪
         &.send-box-queue:not(.disabled) {
-          background-color: @colorInfoBg;
-          color: @colorPrimary;
+          background-color: var(--nx-accent-light);
+          color: var(--nx-accent);
 
           &:hover {
-            background-color: @colorInfoBgHover;
+            background-color: var(--nx-accent-light);
           }
         }
 
@@ -252,12 +375,12 @@
 
           // 停止按钮高亮样式 - 当会话进行中且可点击时
           &.stop-box-active {
-            background-color: @colorInfoBg;
-            color: @colorPrimary;
-            transition: background-color ease-in-out 0.2s;
+            background-color: var(--nx-accent-light);
+            color: var(--nx-accent);
+            transition: background-color 0.15s;
 
             &:hover:not(.disabled) {
-              background-color: @colorInfoBgHover;
+              background-color: var(--nx-accent-light);
             }
           }
         }
@@ -267,15 +390,16 @@
     .agent-mode-select {
       display: inline-flex;
       align-items: center;
-      height: 28px;
+      height: 31px;
 
       .agent-mode-trigger {
-        padding: @paddingXxs @paddingXs;
-        border-radius: @borderRadius;
+        height: 31px;
+        padding: 0 7px;
+        border-radius: 7px;
         box-sizing: border-box;
-        color: @colorTextSecondary;
-        font-size: @fontSizeSm;
-        transition: background-color ease-in-out 0.3s;
+        color: var(--nx-sub);
+        font-size: 12px;
+        transition: background-color 0.15s, color 0.15s;
         word-wrap: normal;
         white-space: nowrap;
         display: flex;
@@ -285,7 +409,8 @@
         cursor: pointer;
 
         &:hover {
-          background: @colorFillTertiary;
+          background: var(--nx-surface2);
+          color: var(--nx-ink);
         }
 
         .agent-mode-arrow {
@@ -295,7 +420,7 @@
     }
 
     .right-actions {
-      gap: 4px;
+      gap: 5px;
       margin-left: auto;
       align-items: center;
       min-width: 0;
@@ -312,8 +437,37 @@
   }
 }
 
+:global([data-theme='dark']) .chat-container .footer .box.send-box {
+  background-color: var(--nx-accent);
+
+  &:hover:not(.disabled) {
+    background-color: var(--nx-accent-hover);
+  }
+}
+
 // 下拉菜单容器
 :global {
+  .newx-work-mode-dropdown {
+    .ant-dropdown-menu {
+      width: min(220px, calc(100vw - 24px));
+      max-height: min(320px, 65vh);
+      padding: 7px;
+      overflow-y: auto;
+      border: 1px solid var(--nx-line);
+      border-radius: 12px;
+      background: var(--nx-paper);
+      box-shadow: var(--nx-shadow-raised);
+    }
+
+    .ant-dropdown-menu-item,
+    .ant-dropdown-menu-submenu-title {
+      min-height: 39px;
+      border-radius: 7px;
+      color: var(--nx-ink);
+      font-size: 14px;
+    }
+  }
+
   .agent-mode-dropdown-overlay {
     z-index: 9999;
 
@@ -416,7 +570,7 @@
     align-items: center;
     font-size: @fontSizeXl;
     justify-content: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 25%);
+    box-shadow: var(--nx-shadow-card);
     z-index: 100;
     opacity: 0;
     visibility: hidden;

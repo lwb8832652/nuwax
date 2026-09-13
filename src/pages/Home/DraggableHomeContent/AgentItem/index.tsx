@@ -65,7 +65,7 @@ const AgentItem: React.FC<AgentItemProps> = ({
       className={cx(styles.container)}
       onClick={onItemClick}
       title={`${
-        info?.name || dict('PC.Pages.HomeDrag.agent')
+        info?.name || dict('PC.Pages.NewxHomeDrag.agent')
       } - ${getDescription()}`}
     >
       {/* 智能体头像 */}
@@ -73,7 +73,7 @@ const AgentItem: React.FC<AgentItemProps> = ({
         <img
           className={cx(styles.img)}
           src={imageError ? agentImage : info.icon || agentImage}
-          alt={info?.name || dict('PC.Pages.HomeDrag.agentAvatar')}
+          alt={info?.name || dict('PC.Pages.NewxHomeDrag.agentAvatar')}
           onError={handleImageError}
           loading="lazy"
         />
@@ -89,10 +89,10 @@ const AgentItem: React.FC<AgentItemProps> = ({
             expandable: false,
             symbol: '...',
           }}
-          title={info?.name || dict('PC.Pages.HomeDrag.agentName')}
+          title={info?.name || dict('PC.Pages.NewxHomeDrag.agentName')}
           className={styles['title-section']}
         >
-          {info?.name || dict('PC.Pages.HomeDrag.unnamedAgent')}
+          {info?.name || dict('PC.Pages.NewxHomeDrag.unnamedAgent')}
         </Typography.Title>
 
         {/* 用户信息区域 */}
@@ -105,7 +105,15 @@ const AgentItem: React.FC<AgentItemProps> = ({
       </div>
 
       {/* 收藏按钮 */}
-      <span
+      <button
+        type="button"
+        disabled={isCollecting}
+        aria-pressed={!!info.collect}
+        aria-label={
+          info.collect
+            ? dict('PC.Pages.HomeDrag.cancelCollect')
+            : dict('PC.Pages.HomeDrag.collect')
+        }
         className={cx(styles['icon-box'], {
           [styles.collected]: info.collect,
           [styles.collecting]: isCollecting,
@@ -122,7 +130,7 @@ const AgentItem: React.FC<AgentItemProps> = ({
             [styles.spinning]: isCollecting,
           })}
         />
-      </span>
+      </button>
 
       {/* 描述区域 - 独立放在最下面，支持两行显示 */}
       <Typography.Paragraph

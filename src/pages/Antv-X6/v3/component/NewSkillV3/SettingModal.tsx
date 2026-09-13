@@ -6,7 +6,7 @@ import classNames from 'classnames';
 import React from 'react';
 import styles from './SettingModal.less';
 
-const cx = classNames.bind(styles);
+const cx = classNames;
 
 // 插件模型设置
 interface SettingModalProps {

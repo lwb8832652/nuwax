@@ -8,7 +8,8 @@
 
 // 弹窗本体，固定在光标附近展示
 .mention-popup {
-  width: 280px;
+  width: 360px;
+  max-width: calc(100vw - 16px);
   max-height: 400px;
   background: @colorBgContainer;
   border-radius: @borderRadius;
@@ -21,6 +22,100 @@
   /* 不设 transition，高度/位置变化即时生效，避免由短变长时闪动；底边固定、高度由下往上变长 */
   display: flex;
   flex-direction: column;
+
+  .resource-picker-header {
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+    padding: 0 @paddingSm;
+    color: @colorTextSecondary;
+    font-size: @fontSizeSm;
+    border-bottom: 1px solid @colorBorderSecondary;
+
+    strong {
+      color: @colorText;
+      font-weight: @fontWeightStrong;
+    }
+  }
+
+  .resource-picker-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+    padding: 0;
+    color: @colorTextSecondary;
+    background: transparent;
+    border: 0;
+    border-radius: @borderRadius;
+    cursor: pointer;
+
+    &:hover {
+      color: @colorText;
+      background: @colorFillSecondary;
+    }
+  }
+
+  .resource-picker-separator {
+    margin: 0 6px;
+    color: @colorTextQuaternary;
+  }
+
+  .resource-type-list {
+    padding: @paddingXs;
+  }
+
+  .resource-type-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 52px;
+    padding: @paddingXs;
+    color: @colorText;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: @borderRadius;
+    cursor: pointer;
+    gap: @marginSm;
+
+    &:hover,
+    &.selected {
+      background: @colorFillSecondary;
+    }
+  }
+
+  .resource-type-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    color: @colorPrimary;
+    background: @colorPrimaryBg;
+    border-radius: @borderRadius;
+    flex-shrink: 0;
+  }
+
+  .resource-type-copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 1px;
+
+    strong {
+      font-size: @fontSize;
+      font-weight: @fontWeightStrong;
+    }
+
+    small {
+      color: @colorTextTertiary;
+      font-size: @fontSizeSm;
+    }
+  }
 
   // 顶部分类标签区域
   .mention-tabs {
@@ -36,7 +131,9 @@
       font-size: @fontSizeSm;
       color: @colorTextSecondary;
       cursor: pointer;
+      border: 0;
       border-radius: @borderRadius;
+      background: transparent;
       transition: all 0.2s;
       text-align: center;
 
@@ -110,7 +207,12 @@
     .mention-item {
       display: flex;
       align-items: center;
+      width: 100%;
       padding: @paddingXs @paddingSm;
+      color: @colorText;
+      text-align: left;
+      background: transparent;
+      border: 0;
       cursor: pointer;
       gap: @marginSm;
 
@@ -124,6 +226,9 @@
       }
 
       .mention-item-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         width: 32px;
         height: 32px;
         border-radius: @borderRadius;
@@ -141,8 +246,10 @@
       }
 
       .mention-item-content {
+        display: flex;
         flex: 1;
         min-width: 0;
+        flex-direction: column;
 
         .mention-item-name {
           flex: 1;
@@ -160,6 +267,12 @@
       .mention-item-tag {
         flex-shrink: 0;
         margin-right: 0;
+      }
+
+      .mention-item-state {
+        flex-shrink: 0;
+        color: @colorTextTertiary;
+        font-size: @fontSizeSm;
       }
     }
 

@@ -1,43 +1,65 @@
-@import '@/styles/color';
-@import '@/styles/token';
+@import (reference) '@/styles/newx-resource.less';
 
 .container {
-  padding: 16px 24px;
+  .newx-resource-page();
 
   .header {
-    margin-bottom: 30px;
-    padding: 30px 60px;
-    z-index: 990;
-    border-radius: 20px;
+    position: relative;
+    z-index: 0;
+    flex-shrink: 0;
+    margin-bottom: 28px;
+    padding: 24px 28px;
+    overflow: hidden;
+    border: 1px solid var(--nx-line);
+    border-radius: 12px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
 
+    // Retain the space's configured banner and link, using a compact title band.
+    &::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background: rgb(22 22 24 / 40%);
+      content: '';
+    }
+
     h3 {
-      margin-bottom: 30px;
-      font-size: 32px;
-      font-weight: @fontWeightStrong;
-      color: @WHITE;
+      margin: 0 0 8px;
+      color: #fff;
+      font-size: 24px;
+      font-weight: 600;
+      line-height: 1.4;
+      letter-spacing: -0.6px;
     }
 
     p {
-      line-height: 36px;
-      font-size: 24px;
-      color: @GRAY05;
+      margin: 0;
+      color: rgb(255 255 255 / 80%);
+      font-size: 13px;
+      line-height: 1.6;
     }
   }
 
   .title-box {
-    margin-bottom: 20px;
+    .newx-resource-header();
+
+    > div {
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
     .theme-title {
-      font-size: 18px;
-      color: @BLANK04;
+      .newx-resource-title();
+      margin-right: 0;
+      font-size: 20px;
     }
   }
 
   .search-input {
-    width: 200px;
+    width: 240px;
+    max-width: 100%;
   }
 
   .min-height-300 {
@@ -45,54 +67,26 @@
   }
 
   .list-section {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-
-    /* 关键修复：确保内容从顶部开始排列，避免不均匀的间距分布 */
-    align-content: start;
+    .newx-resource-grid();
 
     .price-title {
-      font-size: @fontSizeSm;
-      color: #5e6470;
+      color: var(--nx-sub);
+      font-size: 11px;
       font-weight: 400;
     }
   }
 
-  @media (min-width: 1200px) {
-    .list-section {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
+  @media (max-width: 768px) {
+    .header {
+      padding: 20px;
 
-  @media (min-width: 1440px) {
-    .list-section {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      h3 {
+        font-size: 20px;
+      }
     }
   }
 }
 
-@media (max-width: 768px) {
-  .container {
-    padding: 36px 12px 24px;
-
-    .header {
-      padding: 20px;
-      border-radius: 12px;
-
-      h3 {
-        margin-bottom: 20px;
-        font-size: 22px;
-      }
-
-      p {
-        line-height: 22px;
-        font-size: 16px;
-      }
-    }
-
-    .list-section {
-      grid-template-columns: repeat(1, minmax(0, 1fr));
-    }
-  }
+.embedded {
+  padding-top: 22px;
 }

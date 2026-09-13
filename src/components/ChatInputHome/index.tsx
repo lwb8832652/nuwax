@@ -10,21 +10,33 @@ import ConditionRender from '@/components/ConditionRender';
 import PermissionMask from '@/components/PermissionMask';
 import { SUCCESS_CODE } from '@/constants/codes.constants';
 import { UPLOAD_FILE_ACTION } from '@/constants/common.constants';
+import { ENABLE_CHAT_MESSAGE_QUEUE } from '@/constants/feature.constants';
 import { ACCESS_TOKEN } from '@/constants/home.constants';
 import { isSessionStreamBusy } from '@/hooks/useExecutingTaskStatusPoll';
 import useSubscription from '@/hooks/useSubscription';
 import { t } from '@/services/i18nRuntime';
-import { DefaultSelectedEnum, TaskStatus } from '@/types/enums/agent';
+import {
+  AgentComponentTypeEnum,
+  DefaultSelectedEnum,
+  TaskStatus,
+} from '@/types/enums/agent';
 import { UploadFileStatus } from '@/types/enums/common';
+import type { AgentSelectedComponentInfo } from '@/types/interfaces/agent';
 import type { ChatInputProps, UploadFileInfo } from '@/types/interfaces/common';
 import type { MessageInfo } from '@/types/interfaces/conversationInfo';
 import eventBus, { EVENT_NAMES } from '@/utils/eventBus';
 import { handleUploadFileList } from '@/utils/upload';
 import {
   ArrowDownOutlined,
+  ArrowUpOutlined,
   CheckOutlined,
   DesktopOutlined,
+  DownOutlined,
   LoadingOutlined,
+  MessageOutlined,
+  PaperClipOutlined,
+  RobotOutlined,
+  UserAddOutlined,
 } from '@ant-design/icons';
 import { Dropdown, message, Tooltip, Upload, UploadProps } from 'antd';
 import classNames from 'classnames';
@@ -45,15 +57,27 @@ import ComputerTypeSelector from './ComputerTypeSelector';
 import styles from './index.less';
 import ManualComponentItem from './ManualComponentItem';
 import MentionEditor from './MentionEditor';
-import type { MentionEditorHandle, MentionItem } from './MentionPopup/types';
+import {
+  getMentionItemKey,
+  type MentionEditorHandle,
+  type MentionItem,
+} from './MentionPopup/types';
 import ModelSelector from './ModelSelector';
 import SpaceSelector from './SpaceSelector';
+import type { ChatInputComposerProps } from './types';
 
 const cx = classNames.bind(styles);
 
 const VoiceFooter = ChatInputVoiceFooter;
 
 const AGENT_MODE_OPTIONS: AgentMode[] = ['yolo', 'ask'];
+
+const MENTIONABLE_MANUAL_COMPONENT_TYPES = new Set<AgentComponentTypeEnum>([
+  AgentComponentTypeEnum.Skill,
+  AgentComponentTypeEnum.Plugin,
+  AgentComponentTypeEnum.Workflow,
+  AgentComponentTypeEnum.Knowledge,
+]);
 
 const AGENT_MODE_I18N: Record<AgentMode, { label: string; desc: string }> = {
   yolo: {
@@ -72,9 +96,12 @@ export interface ChatInputHomeRef {
 }
 
 /**
- * 聊天输入组件
+ * 工作台和会话页共用的输入框；会话状态由外部适配层提供。
  */
-const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
+export const ChatInputComposer = forwardRef<
+  ChatInputHomeRef,
+  ChatInputComposerProps
+>(
   (
     {
       className,
@@ -95,6 +122,15 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       showTaskAgentToggle = false,
       isTaskAgentActive = false,
       onToggleTaskAgent,
+      workbenchModeEnabled = false,
+      workbenchModeDisabled = false,
+      workbenchModeDisabledReason,
+      onDraftStateChange,
+      canUseWorkbenchAgentMode = showTaskAgentToggle,
+      workbenchExperts = [],
+      selectedWorkbenchExpertId,
+      onWorkbenchModeSelect,
+      onWorkbenchExpertSelect,
       selectedComputerId,
       onComputerSelect,
       agentId,
@@ -108,6 +144,8 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       isPersonalComputer,
       readonly,
       enableMention = true,
+      showResourceMention = false,
+      enableManualResourceMention = true,
       // @ 提及弹窗展示方向：auto | up | down，默认 auto
       mentionPlacement = 'auto',
       /** 占位符文本 */
@@ -139,6 +177,8 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       onStopConversationOverride,
       loadingStopConversationOverride,
       onDisabledStreamActiveOverride,
+      session,
+      voiceInputMock,
     },
     ref,
   ) => {
@@ -154,7 +194,8 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       loadingConversation,
       isLoadingOtherInterface,
       conversationInfo,
-    } = useModel('conversationInfo');
+      onUserStopConversation,
+    } = session;
 
     /** 使用独立会话 model（如预览 Tab），勿改动全局 conversationInfo 活跃状态 */
     const isIsolatedSessionSource = streamActiveOverride !== undefined;
@@ -164,7 +205,7 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
         onDisabledStreamActiveOverride?.();
         return;
       }
-      disabledConversationActive();
+      disabledConversationActive?.();
     }, [
       isIsolatedSessionSource,
       onDisabledStreamActiveOverride,
@@ -198,20 +239,76 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
     // 文档
     const [uploadFiles, setUploadFiles] = useState<UploadFileInfo[]>([]);
     const [files, setFiles] = useState<UploadFileInfo[]>([]);
+    const ignoredUploadUidsRef = useRef<Set<string>>(new Set());
     const [messageInfo, setMessageInfo] = useState<string>('');
     // 已选中的技能 ID 列表
     const [skillIds, setSkillIds] = useState<number[]>([]);
+    const [isVoiceDraftActive, setIsVoiceDraftActive] = useState(false);
+    const hasDraft =
+      !!messageInfo.trim() ||
+      uploadFiles.length > 0 ||
+      skillIds.length > 0 ||
+      isVoiceDraftActive;
+    useEffect(() => {
+      onDraftStateChange?.(hasDraft);
+    }, [hasDraft, onDraftStateChange]);
     // 停止操作是否正在进行中
     const [isStoppingConversation, setIsStoppingConversation] =
       useState<boolean>(false);
     // @ 提及编辑器引用
     const mentionEditorRef = useRef<MentionEditorHandle>(null);
+    /** 由 @ chip 临时启用的手动组件；值记录插入 chip 前是否已经默认启用。 */
+    const manualMentionSelectionsRef = useRef<Map<string, boolean>>(new Map());
+    /** 组件开关回调是 toggle 语义，使用同步快照避免连续选择时状态漂移。 */
+    const selectedComponentListRef = useRef<AgentSelectedComponentInfo[]>(
+      selectedComponentList ?? [],
+    );
+
+    useEffect(() => {
+      selectedComponentListRef.current = selectedComponentList ?? [];
+    }, [selectedComponentList]);
+
+    const pickerManualComponents = useMemo(() => {
+      if (!enableManualResourceMention) return [];
+
+      return (manualComponents ?? []).filter((component) => {
+        if (!MENTIONABLE_MANUAL_COMPONENT_TYPES.has(component.type)) {
+          return false;
+        }
+
+        // 无法切换组件时，仅允许插入当前已启用的资源，避免展示不可调用项。
+        return (
+          !!onSelectComponent ||
+          (selectedComponentList ?? []).some(
+            (selected) =>
+              selected.id === component.id && selected.type === component.type,
+          )
+        );
+      });
+    }, [
+      enableManualResourceMention,
+      manualComponents,
+      onSelectComponent,
+      selectedComponentList,
+    ]);
+
+    const canOpenResourceMention =
+      showResourceMention || enableMention || pickerManualComponents.length > 0;
 
     useImperativeHandle(ref, () => ({
       focus: () => {
         mentionEditorRef.current?.focus?.();
       },
       clear: () => {
+        // 切换专家时同时清掉旧草稿及附件，不反向关闭已启用的手动工具。
+        uploadFiles.forEach((file) =>
+          ignoredUploadUidsRef.current.add(file.uid),
+        );
+        setUploadFiles([]);
+        setFiles([]);
+        setMessageInfo('');
+        setSkillIds([]);
+        manualMentionSelectionsRef.current.clear();
         mentionEditorRef.current?.clear?.();
       },
     }));
@@ -284,13 +381,6 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       );
     }, [uploadFiles]);
 
-    // 监听会话状态变化，当会话结束时重置停止状态
-    useEffect(() => {
-      if (!isConversationActive) {
-        setIsStoppingConversation(false);
-      }
-    }, [isConversationActive]);
-
     // 发送按钮disabled
     const disabledSend = useMemo(() => {
       return !messageInfo && !files?.length;
@@ -305,6 +395,12 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       [isConversationActive, messageList],
     );
     const isActiveConversation = streamActive || effectiveTaskExecuting;
+
+    useEffect(() => {
+      if (!isActiveConversation) {
+        setIsStoppingConversation(false);
+      }
+    }, [isActiveConversation]);
 
     /** 按钮区活跃态（延迟回落）：吸收 model / taskStatus 短暂抖动，避免停止钮与发送钮来回闪 */
     const BUTTON_SLOT_RELEASE_MS = 800;
@@ -322,10 +418,91 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
     }, [isActiveConversation]);
 
     // 单按钮模式：活跃且输入框为空时显示「停止」，否则显示「发送」（活跃时点击即加入队列）
-    const showStopButton = buttonSlotActive && disabledSend;
+    const showStopButton =
+      buttonSlotActive && (!ENABLE_CHAT_MESSAGE_QUEUE || disabledSend);
+
+    const handleManualMentionSelect = useCallback(
+      (item: MentionItem) => {
+        if (
+          item.source !== 'manual' ||
+          !item.targetType ||
+          !onSelectComponent
+        ) {
+          return;
+        }
+
+        const key = getMentionItemKey(item);
+        if (manualMentionSelectionsRef.current.has(key)) return;
+
+        const component: AgentSelectedComponentInfo = {
+          id: item.targetId,
+          type: item.targetType,
+        };
+        const wasAlreadySelected = selectedComponentListRef.current.some(
+          (selected) =>
+            selected.id === component.id && selected.type === component.type,
+        );
+
+        manualMentionSelectionsRef.current.set(key, wasAlreadySelected);
+        if (wasAlreadySelected) return;
+
+        selectedComponentListRef.current = [
+          ...selectedComponentListRef.current,
+          component,
+        ];
+        onSelectComponent(component);
+      },
+      [onSelectComponent],
+    );
+
+    const handleManualMentionRemove = useCallback(
+      (item: MentionItem) => {
+        if (
+          item.source !== 'manual' ||
+          !item.targetType ||
+          !onSelectComponent
+        ) {
+          return;
+        }
+
+        const key = getMentionItemKey(item);
+        if (!manualMentionSelectionsRef.current.has(key)) return;
+
+        const wasAlreadySelected = manualMentionSelectionsRef.current.get(key);
+        manualMentionSelectionsRef.current.delete(key);
+        if (wasAlreadySelected) return;
+
+        const component: AgentSelectedComponentInfo = {
+          id: item.targetId,
+          type: item.targetType,
+        };
+        const isSelected = selectedComponentListRef.current.some(
+          (selected) =>
+            selected.id === component.id && selected.type === component.type,
+        );
+        if (!isSelected) return;
+
+        selectedComponentListRef.current =
+          selectedComponentListRef.current.filter(
+            (selected) =>
+              selected.id !== component.id || selected.type !== component.type,
+          );
+        onSelectComponent(component);
+      },
+      [onSelectComponent],
+    );
 
     // enter事件 - 确认发送消息
     const confirmSendMessage = (value: string) => {
+      if (
+        wholeDisabled ||
+        loadingConversation ||
+        isLoadingOtherInterface ||
+        isStoppingConversation ||
+        (!ENABLE_CHAT_MESSAGE_QUEUE && isActiveConversation)
+      ) {
+        return;
+      }
       // 如果输入框内容不为空 或者 附件文件列表不为空
       if (!!value.trim() || !!files?.length) {
         onEnter(value, files, skillIds, selectedModelId, agentMode);
@@ -338,6 +515,7 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
           // 清空已选中的技能 ID 列表
           setSkillIds([]);
           // 清空@提及编辑器
+          manualMentionSelectionsRef.current.clear();
           mentionEditorRef.current?.clear();
         }
       }
@@ -364,7 +542,7 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
      */
     const handlePressEnter = () => {
       // 中止会话过程中不能触发 enter 事件
-      // 会话活跃时不拦截：消息经 onEnter 流转到外层队列拦截逻辑入队
+      // 队列关闭时，confirmSendMessage 会拦截活跃会话的重复发送。
       if (isStoppingConversation) {
         return;
       }
@@ -392,7 +570,13 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
 
     const handleChange: UploadProps['onChange'] = (info) => {
       const { fileList } = info;
-      setUploadFiles(handleUploadFileList(fileList));
+      setUploadFiles(
+        handleUploadFileList(
+          fileList.filter(
+            (file) => !ignoredUploadUidsRef.current.has(file.uid),
+          ),
+        ),
+      );
     };
 
     const handleDelFile = (uid: string) => {
@@ -635,9 +819,11 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       setIsStoppingConversation(true);
 
       // 获取当前会话请求ID
-      const requestId = getCurrentConversationRequestId();
+      const requestId = getCurrentConversationRequestId?.();
       const conversationId =
-        stopConversationIdOverride ?? getCurrentConversationId();
+        stopConversationIdOverride ??
+        getCurrentConversationId?.() ??
+        conversationInfo?.id;
 
       // 修复：即使 requestId 为空也应该调用停止接口
       // 因为在会话刚开始时，requestId 可能还未设置，但会话已经在进行中
@@ -645,10 +831,12 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
         // 临时聊天需要 requestId
         onTempChatStop(requestId);
       } else if (onStopConversationOverride && conversationId) {
+        onUserStopConversation?.();
         onStopConversationOverride(conversationId);
-      } else if (conversationId) {
+      } else if (conversationId && runStopConversation) {
         // 正常会话只需要 conversationId 即可停止
-        runStopConversation(conversationId);
+        onUserStopConversation?.();
+        runStopConversation(String(conversationId));
       }
     }, [
       isStoppingConversation,
@@ -658,6 +846,8 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       onStopConversationOverride,
       runStopConversation,
       onTempChatStop,
+      onUserStopConversation,
+      conversationInfo?.id,
     ]);
 
     // 获取按钮提示文本
@@ -712,7 +902,7 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
     useEffect(() => {
       return () => {
         if (!isIsolatedSessionSourceRef.current) {
-          disabledConversationActiveRef.current();
+          disabledConversationActiveRef.current?.();
         }
         setUploadFiles([]);
       };
@@ -720,7 +910,9 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
 
     // 本输入框所属会话 id（隔离源用 override，否则取 model），用于过滤队列编辑回填事件
     const ownConversationId =
-      stopConversationIdOverride ?? conversationInfo?.id;
+      stopConversationIdOverride ??
+      getCurrentConversationId?.() ??
+      conversationInfo?.id;
     const ownConversationIdRef = useRef(ownConversationId);
     ownConversationIdRef.current = ownConversationId;
 
@@ -730,10 +922,16 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
         text,
         files: editFiles,
         conversationId: targetConversationId,
+        skillIds: editSkillIds,
+        modelId: editModelId,
+        selectedAgentMode: editAgentMode,
       }: {
         text: string;
         files?: UploadFileInfo[];
         conversationId?: number | string;
+        skillIds?: number[];
+        modelId?: number;
+        selectedAgentMode?: AgentMode;
       }) => {
         // 仅回填到目标会话对应的输入框，避免多实例（主聊天 / 预览 Tab）串扰；
         // 事件未带 conversationId 时按旧行为不过滤（单输入框场景）
@@ -748,11 +946,14 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
         if (editFiles?.length) {
           setUploadFiles((prev) => [...prev, ...editFiles]);
         }
+        if (editSkillIds) setSkillIds(editSkillIds);
+        if (editModelId !== undefined) onModelSelect?.(editModelId);
+        if (editAgentMode !== undefined) onAgentModeChange?.(editAgentMode);
       };
       eventBus.on(EVENT_NAMES.QUEUE_EDIT_MESSAGE, handleEditMessage);
       return () =>
         eventBus.off(EVENT_NAMES.QUEUE_EDIT_MESSAGE, handleEditMessage);
-    }, []);
+    }, [onModelSelect, onAgentModeChange]);
 
     /**
      * 将底部 @ 图标选择的提及项插入到 MentionEditor
@@ -778,10 +979,196 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
       [isEnableSubscription, querySkillSubscriptionPlans],
     );
 
+    const renderAtMentionAction = () => (
+      <AtMentionIcon
+        enableMention={canOpenResourceMention}
+        showResourceMention={canOpenResourceMention}
+        enableSkillMention={enableMention}
+        mentionPlacement={mentionPlacement}
+        enableSubscription={isEnableSubscription}
+        onSelectMention={handleInsertAtMention}
+        usageScenarios={usageScenarios}
+        disabled={wholeDisabled}
+        manualComponents={pickerManualComponents}
+        selectedComponentList={selectedComponentList}
+      />
+    );
+
+    const renderUploadAction = () => (
+      <Upload
+        action={UPLOAD_FILE_ACTION}
+        disabled={wholeDisabled}
+        onChange={handleChange}
+        multiple={true}
+        fileList={uploadFiles}
+        headers={{
+          Authorization: token ? `Bearer ${token}` : '',
+        }}
+        data={{
+          type: 'tmp',
+        }}
+        showUploadList={false}
+      >
+        <Tooltip title={t('PC.Components.ChatInputHome.uploadAttachment')}>
+          <span
+            className={cx(
+              'flex',
+              'items-center',
+              'content-center',
+              'cursor-pointer',
+              styles.box,
+              styles['plus-box'],
+              { [styles['upload-box-disabled']]: wholeDisabled },
+            )}
+          >
+            {showResourceMention ? (
+              <PaperClipOutlined style={{ fontSize: '15px' }} />
+            ) : (
+              <SvgIcon
+                name="icons-chat-add"
+                style={{ fontSize: '14px' }}
+                className={cx(styles['svg-icon'])}
+              />
+            )}
+          </span>
+        </Tooltip>
+      </Upload>
+    );
+
+    const renderComputerSelector = () => {
+      if (!isTaskAgentActive || readonly) return null;
+
+      return (
+        <ComputerTypeSelector
+          value={
+            agentSandboxId !== undefined && agentSandboxId !== null
+              ? String(agentSandboxId)
+              : conversationInfo?.sandboxServerId !== undefined &&
+                conversationInfo?.sandboxServerId !== null
+              ? String(conversationInfo.sandboxServerId)
+              : selectedComputerId
+          }
+          onChange={(id: string) => onComputerSelect?.(id)}
+          disabled={wholeDisabled}
+          agentId={agentId}
+          fixedSelection={
+            fixedSelection || streamActive || effectiveTaskExecuting
+          }
+          unavailable={isSandboxUnavailable}
+          autoSelect={autoSelectComputer}
+          saveOnSelect={saveComputerOnSelect}
+          isPersonalComputer={isPersonalComputer}
+          readonly={readonly}
+        />
+      );
+    };
+
+    const renderModelSelector = () => {
+      if (allowOtherModel !== DefaultSelectedEnum.Yes) return null;
+
+      return (
+        <ModelSelector
+          className={showResourceMention ? 'newx-workbench-model' : undefined}
+          agentId={agentId}
+          selectedModelId={selectedModelId}
+          onModelSelect={onModelSelect}
+          agentType={agentType}
+        />
+      );
+    };
+
+    const renderWorkbenchModeSelector = () => {
+      if (!workbenchModeEnabled) return null;
+
+      return (
+        <Dropdown
+          trigger={['click']}
+          placement="topLeft"
+          overlayClassName="newx-work-mode-dropdown"
+          disabled={wholeDisabled || workbenchModeDisabled}
+          menu={{
+            selectedKeys: [
+              isTaskAgentActive ? 'agent' : 'ask',
+              ...(selectedWorkbenchExpertId
+                ? [`expert-${selectedWorkbenchExpertId}`]
+                : []),
+            ],
+            items: [
+              {
+                key: 'ask',
+                icon: <MessageOutlined />,
+                label: t('PC.Components.ChatInputHome.workbenchAsk'),
+                onClick: () => onWorkbenchModeSelect?.('ask'),
+              },
+              {
+                key: 'agent',
+                icon: <RobotOutlined />,
+                label: t('PC.Components.ChatInputHome.workbenchAgent'),
+                disabled: !canUseWorkbenchAgentMode,
+                onClick: () => onWorkbenchModeSelect?.('agent'),
+              },
+              { type: 'divider' },
+              {
+                key: 'summon',
+                icon: <UserAddOutlined />,
+                label: t('PC.Components.ChatInputHome.summonExpert'),
+                children: workbenchExperts.length
+                  ? workbenchExperts.map((expert) => ({
+                      key: `expert-${expert.targetId}`,
+                      label: expert.name,
+                      title: expert.name,
+                      onClick: () => onWorkbenchExpertSelect?.(expert),
+                    }))
+                  : [
+                      {
+                        key: 'empty-experts',
+                        label: t('PC.Components.ChatInputHome.noExperts'),
+                        disabled: true,
+                      },
+                    ],
+              },
+            ],
+          }}
+        >
+          <button
+            type="button"
+            data-chat-work-mode=""
+            className={styles['workbench-mode-trigger']}
+            disabled={wholeDisabled || workbenchModeDisabled}
+            aria-label={t('PC.Components.ChatInputHome.selectWorkMode')}
+            title={workbenchModeDisabledReason}
+          >
+            {isTaskAgentActive ? <RobotOutlined /> : <MessageOutlined />}
+            <span>
+              {t(
+                isTaskAgentActive
+                  ? 'PC.Components.ChatInputHome.workbenchAgent'
+                  : 'PC.Components.ChatInputHome.workbenchAsk',
+              )}
+            </span>
+            <DownOutlined className={styles['workbench-mode-caret']} />
+          </button>
+        </Dropdown>
+      );
+    };
+
+    const renderSpaceSelector = () => {
+      if (!showSpaceSelector) return null;
+
+      return (
+        <SpaceSelector
+          selectedSpaceId={selectedSpaceId}
+          onSpaceSelect={onSpaceSelect}
+        />
+      );
+    };
+
     return (
       <div className={cx('w-full', 'relative', className)}>
         <div
+          data-chat-composer=""
           className={cx(styles['chat-container'], 'flex', 'flex-col', {
+            [styles['workbench-composer']]: showResourceMention,
             [styles['drag-over']]: isDragging,
             [styles['has-tabs']]: !!tabsSlot,
           })}
@@ -821,6 +1208,7 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
               <ConditionRender condition={!!selectedTag?.label}>
                 <div
                   ref={selectedTagRef}
+                  data-chat-selected-tag=""
                   className={cx(styles['selected-tag'])}
                 >
                   <span className={cx(styles['tag-label'])}>
@@ -830,6 +1218,12 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
                     type="button"
                     className={cx(styles['tag-close'])}
                     aria-label="Clear selected tag"
+                    title={workbenchModeDisabledReason}
+                    disabled={
+                      wholeDisabled ||
+                      workbenchModeDisabled ||
+                      isVoiceDraftActive
+                    }
                     onClick={onClearSelectedTag}
                   />
                 </div>
@@ -843,7 +1237,12 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
                 onChange={setMessageInfo}
                 onSkillIdsChange={setSkillIds}
                 // 是否启用 @ 提及功能，默认启用
-                enableMention={enableMention}
+                enableMention={canOpenResourceMention}
+                enableSkillMention={enableMention}
+                manualComponents={pickerManualComponents}
+                selectedComponentList={selectedComponentList}
+                onMentionSelect={handleManualMentionSelect}
+                onMentionRemove={handleManualMentionRemove}
                 // @ 弹窗展示方向：auto | up | down
                 mentionPlacement={mentionPlacement}
                 // 回车事件处理
@@ -859,6 +1258,8 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
               />
             </div>
             <VoiceFooter.Provider
+              mock={voiceInputMock}
+              onActiveChange={setIsVoiceDraftActive}
               disabled={
                 wholeDisabled ||
                 isActiveConversation ||
@@ -875,6 +1276,7 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
             >
               {(isVoiceActive) => (
                 <footer
+                  data-chat-footer=""
                   className={cx('flex', 'flex-1', styles.footer, {
                     [styles['footer-voice-active']]: isVoiceActive,
                   })}
@@ -916,54 +1318,19 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
                     </ConditionRender>
                   )}
 
-                  <VoiceFooter.HideWhenActive>
-                    <AtMentionIcon
-                      enableMention={enableMention}
-                      mentionPlacement={mentionPlacement}
-                      enableSubscription={isEnableSubscription}
-                      onSelectMention={handleInsertAtMention}
-                      usageScenarios={usageScenarios}
-                      disabled={wholeDisabled}
-                    />
-                  </VoiceFooter.HideWhenActive>
+                  {!showResourceMention && (
+                    <VoiceFooter.HideWhenActive>
+                      {renderAtMentionAction()}
+                    </VoiceFooter.HideWhenActive>
+                  )}
 
-                  {/*上传按钮*/}
-                  <Upload
-                    action={UPLOAD_FILE_ACTION}
-                    disabled={wholeDisabled}
-                    onChange={handleChange}
-                    multiple={true}
-                    fileList={uploadFiles}
-                    headers={{
-                      Authorization: token ? `Bearer ${token}` : '',
-                    }}
-                    data={{
-                      type: 'tmp',
-                    }}
-                    showUploadList={false}
-                  >
-                    <Tooltip
-                      title={t('PC.Components.ChatInputHome.uploadAttachment')}
-                    >
-                      <span
-                        className={cx(
-                          'flex',
-                          'items-center',
-                          'content-center',
-                          'cursor-pointer',
-                          styles.box,
-                          styles['plus-box'],
-                          { [styles['upload-box-disabled']]: wholeDisabled },
-                        )}
-                      >
-                        <SvgIcon
-                          name="icons-chat-add"
-                          style={{ fontSize: '14px' }}
-                          className={cx(styles['svg-icon'])}
-                        />
-                      </span>
-                    </Tooltip>
-                  </Upload>
+                  {!showResourceMention && renderUploadAction()}
+                  {showResourceMention && (
+                    <VoiceFooter.HideWhenActive>
+                      {renderWorkbenchModeSelector()}
+                      {renderModelSelector()}
+                    </VoiceFooter.HideWhenActive>
+                  )}
                   <VoiceFooter.HideWhenActive>
                     {showAgentModeSelector && (
                       <Dropdown
@@ -1024,7 +1391,7 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
                     )}
                   </VoiceFooter.HideWhenActive>
                   <VoiceFooter.HideWhenActive>
-                    {showTaskAgentToggle && (
+                    {showTaskAgentToggle && !workbenchModeEnabled && (
                       <Tooltip
                         title={
                           isTaskAgentActive
@@ -1064,6 +1431,13 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
                       onSelectComponent={onSelectComponent}
                     />
                   </VoiceFooter.HideWhenActive>
+
+                  {showResourceMention && (
+                    <VoiceFooter.HideWhenActive>
+                      {renderComputerSelector()}
+                      {renderSpaceSelector()}
+                    </VoiceFooter.HideWhenActive>
+                  )}
 
                   <VoiceFooter.Expand />
 
@@ -1125,56 +1499,25 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
                               },
                             )}
                           >
-                            <SvgIcon
-                              name="icons-chat-send"
-                              style={{ fontSize: '14px' }}
-                            />
+                            {showResourceMention ? (
+                              <ArrowUpOutlined style={{ fontSize: '15px' }} />
+                            ) : (
+                              <SvgIcon
+                                name="icons-chat-send"
+                                style={{ fontSize: '14px' }}
+                              />
+                            )}
                           </span>
                         </Tooltip>
                       )
                     }
                   >
+                    {showResourceMention && renderAtMentionAction()}
+                    {showResourceMention && renderUploadAction()}
                     {prefix}
-                    {isTaskAgentActive && !readonly && (
-                      <ComputerTypeSelector
-                        value={
-                          agentSandboxId !== undefined &&
-                          agentSandboxId !== null
-                            ? String(agentSandboxId)
-                            : conversationInfo?.sandboxServerId !== undefined &&
-                              conversationInfo?.sandboxServerId !== null
-                            ? String(conversationInfo.sandboxServerId)
-                            : selectedComputerId
-                        }
-                        onChange={(id: string) => onComputerSelect?.(id)}
-                        disabled={wholeDisabled}
-                        agentId={agentId}
-                        fixedSelection={
-                          fixedSelection ||
-                          streamActive ||
-                          effectiveTaskExecuting
-                        }
-                        unavailable={isSandboxUnavailable}
-                        autoSelect={autoSelectComputer}
-                        saveOnSelect={saveComputerOnSelect}
-                        isPersonalComputer={isPersonalComputer}
-                        readonly={readonly}
-                      />
-                    )}
-                    {allowOtherModel === DefaultSelectedEnum.Yes && (
-                      <ModelSelector
-                        agentId={agentId}
-                        selectedModelId={selectedModelId}
-                        onModelSelect={onModelSelect}
-                        agentType={agentType}
-                      />
-                    )}
-                    {showSpaceSelector && (
-                      <SpaceSelector
-                        selectedSpaceId={selectedSpaceId}
-                        onSpaceSelect={onSpaceSelect}
-                      />
-                    )}
+                    {!showResourceMention && renderComputerSelector()}
+                    {!showResourceMention && renderModelSelector()}
+                    {!showResourceMention && renderSpaceSelector()}
                   </VoiceFooter.Right>
                 </footer>
               )}
@@ -1220,6 +1563,14 @@ const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
         </ConditionRender>
       </div>
     );
+  },
+);
+
+/** 工作台的 model 适配层；独立会话直接复用受控的 ChatInputComposer。 */
+const ChatInputHome = forwardRef<ChatInputHomeRef, ChatInputProps>(
+  (props, ref) => {
+    const session = useModel('conversationInfo');
+    return <ChatInputComposer {...props} ref={ref} session={session} />;
   },
 );
 

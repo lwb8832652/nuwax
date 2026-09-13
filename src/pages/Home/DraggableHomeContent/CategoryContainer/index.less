@@ -1,14 +1,11 @@
-@import '@/styles/token';
-
 .categoryContainer {
-  //padding: @paddingXs 0;
-  margin-top: 10px;
-  position: relative;
   display: flex;
-  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  //justify-content: center;
+  position: relative;
   width: 100%;
+  border-bottom: 1px solid var(--nx-line);
+  background: var(--nx-paper);
 
   .tab-left {
     flex: 1;
@@ -17,19 +14,45 @@
   }
 
   .tab-right {
+    display: flex;
     flex: none;
-    line-height: 48px;
+    align-items: center;
+    gap: 12px;
+    margin-left: 12px;
+
+    .discoverExperts {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 4px 0;
+      border: 0;
+      background: transparent;
+      color: var(--nx-muted);
+      font-size: 12px;
+      line-height: 20px;
+      white-space: nowrap;
+      cursor: pointer;
+
+      &:hover {
+        color: var(--nx-ink);
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--nx-accent);
+        outline-offset: 2px;
+      }
+    }
 
     .icon {
-      color: @colorTextQuaternary;
-      cursor: pointer;
+      color: var(--nx-muted);
+      cursor: help;
     }
   }
 
-  // 自定义标签页样式
   :global {
     .ant-tabs {
-      width: 100% !important;
+      width: 100%;
       min-width: 0;
       overflow: hidden;
     }
@@ -50,49 +73,35 @@
       isolation: isolate;
     }
 
-    .ant-tabs-nav-list {
-      will-change: transform;
-    }
-
     .ant-tabs-tab {
-      // 基础样式
-      padding: 8px 16px !important;
-      border-radius: 8px;
-      border: none;
-      margin-left: 0 !important;
-      margin-right: 8px !important;
-
-      // 未选中状态
-      color: @colorTextSecondary;
-      background-color: transparent;
-      font-size: @fontSize;
+      height: 50px;
+      padding: 0 1px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      font-size: 15px;
+      font-weight: 500;
       line-height: 24px;
-      transition: background-color 0.3s, color 0.3s;
 
       .ant-tabs-tab-btn {
-        color: @colorTextSecondary;
-        transition: color 0.3s;
+        color: var(--nx-muted);
+        transition: color 0.15s;
       }
 
-      &:hover {
-        .ant-tabs-tab-btn {
-          color: @colorText;
-        }
+      &:hover .ant-tabs-tab-btn {
+        color: var(--nx-ink);
       }
 
-      // 选中状态
-      &.ant-tabs-tab-active {
-        background-color: rgba(0, 0, 0, 5%); // 浅灰色背景
-
-        .ant-tabs-tab-btn {
-          color: @colorText !important;
-        }
+      &.ant-tabs-tab-active .ant-tabs-tab-btn {
+        color: var(--nx-ink);
+        font-weight: 600;
+        text-shadow: none;
       }
     }
 
-    // 移除标签栏按钮聚焦样式
-    .ant-tabs-tab-btn:focus:not(:focus-visible) {
-      color: @colorTextSecondary;
+    .ant-tabs-ink-bar {
+      height: 2px;
+      background: var(--nx-ink);
     }
   }
 }

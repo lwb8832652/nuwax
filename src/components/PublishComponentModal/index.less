@@ -1,18 +1,23 @@
 @import '@/styles/color';
+@import (reference) '@/styles/newx-editor.less';
 
 .modal-content {
-  width: 560px;
+  width: min(560px, calc(100vw - 32px));
   height: 80%;
-  background-color: @WHITE12 !important;
+  background-color: var(--nx-paper) !important;
+  border: 1px solid var(--nx-line);
+  border-radius: var(--nx-radius-lg);
+  .newx-editor-controls();
   overflow: hidden;
 
   .modal-header {
-    background-color: @WHITE12;
+    background-color: var(--nx-paper);
   }
 
   .modal-body {
     max-height: calc(100vh - 180px);
     overflow-y: auto;
+    .newx-editor-scrollbar();
   }
 
   .input-textarea {
@@ -31,6 +36,7 @@
   }
 
   .table-wrap {
+    .newx-editor-table();
     .label-normal {
       width: auto;
     }

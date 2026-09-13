@@ -16,18 +16,19 @@
 .mention-editor {
   position: relative;
   width: 100%;
-  padding: 4px @paddingSm;
+  box-sizing: border-box;
+  padding: 12px 14px 8px;
   text-indent: var(--mention-inline-prefix-offset, 0);
-  font-size: @fontSize;
-  line-height: 1.5;
-  color: @colorText;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--nx-ink);
   background: transparent;
   border: none;
   outline: none;
   resize: none;
   overflow-y: auto;
   word-wrap: break-word;
-  word-break: break-all;
+  word-break: break-word;
   white-space: pre-wrap;
   caret-color: @colorPrimary;
 
@@ -40,10 +41,10 @@
   &.empty::before {
     content: attr(data-placeholder);
     position: absolute;
-    top: 4px;
-    left: @paddingSm;
-    right: @paddingSm;
-    color: @colorTextQuaternary;
+    top: 12px;
+    left: 14px;
+    right: 14px;
+    color: var(--nx-muted);
     text-indent: var(--mention-inline-prefix-offset, 0);
     pointer-events: none;
     display: box;
@@ -70,11 +71,11 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: @colorBorder;
+    background: var(--nx-line);
     border-radius: 3px;
 
     &:hover {
-      background: @colorTextTertiary;
+      background: var(--nx-muted);
     }
   }
 }
@@ -90,17 +91,21 @@
 .mention-chip {
   display: inline-flex;
   align-items: center;
+  height: 22px;
   text-indent: 0;
-  background-color: @colorBgLayout;
-  border-radius: @borderRadius;
-  padding: 2px 4px 2px 8px;
+  border: 1px solid var(--nx-accent-border);
+  border-radius: var(--nx-radius-sm);
+  background-color: var(--nx-accent-light);
+  color: var(--nx-accent);
+  padding: 0 4px 0 6px;
   margin: 0 2px;
   user-select: none;
   cursor: default;
-  transition: all 0.2s;
+  transition: border-color 0.15s, background-color 0.15s;
 
   &:hover {
-    opacity: 0.8;
+    border-color: var(--nx-accent-border);
+    background-color: var(--nx-accent-light);
 
     // 仅在 hover 时强调删除按钮，平时弱化视觉噪音
     .mention-delete {
@@ -114,9 +119,9 @@
     gap: 2px;
 
     .mention-name {
-      font-size: @fontSizeSm;
-      color: @colorTextSecondary;
-      font-weight: 400;
+      color: currentcolor;
+      font-size: 11px;
+      font-weight: 500;
     }
 
     .mention-delete {
@@ -126,8 +131,8 @@
       width: 16px;
       height: 16px;
       margin-left: 2px;
-      font-size: 12px;
-      color: @colorTextSecondary;
+      font-size: 11px;
+      color: currentcolor;
       cursor: pointer;
       opacity: 0.6;
       transition: all 0.2s;

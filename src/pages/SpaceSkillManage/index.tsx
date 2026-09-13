@@ -1,7 +1,10 @@
+import ResourceCatalogScope from '@/components/business-component/ResourceCatalogScope';
 import MoveCopyComponent from '@/components/MoveCopyComponent';
 import TipsBox from '@/components/TipsBox';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
 import { SUCCESS_CODE } from '@/constants/codes.constants';
+import SpaceSquare from '@/pages/SpaceSquare';
+import Square from '@/pages/Square';
 import { dict } from '@/services/i18nRuntime';
 import { apiDeleteSkill, apiSkillCopyToSpace } from '@/services/library';
 import {
@@ -11,6 +14,10 @@ import {
 import { AgentComponentTypeEnum } from '@/types/enums/agent';
 import { CreateUpdateModeEnum } from '@/types/enums/common';
 import { ApplicationMoreActionEnum } from '@/types/enums/space';
+import {
+  SquareAgentTypeEnum,
+  SquareTemplateTargetTypeEnum,
+} from '@/types/enums/square';
 import type { CustomPopoverItem } from '@/types/interfaces/common';
 import {
   SkillCopyToSpaceParams,
@@ -263,7 +270,7 @@ const SpaceSkillManage: React.FC = () => {
 
   return (
     <WorkspaceLayout
-      title={dict('PC.Pages.SpaceSkillManage.pageTitle')}
+      title={dict('PC.Components.Newx.skills')}
       leftSlot={<HeaderLeftSlot />}
       rightSlot={
         <HeaderRightSlot
@@ -324,4 +331,29 @@ const SpaceSkillManage: React.FC = () => {
   );
 };
 
-export default SpaceSkillManage;
+const SpaceSkillManageCatalog: React.FC = () => (
+  <ResourceCatalogScope
+    discovery={<Square embedded resourceType={SquareAgentTypeEnum.Skill} />}
+    published={
+      <SpaceSquare embedded resourceType={SquareAgentTypeEnum.Skill} />
+    }
+    templates={
+      <Square
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.Skill}
+      />
+    }
+    spaceTemplates={
+      <SpaceSquare
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.Skill}
+      />
+    }
+  >
+    <SpaceSkillManage />
+  </ResourceCatalogScope>
+);
+
+export default SpaceSkillManageCatalog;

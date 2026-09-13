@@ -41,7 +41,7 @@ const CreateAgent: React.FC<CreateAgentProps> = ({
     onSuccess: (result: AgentAddResult) => {
       setImageUrl('');
       onConfirmCreate?.(result);
-      message.success(dict('PC.Components.CreateAgent.createSuccess'));
+      message.success(dict('PC.Components.NewxCreateExpert.createSuccess'));
       setLoading(false);
     },
     onError: () => {
@@ -54,7 +54,7 @@ const CreateAgent: React.FC<CreateAgentProps> = ({
     manual: true,
     debounceInterval: 300,
     onSuccess: (_: null, params: AgentConfigUpdateParams[]) => {
-      message.success(dict('PC.Components.CreateAgent.editSuccess'));
+      message.success(dict('PC.Components.NewxCreateExpert.editSuccess'));
       setLoading(false);
       const info: AgentConfigUpdateParams = params[0];
       onConfirmUpdate?.(info);
@@ -155,8 +155,8 @@ const CreateAgent: React.FC<CreateAgentProps> = ({
       }
     }
     return mode === CreateUpdateModeEnum.Create
-      ? dict('PC.Components.CreateAgent.createTitle')
-      : dict('PC.Components.CreateAgent.updateTitle');
+      ? dict('PC.Components.NewxCreateExpert.createTitle')
+      : dict('PC.Components.NewxCreateExpert.updateTitle');
   }, [type, mode]);
 
   return (
@@ -177,12 +177,12 @@ const CreateAgent: React.FC<CreateAgentProps> = ({
       >
         <Form.Item
           name="name"
-          label={dict('PC.Components.CreateAgent.nameLabel')}
+          label={dict('PC.Components.NewxCreateExpert.nameLabel')}
           validateTrigger="onBlur"
           rules={[
             {
               required: true,
-              message: dict('PC.Components.CreateAgent.nameRequired'),
+              message: dict('PC.Components.NewxCreateExpert.nameRequired'),
             },
             {
               validator(_, value) {
@@ -195,23 +195,27 @@ const CreateAgent: React.FC<CreateAgentProps> = ({
                   );
                 }
                 return Promise.reject(
-                  new Error(dict('PC.Components.CreateAgent.nameRequired')),
+                  new Error(
+                    dict('PC.Components.NewxCreateExpert.nameRequired'),
+                  ),
                 );
               },
             },
           ]}
         >
           <Input
-            placeholder={dict('PC.Components.CreateAgent.namePlaceholder')}
+            placeholder={dict('PC.Components.NewxCreateExpert.namePlaceholder')}
             showCount
             maxLength={50}
           />
         </Form.Item>
         <OverrideTextArea
           name="description"
-          label={dict('PC.Components.CreateAgent.descriptionLabel')}
+          label={dict('PC.Components.NewxCreateExpert.descriptionLabel')}
           initialValue={agentConfigInfo?.description}
-          placeholder={dict('PC.Components.CreateAgent.descriptionPlaceholder')}
+          placeholder={dict(
+            'PC.Components.NewxCreateExpert.descriptionPlaceholder',
+          )}
           maxLength={10000}
         />
         <Form.Item

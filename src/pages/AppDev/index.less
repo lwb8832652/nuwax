@@ -9,6 +9,7 @@
 
 .container {
   color: @colorTextBase;
+  background-color: var(--nx-surface);
   background-image: @backgroundImage;
   background-size: cover;
   background-position: center;
@@ -33,9 +34,9 @@
   .section {
     // gap: 20px;
     overflow-x: auto;
-    border-radius: @pageContainerBorderRadius;
-    border: @lineWidth solid @colorSplit;
-    margin: 0 @marginSm @marginSm;
+    border-radius: 10px;
+    border: 1px solid var(--nx-line);
+    margin: 0 12px 12px;
     background-color: @colorBgContainer;
   }
 
@@ -74,7 +75,7 @@
 .leftPanel {
   width: 380px;
   height: 100%;
-  border-right: 1px solid rgba(0, 0, 0, 10%);
+  border-right: 1px solid var(--nx-line);
   padding: 0;
   flex-shrink: 0; // 防止收缩
   display: flex;

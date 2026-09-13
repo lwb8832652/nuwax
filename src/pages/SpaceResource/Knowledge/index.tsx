@@ -1,7 +1,9 @@
+import ResourceCatalogScope from '@/components/business-component/ResourceCatalogScope';
 import ButtonToggle from '@/components/ButtonToggle';
 import CreateKnowledge from '@/components/CreateKnowledge';
 import Loading from '@/components/custom/Loading';
 import { CREATE_LIST } from '@/constants/space.constants';
+import Square from '@/pages/Square';
 import { dict } from '@/services/i18nRuntime';
 import { apiKnowledgeConfigDelete } from '@/services/knowledge';
 import { apiComponentList } from '@/services/library';
@@ -10,6 +12,7 @@ import {
   ComponentTypeEnum,
   CreateListEnum,
 } from '@/types/enums/space';
+import { SquareAgentTypeEnum } from '@/types/enums/square';
 import type { CustomPopoverItem } from '@/types/interfaces/common';
 import type { ComponentInfo } from '@/types/interfaces/library';
 import { modalConfirm } from '@/utils/ant-custom';
@@ -224,4 +227,12 @@ const SpaceKnowledge: React.FC = () => {
   );
 };
 
-export default SpaceKnowledge;
+const SpaceKnowledgeCatalog: React.FC = () => (
+  <ResourceCatalogScope
+    discovery={<Square embedded resourceType={SquareAgentTypeEnum.Knowledge} />}
+  >
+    <SpaceKnowledge />
+  </ResourceCatalogScope>
+);
+
+export default SpaceKnowledgeCatalog;

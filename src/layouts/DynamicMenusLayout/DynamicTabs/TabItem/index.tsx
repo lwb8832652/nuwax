@@ -1,12 +1,8 @@
 import { SvgIcon } from '@/components/base';
-import { useUnifiedTheme } from '@/hooks/useUnifiedTheme';
-import { ThemeNavigationStyleType } from '@/types/enums/theme';
-import { Tooltip, Typography } from 'antd';
+import { RightOutlined } from '@ant-design/icons';
 import classNames from 'classnames';
-import React, { useMemo } from 'react';
+import React from 'react';
 import styles from './index.less';
-
-const cx = classNames.bind(styles);
 
 interface TabItemProps {
   active: boolean;
@@ -15,9 +11,11 @@ interface TabItemProps {
   onClick: () => void;
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
+  isSecondMenuCollapsed?: boolean;
+  hasChildren?: boolean;
 }
 
-const TabItem: React.FC<TabItemProps & { isSecondMenuCollapsed?: boolean }> = ({
+const TabItem: React.FC<TabItemProps> = ({
   active,
   icon,
   onClick,
@@ -25,89 +23,36 @@ const TabItem: React.FC<TabItemProps & { isSecondMenuCollapsed?: boolean }> = ({
   onMouseEnter,
   onMouseLeave,
   isSecondMenuCollapsed = false,
-}) => {
-  // 获取当前导航风格
-  const { navigationStyle } = useUnifiedTheme();
-  const isStyle2 = useMemo(
-    () => navigationStyle === ThemeNavigationStyleType.STYLE2,
-    [navigationStyle],
-  );
-  const navStyle: React.CSSProperties = useMemo(() => {
-    return isStyle2
-      ? {
-          width: '64px',
-          height: '64px',
-        }
-      : {
-          width: '40px',
-          height: '40px',
-          padding: 0,
-        };
-  }, [isStyle2]);
-
-  const content = (
-    <div
-      onClick={onClick}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-      className={cx(
-        'flex',
-        'flex-col',
-        'items-center',
-        'content-center',
-        'cursor-pointer',
-        styles.box,
-        { [styles.active]: active },
+  hasChildren = false,
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+    onFocus={onMouseEnter}
+    className={classNames(styles.item, {
+      [styles.active]: active,
+      [styles.collapsed]: isSecondMenuCollapsed,
+    })}
+    aria-label={text}
+    aria-current={active ? 'page' : undefined}
+    title={isSecondMenuCollapsed ? text : undefined}
+  >
+    <span className={styles.icon}>
+      {icon && /\.(png|jpe?g|webp)(\?|$)/i.test(icon) ? (
+        <img src={icon} alt="" />
+      ) : (
+        <SvgIcon name={icon || 'icons-nav-task-time'} />
       )}
-    >
-      <div className={cx(styles['active-box'])} style={navStyle}>
-        <div className={cx(styles['active-icon-container'])}>
-          {icon &&
-          (icon?.includes('.png') ||
-            icon?.includes('.jpg') ||
-            icon?.includes('.jpeg')) ? (
-            <img className={cx(styles['icon-image'])} src={icon} />
-          ) : (
-            <SvgIcon name={icon || 'icons-nav-task-time'} />
-          )}
-        </div>
-        <Typography.Text
-          className={cx(styles.text)}
-          style={{
-            display: isStyle2 ? 'block' : 'none',
-            color: 'inherit',
-          }}
-          ellipsis={{
-            tooltip: {
-              title: text,
-              placement: 'right',
-              color: '#fff',
-              styles: { body: { color: '#000' } },
-            },
-          }}
-        >
-          {text}
-        </Typography.Text>
-      </div>
-    </div>
-  );
-
-  // 当二级菜单收起时，不显示Tooltip，避免与悬浮菜单冲突
-  if (isSecondMenuCollapsed || isStyle2) {
-    return content;
-  }
-
-  // 二级菜单展开时，正常显示Tooltip
-  return (
-    <Tooltip
-      title={text}
-      placement="right"
-      color="#fff"
-      styles={{ body: { color: '#000' } }}
-    >
-      {content}
-    </Tooltip>
-  );
-};
+    </span>
+    {!isSecondMenuCollapsed && (
+      <>
+        <span className={styles.text}>{text}</span>
+        {hasChildren && <RightOutlined className={styles.caret} />}
+      </>
+    )}
+  </button>
+);
 
 export default TabItem;

@@ -29,7 +29,14 @@ import { t } from '@/services/i18nRuntime';
 import { AgentComponentTypeEnum } from '@/types/enums/agent';
 import { AgentTypeEnum } from '@/types/enums/space';
 import type { Page } from '@/types/interfaces/request';
-import { SearchOutlined } from '@ant-design/icons';
+import {
+  ApiOutlined,
+  DatabaseOutlined,
+  DeploymentUnitOutlined,
+  LeftOutlined,
+  SearchOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons';
 import { useRequest } from 'ahooks';
 import { Input, type InputRef, Tag } from 'antd';
 import classNames from 'classnames';
@@ -83,6 +90,45 @@ const PAGE_SIZE = 12;
 
 /** 默认的使用场景过滤参数（定义为静态常量以避免 React 解构默认值带来的引用死循环） */
 const DEFAULT_USAGE_SCENARIOS = [AgentTypeEnum.TaskAgent];
+
+const MANUAL_RESOURCE_TYPES = [
+  AgentComponentTypeEnum.Skill,
+  AgentComponentTypeEnum.Plugin,
+  AgentComponentTypeEnum.Workflow,
+  AgentComponentTypeEnum.Knowledge,
+] as const;
+
+type ResourceType = (typeof MANUAL_RESOURCE_TYPES)[number];
+
+const getResourceTypeLabel = (type: ResourceType) => {
+  switch (type) {
+    case AgentComponentTypeEnum.Skill:
+      return t('PC.Components.Newx.skills');
+    case AgentComponentTypeEnum.Plugin:
+      return t('PC.Pages.SpaceSquare.plugin');
+    case AgentComponentTypeEnum.Workflow:
+      return t('PC.Pages.SpaceSquare.workflow');
+    case AgentComponentTypeEnum.Knowledge:
+      return t('PC.Common.Global.knowledge');
+    default:
+      return type;
+  }
+};
+
+const getResourceTypeIcon = (type: ResourceType) => {
+  switch (type) {
+    case AgentComponentTypeEnum.Skill:
+      return <ThunderboltOutlined />;
+    case AgentComponentTypeEnum.Plugin:
+      return <ApiOutlined />;
+    case AgentComponentTypeEnum.Workflow:
+      return <DeploymentUnitOutlined />;
+    case AgentComponentTypeEnum.Knowledge:
+      return <DatabaseOutlined />;
+    default:
+      return null;
+  }
+};
 /**
  * 单个 Tab 的列表状态
  * 用于管理分页数据、首次加载状态和滚动加载状态
@@ -140,24 +186,31 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
       position,
       onSelect,
       enableSubscription = false,
+      enableSkillMention = true,
       onClose,
       searchText,
       maxHeight,
       onHeightChange,
       showSearchInput = false,
       usageScenarios = DEFAULT_USAGE_SCENARIOS,
+      manualComponents = [],
+      selectedComponentList = [],
     },
     ref,
   ) => {
     // ==================== State ====================
     /** 当前激活的 Tab */
     const [activeTab, setActiveTab] = useState<TabType>('all');
+    /** 第一层资源类型选择；仅在选中后才展示可调用资源 */
+    const [activeResourceType, setActiveResourceType] =
+      useState<ResourceType | null>(null);
     /** 弹窗内搜索输入框的值（仅当 showSearchInput 为 true 时使用） */
     const [searchInputValue, setSearchInputValue] = useState<string>('');
     /** 实际参与搜索的关键字：显示内置搜索框时用输入框值，否则用外部 searchText */
     const effectiveSearchText = showSearchInput
       ? searchInputValue
       : searchText ?? '';
+    const usageScenariosKey = usageScenarios.join(',');
     /** 当前选中项索引（仅内部状态） */
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
     /** 各 Tab 对应的分页数据 */
@@ -174,6 +227,8 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
     const hasInitTabsRef = useRef<boolean>(false);
     /** 上一次已用于请求的搜索关键字，关键字变化时仅刷新当前 Tab */
     const lastSearchTextRef = useRef<string>('');
+    /** 上一次已加载的场景值；避免等值数组实例重复请求。 */
+    const lastUsageScenariosKeyRef = useRef<string>('');
     /** 在最后一项按向下键触发加载更多后，待加载完成时要选中的索引（新一页的第一项） */
     const pendingSelectIndexAfterLoadRef = useRef<number | null>(null);
     /** 弹窗内搜索输入框引用（showSearchInput 时打开弹窗自动聚焦） */
@@ -191,6 +246,56 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
       [],
     );
 
+    const resourceTypes = useMemo(() => {
+      const manualTypes = new Set(
+        manualComponents
+          .map((item) => item.type)
+          .filter((type): type is ResourceType =>
+            MANUAL_RESOURCE_TYPES.includes(type as ResourceType),
+          ),
+      );
+
+      return MANUAL_RESOURCE_TYPES.filter(
+        (type) =>
+          manualTypes.has(type) ||
+          (type === AgentComponentTypeEnum.Skill && enableSkillMention),
+      );
+    }, [enableSkillMention, manualComponents]);
+
+    const activeManualItems = useMemo(() => {
+      if (!activeResourceType) return [];
+
+      const keyword = (effectiveSearchText ?? '').trim().toLowerCase();
+      return manualComponents
+        .filter((item) => item.type === activeResourceType)
+        .map(
+          (item): MentionItem => ({
+            id: `manual:${item.type}:${item.id}`,
+            targetId: item.id,
+            targetType: item.type,
+            source: 'manual',
+            name: item.name,
+            icon: item.icon,
+            description: item.description,
+            active: selectedComponentList.some(
+              (selected) =>
+                selected.id === item.id && selected.type === item.type,
+            ),
+          }),
+        )
+        .filter(
+          (item) =>
+            !keyword ||
+            item.name.toLowerCase().includes(keyword) ||
+            (item.description?.toLowerCase().includes(keyword) ?? false),
+        );
+    }, [
+      activeResourceType,
+      effectiveSearchText,
+      manualComponents,
+      selectedComponentList,
+    ]);
+
     /**
      * 获取当前需要渲染的列表项
      * 这里已经是按 Tab、分页、搜索处理后的最终结果
@@ -201,8 +306,12 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
      * - 最近使用 / 我的收藏：仅做本地过滤，不因 searchText 请求后端
      */
     const currentItems = useMemo(() => {
+      if (!activeResourceType) return [];
       const items = tabDataMap[activeTab].items;
-      if (activeTab === 'all') return items;
+      if (activeResourceType !== AgentComponentTypeEnum.Skill) {
+        return activeManualItems;
+      }
+      if (activeTab === 'all') return [...activeManualItems, ...items];
       const kw = (effectiveSearchText ?? '').trim().toLowerCase();
       if (!kw) return items;
       return items.filter(
@@ -210,7 +319,13 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
           item.name.toLowerCase().includes(kw) ||
           (item.description?.toLowerCase().includes(kw) ?? false),
       );
-    }, [activeTab, tabDataMap, effectiveSearchText]);
+    }, [
+      activeManualItems,
+      activeResourceType,
+      activeTab,
+      tabDataMap,
+      effectiveSearchText,
+    ]);
 
     const activeTabData = useMemo(() => {
       return tabDataMap[activeTab];
@@ -224,7 +339,11 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
       (tab: Exclude<TabType, 'all'>, records: SkillInfoForAt[]) => {
         updateTabDataState(tab, (prev) => ({
           ...prev,
-          items: records,
+          items: records.map((item) => ({
+            ...item,
+            targetType: AgentComponentTypeEnum.Skill,
+            source: 'skill' as const,
+          })),
           page: 1,
           total: records.length,
           loading: false,
@@ -323,13 +442,26 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
               total: 0,
               hasMore: false,
             }));
-            onClose();
             return;
           }
 
           updateTabDataState('all', (prev) => ({
             ...prev,
-            items: page === 1 ? records : [...prev.items, ...records],
+            items:
+              page === 1
+                ? records.map((item) => ({
+                    ...item,
+                    targetType: AgentComponentTypeEnum.Skill,
+                    source: 'skill' as const,
+                  }))
+                : [
+                    ...prev.items,
+                    ...records.map((item) => ({
+                      ...item,
+                      targetType: AgentComponentTypeEnum.Skill,
+                      source: 'skill' as const,
+                    })),
+                  ],
             page,
             total,
             loading: false,
@@ -351,7 +483,13 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
      */
     const loadTabData = useCallback(
       async (tab: TabType, page: number = 1) => {
-        if (!visible) return;
+        if (
+          !visible ||
+          activeResourceType !== AgentComponentTypeEnum.Skill ||
+          !enableSkillMention
+        ) {
+          return;
+        }
 
         updateTabDataState(tab, (prev) => ({
           ...prev,
@@ -384,6 +522,8 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
         loadRecentTabData,
         updateTabDataState,
         visible,
+        activeResourceType,
+        enableSkillMention,
       ],
     );
 
@@ -408,12 +548,42 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
           !tabState ||
           !tabState.initialized ||
           (tab === 'all' && tabState.loadedWithSearchText !== currentSearch);
-        if (needLoad) {
+        if (
+          needLoad &&
+          activeResourceType === AgentComponentTypeEnum.Skill &&
+          enableSkillMention
+        ) {
           loadTabData(tab, 1);
         }
       },
-      [loadTabData, tabDataMap, effectiveSearchText],
+      [
+        activeResourceType,
+        enableSkillMention,
+        loadTabData,
+        tabDataMap,
+        effectiveSearchText,
+      ],
     );
+
+    const handleResourceTypeSelect = useCallback((type: ResourceType) => {
+      setActiveResourceType(type);
+      setActiveTab('all');
+      setSelectedIndex(0);
+      setTabDataMap(createTabDataState());
+      hasInitTabsRef.current = false;
+      lastSearchTextRef.current = '';
+      if (listRef.current) {
+        listRef.current.scrollTop = 0;
+      }
+    }, []);
+
+    const returnToResourceTypes = useCallback(() => {
+      setActiveResourceType(null);
+      setSelectedIndex(0);
+      if (listRef.current) {
+        listRef.current.scrollTop = 0;
+      }
+    }, []);
 
     // ==================== Effects ====================
     /**
@@ -423,6 +593,7 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
     useEffect(() => {
       return () => {
         setActiveTab('all');
+        setActiveResourceType(null);
         setSelectedIndex(0);
         setTabDataMap(createTabDataState());
         setSearchInputValue('');
@@ -431,35 +602,49 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
          */
         hasInitTabsRef.current = false;
         lastSearchTextRef.current = '';
+        lastUsageScenariosKeyRef.current = '';
       };
     }, [visible]);
 
     /**
-     * 弹窗首次打开时，只加载当前 Tab 的第一页数据（仅执行一次，不轮询其他 Tab）
+     * 弹窗首次打开或使用场景实际变化时，只加载当前 Tab 的第一页数据。
+     * 使用场景按值比较，避免父组件创建等值数组时重复请求。
      */
     useEffect(() => {
-      if (!visible || hasInitTabsRef.current) return;
+      if (
+        !visible ||
+        activeResourceType !== AgentComponentTypeEnum.Skill ||
+        !enableSkillMention
+      ) {
+        return;
+      }
 
+      const isUsageScenarioChanged =
+        lastUsageScenariosKeyRef.current !== usageScenariosKey;
+      if (hasInitTabsRef.current && !isUsageScenarioChanged) return;
+
+      const shouldResetForUsageScenario =
+        hasInitTabsRef.current && isUsageScenarioChanged;
       hasInitTabsRef.current = true;
+      lastUsageScenariosKeyRef.current = usageScenariosKey;
       lastSearchTextRef.current = effectiveSearchText ?? '';
-      loadTabData(activeTab, 1);
-    }, [activeTab, loadTabData, visible, effectiveSearchText]);
-
-    /**
-     * 当 usageScenarios 改变时，如果已经加载过数据，则重置并重新拉取当前 Tab 的数据
-     */
-    useEffect(() => {
-      if (!visible) return;
-
-      if (hasInitTabsRef.current) {
+      if (shouldResetForUsageScenario) {
         setTabDataMap(createTabDataState());
         setSelectedIndex(0);
         if (listRef.current) {
           listRef.current.scrollTop = 0;
         }
-        loadTabData(activeTab, 1);
       }
-    }, [usageScenarios, activeTab, loadTabData, visible]);
+      loadTabData(activeTab, 1);
+    }, [
+      activeResourceType,
+      activeTab,
+      effectiveSearchText,
+      enableSkillMention,
+      loadTabData,
+      usageScenariosKey,
+      visible,
+    ]);
 
     /**
      * 弹窗已打开后：搜索关键字变化时
@@ -467,12 +652,26 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
      * - 当前为最近使用 / 我的收藏：不请求后端，仅依赖 currentItems 的本地过滤
      */
     useEffect(() => {
-      if (!visible || !hasInitTabsRef.current) return;
+      if (
+        !visible ||
+        activeResourceType !== AgentComponentTypeEnum.Skill ||
+        !enableSkillMention ||
+        !hasInitTabsRef.current
+      ) {
+        return;
+      }
       const currentSearch = effectiveSearchText ?? '';
       if (currentSearch === lastSearchTextRef.current) return;
       lastSearchTextRef.current = currentSearch;
       loadTabData(activeTab, 1);
-    }, [visible, effectiveSearchText, activeTab, loadTabData]);
+    }, [
+      visible,
+      activeResourceType,
+      effectiveSearchText,
+      activeTab,
+      enableSkillMention,
+      loadTabData,
+    ]);
 
     /**
      * 使用 ResizeObserver 在弹窗实际尺寸变化时上报高度，确保父组件用真实渲染高度重算位置，
@@ -512,23 +711,31 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
       if (listRef.current) {
         listRef.current.scrollTop = 0;
       }
-    }, [activeTab, effectiveSearchText]);
+    }, [activeResourceType, activeTab, effectiveSearchText]);
 
     /**
      * 当列表项数量变化时，确保选中索引不越界；
      * 若存在「按向下键触发的加载更多」待选中的索引，则选中该索引（新一页的第一项）
      */
     useEffect(() => {
+      const selectableCount = activeResourceType
+        ? currentItems.length
+        : resourceTypes.length;
       const pending = pendingSelectIndexAfterLoadRef.current;
       if (pending !== null && currentItems.length > pending) {
         pendingSelectIndexAfterLoadRef.current = null;
         setSelectedIndex(pending);
         return;
       }
-      if (selectedIndex >= currentItems.length && currentItems.length > 0) {
-        setSelectedIndex(currentItems.length - 1);
+      if (selectedIndex >= selectableCount && selectableCount > 0) {
+        setSelectedIndex(selectableCount - 1);
       }
-    }, [currentItems.length, selectedIndex]);
+    }, [
+      activeResourceType,
+      currentItems.length,
+      resourceTypes.length,
+      selectedIndex,
+    ]);
 
     /**
      * 自动滚动到选中项
@@ -561,11 +768,26 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
      * 选择当前选中的项
      */
     const handleSelectCurrentItem = useCallback(() => {
+      if (!activeResourceType) {
+        const resourceType = resourceTypes[selectedIndex];
+        if (resourceType) {
+          handleResourceTypeSelect(resourceType);
+        }
+        return;
+      }
+
       const item = currentItems[selectedIndex];
       if (item) {
         onSelect(item);
       }
-    }, [currentItems, selectedIndex, onSelect]);
+    }, [
+      activeResourceType,
+      currentItems,
+      handleResourceTypeSelect,
+      onSelect,
+      resourceTypes,
+      selectedIndex,
+    ]);
 
     /**
      * 向上移动选中项
@@ -591,13 +813,24 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
      * - 在最后一项且没有更多分页时：循环到第一项
      */
     const handleArrowDown = useCallback(() => {
+      if (!activeResourceType) {
+        if (resourceTypes.length > 0) {
+          setSelectedIndex((index) => (index + 1) % resourceTypes.length);
+        }
+        return;
+      }
+
       if (selectedIndex < currentItems.length - 1) {
         setSelectedIndex(selectedIndex + 1);
         return;
       }
 
       // 已在最后一项
-      if (activeTabData.hasMore) {
+      if (
+        activeResourceType === AgentComponentTypeEnum.Skill &&
+        enableSkillMention &&
+        activeTabData.hasMore
+      ) {
         // 标记：加载完成后自动选中新一页第一项
         pendingSelectIndexAfterLoadRef.current = currentItems.length;
         // 如果当前不在加载中，则由这里触发下一页加载；
@@ -612,29 +845,50 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
       setSelectedIndex(0);
     }, [
       selectedIndex,
+      activeResourceType,
+      enableSkillMention,
       currentItems.length,
       activeTab,
       activeTabData,
       loadTabData,
+      resourceTypes.length,
     ]);
 
     /**
      * 向左切换 Tab
      */
     const handleArrowLeft = useCallback(() => {
+      if (
+        activeResourceType &&
+        activeResourceType !== AgentComponentTypeEnum.Skill
+      ) {
+        returnToResourceTypes();
+        return;
+      }
+      if (!activeResourceType) return;
       const currentIndex = TABS.findIndex((tab) => tab.key === activeTab);
       const newIndex = currentIndex <= 0 ? TABS.length - 1 : currentIndex - 1;
       handleTabChange(TABS[newIndex].key);
-    }, [activeTab, handleTabChange]);
+    }, [activeResourceType, activeTab, handleTabChange, returnToResourceTypes]);
 
     /**
      * 向右切换 Tab
      */
     const handleArrowRight = useCallback(() => {
+      if (!activeResourceType) {
+        handleSelectCurrentItem();
+        return;
+      }
+      if (activeResourceType !== AgentComponentTypeEnum.Skill) return;
       const currentIndex = TABS.findIndex((tab) => tab.key === activeTab);
       const newIndex = currentIndex >= TABS.length - 1 ? 0 : currentIndex + 1;
       handleTabChange(TABS[newIndex].key);
-    }, [activeTab, handleTabChange]);
+    }, [
+      activeResourceType,
+      activeTab,
+      handleSelectCurrentItem,
+      handleTabChange,
+    ]);
 
     /**
      * 重置选中索引为 0
@@ -679,6 +933,8 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
 
         if (
           !isNearBottom ||
+          activeResourceType !== AgentComponentTypeEnum.Skill ||
+          !enableSkillMention ||
           activeTabData.loading ||
           !activeTabData.hasMore ||
           currentItems.length === 0
@@ -688,7 +944,14 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
 
         loadTabData(activeTab, activeTabData.page + 1);
       },
-      [activeTab, activeTabData, currentItems.length, loadTabData],
+      [
+        activeResourceType,
+        activeTab,
+        activeTabData,
+        currentItems.length,
+        enableSkillMention,
+        loadTabData,
+      ],
     );
 
     /**
@@ -762,14 +1025,37 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
           e.preventDefault();
         }}
       >
-        {/* 搜索输入框（由 showSearchInput 控制，置于 Tabs 上方；data-mention-search 便于点击清除图标时不触发容器 preventDefault） */}
-        {showSearchInput && (
+        <div className={styles['resource-picker-header']}>
+          {activeResourceType && (
+            <button
+              type="button"
+              className={styles['resource-picker-back']}
+              aria-label={t(
+                'PC.Components.ChatInputHomeMentionPopup.backToResourceTypes',
+              )}
+              onClick={returnToResourceTypes}
+            >
+              <LeftOutlined />
+            </button>
+          )}
+          <span>
+            {t('PC.Components.ChatInputHomeMentionPopup.selectResourceType')}
+          </span>
+          {activeResourceType && (
+            <>
+              <span className={styles['resource-picker-separator']}>/</span>
+              <strong>{getResourceTypeLabel(activeResourceType)}</strong>
+            </>
+          )}
+        </div>
+
+        {showSearchInput && activeResourceType && (
           <div className={styles['mention-search-wrap']} data-mention-search>
             <Input
               ref={searchInputRef}
               className={styles['mention-search-input']}
               placeholder={t(
-                'PC.Components.ChatInputHomeMentionPopup.searchSkill',
+                'PC.Components.ChatInputHomeMentionPopup.searchResource',
               )}
               allowClear
               value={searchInputValue}
@@ -783,102 +1069,166 @@ const MentionPopup = React.forwardRef<MentionPopupHandle, MentionPopupProps>(
           </div>
         )}
 
-        {/* Tab 标签栏 */}
-        <div className={styles['mention-tabs']}>
-          {TABS.map((tab) => (
-            <div
-              key={tab.key}
-              className={`${styles['mention-tab']} ${
-                activeTab === tab.key ? styles.active : ''
-              }`}
-              onClick={() => handleTabChange(tab.key)}
-            >
-              {tab.label}
-            </div>
-          ))}
-        </div>
-
-        {/* 列表项 */}
-        <div
-          ref={listRef}
-          className={styles['mention-list']}
-          onScroll={handleListScroll}
-        >
-          {activeTabData.loading && currentItems.length === 0 ? (
-            <div className={styles['mention-empty']}>
-              {t('PC.Components.ChatInputHomeMentionPopup.loading')}
-            </div>
-          ) : currentItems.length === 0 ? (
-            // 空状态
-            <div className={styles['mention-empty']}>
-              {activeTab === 'favorite'
-                ? t('PC.Components.ChatInputHomeMentionPopup.emptyFavorite')
-                : t('PC.Components.ChatInputHomeMentionPopup.emptyNotFound')}
-            </div>
-          ) : (
-            // 列表项渲染，直接使用接口返回的 SkillInfoForAt 结构
-            currentItems.map((item: MentionItem, index) => {
-              const showPaymentInfo =
-                enableSubscription && item.paymentRequired === true;
-              const isSubscribed = item.subscribed === true;
-
-              return (
-                <div
-                  key={item.id ?? item.targetId}
-                  className={`${styles['mention-item']} overflow-hide ${
-                    index === selectedIndex ? styles.selected : ''
-                  }`}
-                  onClick={() => onSelect(item)}
+        {!activeResourceType ? (
+          <div className={styles['resource-type-list']}>
+            {resourceTypes.length === 0 ? (
+              <div className={styles['mention-empty']}>
+                {t(
+                  'PC.Components.ChatInputHomeMentionPopup.noAvailableResource',
+                )}
+              </div>
+            ) : (
+              resourceTypes.map((type, index) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={cx(styles['resource-type-item'], {
+                    [styles.selected]: index === selectedIndex,
+                  })}
+                  onClick={() => handleResourceTypeSelect(type)}
                   onMouseMove={() => handleItemMouseMove(index)}
                 >
-                  {/* 左侧图标 */}
-                  <span className={styles['mention-item-icon']}>
-                    <img src={item.icon} alt={item.name} />
+                  <span className={styles['resource-type-icon']}>
+                    {getResourceTypeIcon(type)}
                   </span>
-                  {/* 中间名称 + 描述 */}
-                  <div className={styles['mention-item-content']}>
-                    <div
-                      className={cx(
-                        styles['mention-item-name'],
-                        'text-ellipsis',
-                      )}
-                    >
-                      {item.name}
-                    </div>
-                    {item.description && (
-                      <div
-                        className={cx(
-                          styles['mention-item-desc'],
-                          'text-ellipsis',
-                        )}
-                      >
-                        {item.description}
-                      </div>
-                    )}
-                  </div>
-                  {/* 右侧付费/已订阅标签 */}
-                  {showPaymentInfo && (
-                    <Tag
-                      className={styles['mention-item-tag']}
-                      color={isSubscribed ? 'success' : 'processing'}
-                    >
-                      {isSubscribed
-                        ? t('PC.Pages.Square.SingleAgent.subscribed')
-                        : t('PC.Pages.Square.SingleAgent.paid')}
-                    </Tag>
-                  )}
-                </div>
-              );
-            })
-          )}
-          {activeTabData.loading &&
-            activeTabData.page > 1 &&
-            currentItems.length > 0 && (
-              <div className={styles['mention-empty']}>
-                {t('PC.Components.ChatInputHomeMentionPopup.loadingMore')}
-              </div>
+                  <span className={styles['resource-type-copy']}>
+                    <strong>{getResourceTypeLabel(type)}</strong>
+                    <small>
+                      {type === AgentComponentTypeEnum.Skill &&
+                      enableSkillMention
+                        ? t(
+                            'PC.Components.ChatInputHomeMentionPopup.searchResource',
+                          )
+                        : t(
+                            'PC.Components.ChatInputHomeMentionPopup.currentSessionResource',
+                          )}
+                    </small>
+                  </span>
+                </button>
+              ))
             )}
-        </div>
+          </div>
+        ) : (
+          <>
+            {activeResourceType === AgentComponentTypeEnum.Skill &&
+              enableSkillMention && (
+                <div className={styles['mention-tabs']}>
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      className={cx(styles['mention-tab'], {
+                        [styles.active]: activeTab === tab.key,
+                      })}
+                      onClick={() => handleTabChange(tab.key)}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+            <div
+              ref={listRef}
+              className={styles['mention-list']}
+              onScroll={handleListScroll}
+            >
+              {activeTabData.loading && currentItems.length === 0 ? (
+                <div className={styles['mention-empty']}>
+                  {t('PC.Components.ChatInputHomeMentionPopup.loading')}
+                </div>
+              ) : currentItems.length === 0 ? (
+                <div className={styles['mention-empty']}>
+                  {activeResourceType === AgentComponentTypeEnum.Skill &&
+                  activeTab === 'favorite'
+                    ? t('PC.Components.ChatInputHomeMentionPopup.emptyFavorite')
+                    : t(
+                        'PC.Components.ChatInputHomeMentionPopup.emptyNotFound',
+                      )}
+                </div>
+              ) : (
+                currentItems.map((item: MentionItem, index) => {
+                  const showPaymentInfo =
+                    item.source !== 'manual' &&
+                    enableSubscription &&
+                    item.paymentRequired === true;
+                  const isSubscribed = item.subscribed === true;
+                  const isImageIcon = /^https?:|^\/|^data:image\//.test(
+                    item.icon || '',
+                  );
+
+                  return (
+                    <button
+                      key={item.id ?? `${item.source}:${item.targetId}`}
+                      type="button"
+                      className={cx(styles['mention-item'], 'overflow-hide', {
+                        [styles.selected]: index === selectedIndex,
+                      })}
+                      onClick={() => onSelect(item)}
+                      onMouseMove={() => handleItemMouseMove(index)}
+                    >
+                      <span className={styles['mention-item-icon']}>
+                        {isImageIcon ? (
+                          <img src={item.icon} alt="" />
+                        ) : (
+                          getResourceTypeIcon(
+                            (item.targetType ??
+                              AgentComponentTypeEnum.Skill) as ResourceType,
+                          )
+                        )}
+                      </span>
+                      <span className={styles['mention-item-content']}>
+                        <span
+                          className={cx(
+                            styles['mention-item-name'],
+                            'text-ellipsis',
+                          )}
+                        >
+                          {item.name}
+                        </span>
+                        {item.description && (
+                          <span
+                            className={cx(
+                              styles['mention-item-desc'],
+                              'text-ellipsis',
+                            )}
+                          >
+                            {item.description}
+                          </span>
+                        )}
+                      </span>
+                      {item.source === 'manual' && item.active && (
+                        <span className={styles['mention-item-state']}>
+                          {t(
+                            'PC.Components.ChatInputHomeMentionPopup.alreadyEnabled',
+                          )}
+                        </span>
+                      )}
+                      {showPaymentInfo && (
+                        <Tag
+                          className={styles['mention-item-tag']}
+                          color={isSubscribed ? 'success' : 'processing'}
+                        >
+                          {isSubscribed
+                            ? t('PC.Pages.Square.SingleAgent.subscribed')
+                            : t('PC.Pages.Square.SingleAgent.paid')}
+                        </Tag>
+                      )}
+                    </button>
+                  );
+                })
+              )}
+              {activeResourceType === AgentComponentTypeEnum.Skill &&
+                activeTabData.loading &&
+                activeTabData.page > 1 &&
+                currentItems.length > 0 && (
+                  <div className={styles['mention-empty']}>
+                    {t('PC.Components.ChatInputHomeMentionPopup.loadingMore')}
+                  </div>
+                )}
+            </div>
+          </>
+        )}
       </div>
     );
   },

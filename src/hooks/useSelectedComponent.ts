@@ -14,19 +14,14 @@ const useSelectedComponent = () => {
 
   // 选中配置组件
   const handleSelectComponent = (item: AgentSelectedComponentInfo) => {
-    const _selectedComponentList = [...selectedComponentList];
-    // 已存在则删除
-    if (_selectedComponentList.some((c) => c.id === item.id)) {
-      const index = _selectedComponentList.findIndex((c) => c.id === item.id);
-      _selectedComponentList.splice(index, 1);
-    } else {
-      _selectedComponentList.push({
-        id: item.id,
-        type: item.type,
-      });
-    }
+    setSelectedComponentList((current) => {
+      const isSameComponent = (component: AgentSelectedComponentInfo) =>
+        component.id === item.id && component.type === item.type;
 
-    setSelectedComponentList(_selectedComponentList);
+      return current.some(isSameComponent)
+        ? current.filter((component) => !isSameComponent(component))
+        : [...current, { id: item.id, type: item.type }];
+    });
   };
 
   // 初始化选中的组件列表

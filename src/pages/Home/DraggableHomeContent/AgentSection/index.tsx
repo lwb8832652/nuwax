@@ -37,8 +37,6 @@ interface AgentSectionProps {
   onMouseEnter: (text: string) => void;
   /** 鼠标离开事件 */
   onMouseLeave: () => void;
-  /** 区域引用 */
-  sectionRef: (el: HTMLDivElement | null) => void;
   /** 拖拽结束回调 */
   onAgentDragEnd?: (
     categoryType: string,
@@ -58,7 +56,6 @@ const AgentSection: React.FC<AgentSectionProps> = ({
   onToggleCollect,
   onMouseEnter,
   onMouseLeave,
-  sectionRef,
   onAgentDragEnd,
 }) => {
   // 维护自身的 agents 状态
@@ -115,7 +112,6 @@ const AgentSection: React.FC<AgentSectionProps> = ({
 
   return (
     <div
-      ref={sectionRef}
       data-category={category.type}
       className={cx(styles.section, {
         // [styles.dragging]: isDragging,
@@ -123,7 +119,7 @@ const AgentSection: React.FC<AgentSectionProps> = ({
     >
       {/* 分类标题 */}
       <div className={cx(styles.sectionTitle)}>
-        {category.name}({localAgents.length})
+        {category.name} · {localAgents.length}
       </div>
 
       {/* 智能体列表 */}

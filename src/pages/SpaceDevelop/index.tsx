@@ -1,3 +1,4 @@
+import ResourceCatalogScope from '@/components/business-component/ResourceCatalogScope';
 import ButtonToggle from '@/components/ButtonToggle';
 import CreateAgent from '@/components/CreateAgent';
 import Loading from '@/components/custom/Loading';
@@ -12,6 +13,8 @@ import {
   FILTER_STATUS,
 } from '@/constants/space.constants';
 import AnalyzeStatistics from '@/pages/SpaceDevelop/AnalyzeStatistics';
+import SpaceSquare from '@/pages/SpaceSquare';
+import Square from '@/pages/Square';
 import {
   apiAgentConfigList,
   apiAgentCopyToSpace,
@@ -28,6 +31,10 @@ import {
   CreateListEnum,
   FilterStatusEnum,
 } from '@/types/enums/space';
+import {
+  SquareAgentTypeEnum,
+  SquareTemplateTargetTypeEnum,
+} from '@/types/enums/square';
 import type { AgentAddResult, AgentConfigInfo } from '@/types/interfaces/agent';
 import {
   AnalyzeStatisticsItem,
@@ -523,7 +530,7 @@ const SpaceDevelop: React.FC = () => {
       <div className={cx(styles['header-area'])}>
         <div className={cx(styles['header-left'])}>
           <h3 className={cx(styles.title)}>
-            {dict('PC.Pages.SpaceDevelop.Index.agentDevelop')}
+            {dict('PC.Components.Newx.experts')}
           </h3>
           <SelectList
             value={subType}
@@ -546,7 +553,7 @@ const SpaceDevelop: React.FC = () => {
         <div className={cx(styles['header-right'])}>
           <Input
             rootClassName={cx(styles.input)}
-            placeholder={dict('PC.Pages.SpaceDevelop.Index.searchAgent')}
+            placeholder={dict('PC.Components.Newx.searchExperts')}
             value={keyword}
             onChange={handleQueryAgent}
             prefix={<SearchOutlined />}
@@ -563,7 +570,7 @@ const SpaceDevelop: React.FC = () => {
           {/* 创建智能体按钮：如果只有一种类型则直接创建，否则显示下拉选择 */}
           <CustomPopover list={AGENT_TYPE_LIST} onClick={handlerClickAgentType}>
             <Button type="primary" icon={<PlusOutlined />}>
-              {dict('PC.Pages.SpaceDevelop.Index.createAgent')}
+              {dict('PC.Components.Newx.createExpert')}
             </Button>
           </CustomPopover>
         </div>
@@ -597,7 +604,7 @@ const SpaceDevelop: React.FC = () => {
       <AnalyzeStatistics
         open={openAnalyze}
         onCancel={() => setOpenAnalyze(false)}
-        title={dict('PC.Pages.SpaceDevelop.Index.agentOverview')}
+        title={dict('PC.Components.Newx.expertOverview')}
         list={agentStatistics}
       />
       {/*智能体迁移弹窗*/}
@@ -636,4 +643,29 @@ const SpaceDevelop: React.FC = () => {
   );
 };
 
-export default SpaceDevelop;
+const SpaceDevelopCatalog: React.FC = () => (
+  <ResourceCatalogScope
+    discovery={<Square embedded resourceType={SquareAgentTypeEnum.Agent} />}
+    published={
+      <SpaceSquare embedded resourceType={SquareAgentTypeEnum.Agent} />
+    }
+    templates={
+      <Square
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.ChatBot}
+      />
+    }
+    spaceTemplates={
+      <SpaceSquare
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.ChatBot}
+      />
+    }
+  >
+    <SpaceDevelop />
+  </ResourceCatalogScope>
+);
+
+export default SpaceDevelopCatalog;

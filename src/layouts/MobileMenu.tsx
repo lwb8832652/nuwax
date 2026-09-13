@@ -22,7 +22,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
 }) => (
   <>
     {/* 菜单按钮始终显示 */}
-    <div
+    <button
+      type="button"
+      aria-label={
+        isOpen
+          ? dict('PC.Layouts.DynamicMenusLayout.CollapseButton.collapseMenu')
+          : dict('PC.Layouts.DynamicMenusLayout.CollapseButton.expandMenu')
+      }
+      aria-expanded={isOpen}
+      onClick={onToggle}
       className={styles.mobileMenuBtn}
       style={{
         left: menuWidth,
@@ -30,12 +38,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         transition: 'margin-left 0.3s',
       }}
     >
-      <SvgIcon
-        name="icons-common-caret_left"
-        onClick={onToggle}
-        rotate={isOpen ? 0 : 180}
-      />
-    </div>
+      <SvgIcon name="icons-common-caret_left" rotate={isOpen ? 0 : 180} />
+    </button>
     {/* 遮罩层，仅在菜单展开时显示 */}
     {isOpen && (
       <div

@@ -1,4 +1,5 @@
 import WorkspaceLayout from '@/components/WorkspaceLayout';
+import { dict } from '@/services/i18nRuntime';
 import classNames from 'classnames';
 import React from 'react';
 import { useModel, useParams } from 'umi';
@@ -50,7 +51,10 @@ const SpaceCreateProject: React.FC = () => {
   };
 
   return (
-    <WorkspaceLayout>
+    <WorkspaceLayout
+      title={dict('PC.Pages.SpaceCreateProject.createTitle')}
+      contentPadding={0}
+    >
       <div className={cx(styles['create-project-wrapper'])}>
         <GreetingHeader />
         <PromptBox onSubmit={handleCreateSubmit} />

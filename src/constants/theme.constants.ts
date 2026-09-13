@@ -11,8 +11,8 @@ import {
 } from '@/types/interfaces/theme';
 // 主题令牌常量配置
 // 为主题配置添加类型
-import type { ThemeConfig } from 'antd/es/config-provider';
-import type { AliasToken, ComponentTokenMap } from 'antd/es/theme/interface';
+import type { ThemeConfig } from 'antd';
+import type { AliasToken } from 'antd/es/theme/interface';
 import { FIRST_MENU_WIDTH_STYLE2 } from './layout.constants';
 
 /**
@@ -21,7 +21,7 @@ import { FIRST_MENU_WIDTH_STYLE2 } from './layout.constants';
  */
 export const THEME_COLOR_CONFIGS = [
   {
-    color: '#5147ff',
+    color: '#5e6ad2',
     name: dict('PC.Constants.Theme.colorBlue'),
     isDefault: true,
   },
@@ -55,7 +55,7 @@ export const STORAGE_KEYS = {
  * 统一管理所有默认值，确保各模块间的一致性
  */
 export const DEFAULT_THEME_CONFIG = {
-  PRIMARY_COLOR: '#5147ff',
+  PRIMARY_COLOR: '#5e6ad2',
   BACKGROUND_ID: '',
   NAVIGATION_STYLE: 'style1',
   LAYOUT_STYLE: 'light',
@@ -134,25 +134,24 @@ export const STYLE_CONFIGS: Record<string, ThemeStyleConfig> = {
   // 浅色 + 风格1
   'light-style1': {
     layout: {
-      '--xagi-layout-text-primary': '#000000',
-      '--xagi-layout-text-secondary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-text-tertiary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-text-disabled': 'rgba(0, 0, 0, 0.25)',
-      '--xagi-layout-second-menu-text-color': 'rgba(0, 0, 0, 0.88)',
-      '--xagi-layout-second-menu-text-color-secondary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-second-menu-adaptive-text': 'rgba(0, 0, 0, 0.88)',
-      '--xagi-layout-second-menu-adaptive-text-secondary':
-        'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-second-menu-adaptive-text-tertiary': 'rgba(0, 0, 0, 0.45)',
-      '--xagi-layout-bg-primary': 'rgba(255, 255, 255, 0.95)',
-      '--xagi-layout-bg-secondary': 'rgba(255, 255, 255, 0.85)',
-      '--xagi-layout-bg-card': 'rgba(255, 255, 255, 0.65)',
-      '--xagi-layout-bg-input': 'rgba(255, 255, 255, 0.45)',
-      '--xagi-layout-border-primary': 'rgba(0, 0, 0, 0.15)',
-      '--xagi-layout-border-secondary': 'rgba(0, 0, 0, 0.1)',
-      '--xagi-layout-shadow': 'rgba(0, 0, 0, 0.1)',
+      '--xagi-layout-text-primary': '#292928',
+      '--xagi-layout-text-secondary': '#747471',
+      '--xagi-layout-text-tertiary': '#9b9b98',
+      '--xagi-layout-text-disabled': 'rgba(41, 41, 40, 0.35)',
+      '--xagi-layout-second-menu-text-color': '#292928',
+      '--xagi-layout-second-menu-text-color-secondary': '#747471',
+      '--xagi-layout-second-menu-adaptive-text': '#292928',
+      '--xagi-layout-second-menu-adaptive-text-secondary': '#747471',
+      '--xagi-layout-second-menu-adaptive-text-tertiary': '#9b9b98',
+      '--xagi-layout-bg-primary': '#ffffff',
+      '--xagi-layout-bg-secondary': '#fafaf9',
+      '--xagi-layout-bg-card': '#ffffff',
+      '--xagi-layout-bg-input': '#f6f6f4',
+      '--xagi-layout-border-primary': '#ececea',
+      '--xagi-layout-border-secondary': '#f5f5f3',
+      '--xagi-layout-shadow': 'rgba(20, 20, 20, 0.04)',
       '--xagi-layout-overlay': 'rgba(255, 255, 255, 0.7)',
-      '--xagi-layout-bg-container': 'rgba(255, 255, 255, 0.95)',
+      '--xagi-layout-bg-container': '#ffffff',
     },
     navigation: {
       '--xagi-nav-first-menu-width': '60px',
@@ -164,57 +163,53 @@ export const STYLE_CONFIGS: Record<string, ThemeStyleConfig> = {
   // 浅色 + 风格2
   'light-style2': {
     layout: {
-      '--xagi-layout-text-primary': '#000000',
-      '--xagi-layout-text-secondary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-text-tertiary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-text-disabled': 'rgba(0, 0, 0, 0.25)',
-      '--xagi-layout-second-menu-text-color': 'rgba(0, 0, 0, 0.88)',
-      '--xagi-layout-second-menu-text-color-secondary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-second-menu-adaptive-text': 'rgba(0, 0, 0, 0.88)',
-      '--xagi-layout-second-menu-adaptive-text-secondary':
-        'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-second-menu-adaptive-text-tertiary': 'rgba(0, 0, 0, 0.45)',
-      '--xagi-layout-bg-primary': 'rgba(255, 255, 255, 0.95)',
-      '--xagi-layout-bg-secondary': 'rgba(255, 255, 255, 0.85)',
-      '--xagi-layout-bg-card': 'rgba(255, 255, 255, 0.65)',
-      '--xagi-layout-bg-input': 'rgba(255, 255, 255, 0.45)',
-      '--xagi-layout-border-primary': 'rgba(0, 0, 0, 0.15)',
-      '--xagi-layout-border-secondary': 'rgba(0, 0, 0, 0.1)',
-      '--xagi-layout-shadow': 'rgba(0, 0, 0, 0.1)',
+      '--xagi-layout-text-primary': '#292928',
+      '--xagi-layout-text-secondary': '#747471',
+      '--xagi-layout-text-tertiary': '#9b9b98',
+      '--xagi-layout-text-disabled': 'rgba(41, 41, 40, 0.35)',
+      '--xagi-layout-second-menu-text-color': '#292928',
+      '--xagi-layout-second-menu-text-color-secondary': '#747471',
+      '--xagi-layout-second-menu-adaptive-text': '#292928',
+      '--xagi-layout-second-menu-adaptive-text-secondary': '#747471',
+      '--xagi-layout-second-menu-adaptive-text-tertiary': '#9b9b98',
+      '--xagi-layout-bg-primary': '#ffffff',
+      '--xagi-layout-bg-secondary': '#fafaf9',
+      '--xagi-layout-bg-card': '#ffffff',
+      '--xagi-layout-bg-input': '#f6f6f4',
+      '--xagi-layout-border-primary': '#ececea',
+      '--xagi-layout-border-secondary': '#f5f5f3',
+      '--xagi-layout-shadow': 'rgba(20, 20, 20, 0.04)',
       '--xagi-layout-overlay': 'rgba(255, 255, 255, 0.7)',
-      '--xagi-layout-bg-container': 'rgba(255, 255, 255, 0.95)',
+      '--xagi-layout-bg-container': '#ffffff',
     },
     navigation: {
       '--xagi-nav-first-menu-width': `${FIRST_MENU_WIDTH_STYLE2}px`,
       '--xagi-page-container-margin': '0',
       '--xagi-page-container-border-radius': '0',
-      '--xagi-page-container-border-color': 'rgba(0, 0, 0, 0.15)',
+      '--xagi-page-container-border-color': '#ececea',
     },
   },
   // 深色 + 风格1
   'dark-style1': {
     layout: {
-      '--xagi-layout-text-primary': '#ffffff',
-      '--xagi-layout-text-secondary': 'rgba(255, 255, 255, 0.85)',
-      '--xagi-layout-text-tertiary': 'rgba(255, 255, 255, 0.65)',
-      '--xagi-layout-text-disabled': 'rgba(255, 255, 255, 0.25)',
-      '--xagi-layout-second-menu-text-color': 'rgba(255, 255, 255, 1)',
-      '--xagi-layout-second-menu-text-color-secondary':
-        'rgba(255, 255, 255, 0.8)',
-      '--xagi-layout-second-menu-adaptive-text': 'rgba(255, 255, 255, 1)',
-      '--xagi-layout-second-menu-adaptive-text-secondary':
-        'rgba(255, 255, 255, 0.8)',
-      '--xagi-layout-second-menu-adaptive-text-tertiary':
-        'rgba(255, 255, 255, 0.6)',
-      '--xagi-layout-bg-primary': 'rgba(0, 0, 0, 0.85)',
-      '--xagi-layout-bg-secondary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-bg-card': 'rgba(0, 0, 0, 0.45)',
-      '--xagi-layout-bg-input': 'rgba(0, 0, 0, 0.25)',
-      '--xagi-layout-border-primary': 'rgba(255, 255, 255, 0.12)',
-      '--xagi-layout-border-secondary': 'rgba(255, 255, 255, 0.08)',
-      '--xagi-layout-shadow': 'rgba(0, 0, 0, 0.6)',
-      '--xagi-layout-overlay': 'rgba(0, 0, 0, 0.7)',
-      '--xagi-layout-bg-container': '#ffffff',
+      '--xagi-layout-text-primary': '#ecedec',
+      '--xagi-layout-text-secondary': '#a0a09c',
+      '--xagi-layout-text-tertiary': '#6e6e6a',
+      '--xagi-layout-text-disabled': 'rgba(236, 237, 236, 0.3)',
+      '--xagi-layout-second-menu-text-color': '#ecedec',
+      '--xagi-layout-second-menu-text-color-secondary': '#a0a09c',
+      '--xagi-layout-second-menu-adaptive-text': '#ecedec',
+      '--xagi-layout-second-menu-adaptive-text-secondary': '#a0a09c',
+      '--xagi-layout-second-menu-adaptive-text-tertiary': '#6e6e6a',
+      '--xagi-layout-bg-primary': '#232322',
+      '--xagi-layout-bg-secondary': '#1b1b1a',
+      '--xagi-layout-bg-card': '#2a2a28',
+      '--xagi-layout-bg-input': '#2a2a28',
+      '--xagi-layout-border-primary': '#2e2e2c',
+      '--xagi-layout-border-secondary': '#262624',
+      '--xagi-layout-shadow': 'rgba(0, 0, 0, 0.5)',
+      '--xagi-layout-overlay': 'rgba(27, 27, 26, 0.7)',
+      '--xagi-layout-bg-container': '#232322',
     },
     navigation: {
       '--xagi-nav-first-menu-width': '60px',
@@ -226,31 +221,30 @@ export const STYLE_CONFIGS: Record<string, ThemeStyleConfig> = {
   // 深色 + 风格2
   'dark-style2': {
     layout: {
-      '--xagi-layout-text-primary': '#ffffff',
-      '--xagi-layout-text-secondary': 'rgba(255, 255, 255, 0.85)',
-      '--xagi-layout-text-tertiary': 'rgba(255, 255, 255, 0.65)',
-      '--xagi-layout-text-disabled': 'rgba(255, 255, 255, 0.25)',
-      '--xagi-layout-second-menu-text-color': 'rgba(0, 0, 0, 0.88)',
-      '--xagi-layout-second-menu-text-color-secondary': 'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-second-menu-adaptive-text': 'rgba(0, 0, 0, 0.88)',
-      '--xagi-layout-second-menu-adaptive-text-secondary':
-        'rgba(0, 0, 0, 0.65)',
-      '--xagi-layout-second-menu-adaptive-text-tertiary': 'rgba(0, 0, 0, 0.45)',
-      '--xagi-layout-bg-primary': 'rgba(0, 0, 0, 0.85)',
-      '--xagi-layout-bg-secondary': 'rgba(0, 0, 0, 0.85)',
-      '--xagi-layout-bg-card': 'rgba(0, 0, 0, 0.45)',
-      '--xagi-layout-bg-input': 'rgba(0, 0, 0, 0.25)',
-      '--xagi-layout-border-primary': 'rgba(255, 255, 255, 0.12)',
-      '--xagi-layout-border-secondary': 'rgba(255, 255, 255, 0.08)',
-      '--xagi-layout-shadow': 'rgba(0, 0, 0, 0.6)',
-      '--xagi-layout-overlay': 'rgba(0, 0, 0, 0.7)',
-      '--xagi-layout-bg-container': '#ffffff',
+      '--xagi-layout-text-primary': '#ecedec',
+      '--xagi-layout-text-secondary': '#a0a09c',
+      '--xagi-layout-text-tertiary': '#6e6e6a',
+      '--xagi-layout-text-disabled': 'rgba(236, 237, 236, 0.3)',
+      '--xagi-layout-second-menu-text-color': '#ecedec',
+      '--xagi-layout-second-menu-text-color-secondary': '#a0a09c',
+      '--xagi-layout-second-menu-adaptive-text': '#ecedec',
+      '--xagi-layout-second-menu-adaptive-text-secondary': '#a0a09c',
+      '--xagi-layout-second-menu-adaptive-text-tertiary': '#6e6e6a',
+      '--xagi-layout-bg-primary': '#232322',
+      '--xagi-layout-bg-secondary': '#1b1b1a',
+      '--xagi-layout-bg-card': '#2a2a28',
+      '--xagi-layout-bg-input': '#2a2a28',
+      '--xagi-layout-border-primary': '#2e2e2c',
+      '--xagi-layout-border-secondary': '#262624',
+      '--xagi-layout-shadow': 'rgba(0, 0, 0, 0.5)',
+      '--xagi-layout-overlay': 'rgba(27, 27, 26, 0.7)',
+      '--xagi-layout-bg-container': '#232322',
     },
     navigation: {
       '--xagi-nav-first-menu-width': `${FIRST_MENU_WIDTH_STYLE2}px`,
       '--xagi-page-container-margin': '0',
       '--xagi-page-container-border-radius': '0',
-      '--xagi-page-container-border-color': 'rgba(0, 0, 0, 0.15)',
+      '--xagi-page-container-border-color': '#2e2e2c',
     },
   },
 };
@@ -280,38 +274,43 @@ export type StyleConfigKey = keyof typeof STYLE_CONFIGS;
  * 用于配置 Ant Design 组件的主题
  */
 export const themeTokens: Partial<AliasToken> = {
-  // 品牌主色 - 项目主色调
-  colorPrimary: '#5147ff',
+  // 品牌主色 - NewX 主色调
+  colorPrimary: '#5e6ad2',
 
-  // 功能色
-  colorSuccess: '#3bb346',
-  colorWarning: '#fc8800',
+  // 功能色（NewX 功能色系）
+  colorSuccess: '#23815b',
+  colorWarning: '#b46620',
   colorError: '#f93920',
-  colorInfo: '#0077fa',
+  colorInfo: '#4367b8',
 
-  // 基础色 - 用于派生文本和背景色
-  colorTextBase: '#000000',
+  // 基础色 - 用于派生文本和背景色（NewX 暖灰文字系）
+  colorTextBase: '#292928',
   colorBgBase: '#ffffff',
+  colorText: '#292928',
+  colorTextSecondary: '#747471',
+  colorTextTertiary: '#9b9b98',
+  colorBgContainer: '#ffffff',
+  colorBgElevated: '#ffffff',
 
   // 超链接颜色
-  colorLink: '#5147ff',
+  colorLink: '#5e6ad2',
 
-  // 字体配置
+  // 字体配置（NewX：Inter + JetBrains Mono，字体文件本地化）
   fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+    '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Source Han Sans SC", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif',
   fontFamilyCode:
-    'Monaco, "Menlo", "Ubuntu Mono", "Consolas", "Liberation Mono", "Courier New", monospace',
+    '"JetBrains Mono", "Fira Code", "Consolas", "Monaco", "Courier New", monospace',
 
   // 字号配置
   fontSize: 14,
-  fontWeightStrong: 400,
+  fontWeightStrong: 500,
 
-  // 线条配置
-  lineWidth: 0.5,
+  // 线条配置（NewX 1px 细线框）
+  lineWidth: 1,
   lineType: 'solid',
 
-  // 圆角配置
-  borderRadius: 8,
+  // 圆角配置（NewX 圆角体系 6/10/14）
+  borderRadius: 6,
 
   // 尺寸配置
   sizeUnit: 4,
@@ -358,217 +357,108 @@ export const themeTokens: Partial<AliasToken> = {
   geekblue: '#2f54eb',
   lime: '#a0d911',
   gold: '#faad14',
-  // 填充颜色 浅色
-  colorFill: 'rgba(12,20,40,0.1)',
-  colorFillSecondary: 'rgba(12,20,40,0.06)',
-  colorFillTertiary: 'rgba(12,20,40,0.04)',
-  colorFillQuaternary: 'rgba(12,20,40,0.02)',
+  // 填充颜色 浅色（NewX：ink 暖灰基派生）
+  colorFill: 'rgba(41,41,40,0.08)',
+  colorFillSecondary: 'rgba(41,41,40,0.05)',
+  colorFillTertiary: 'rgba(41,41,40,0.03)',
+  colorFillQuaternary: 'rgba(41,41,40,0.015)',
+
+  // 边框/分割（NewX 线条系）
+  colorBorder: '#dcdcda',
+  colorBorderSecondary: '#ececea',
+  colorSplit: 'rgba(41,41,40,0.06)',
+
+  // 布局底色
+  colorBgLayout: '#f6f6f4',
+
+  // 阴影（NewX 轻阴影体系）
+  boxShadow: '0 14px 36px rgba(0,0,0,0.11)',
+  boxShadowSecondary: '0 7px 17px rgba(20,20,20,0.06)',
+  boxShadowCard: '0 7px 17px rgba(20,20,20,0.04)',
   // border radius
   borderRadiusSM: 4,
-  borderRadiusLG: 12,
+  borderRadiusLG: 14,
 };
 
 export const darkThemeTokens = {
   ...themeTokens,
-  colorBgBase: '#000',
-  colorTextBase: '#fff',
-  // TODO 填充颜色 深色 缺少
+  // NewX 暗色版基础色
+  colorBgBase: '#1b1b1a',
+  colorTextBase: '#ecedec',
+  colorText: '#ecedec',
+  colorTextSecondary: '#a0a09c',
+  colorTextTertiary: '#858580',
+  colorBgContainer: '#1b1b1a',
+  colorBgElevated: '#232322',
 
-  // 导航深色主题适配
-  colorFill: 'rgba(255, 255, 255, 0.08)',
-  colorFillSecondary: 'rgba(255, 255, 255, 0.04)',
-  colorFillTertiary: 'rgba(255, 255, 255, 0.02)',
-  colorFillQuaternary: 'rgba(255, 255, 255, 0.01)',
+  // 填充颜色 深色（NewX：浅灰基派生，补齐原 TODO）
+  colorFill: 'rgba(236,237,236,0.1)',
+  colorFillSecondary: 'rgba(236,237,236,0.06)',
+  colorFillTertiary: 'rgba(236,237,236,0.04)',
+  colorFillQuaternary: 'rgba(236,237,236,0.02)',
+
+  // 深色边框/分割
+  colorBorder: '#3a3a38',
+  colorBorderSecondary: '#2e2e2c',
+  colorSplit: 'rgba(236,237,236,0.08)',
+  colorBgLayout: '#151514',
+
+  // 深色阴影
+  boxShadow: '0 14px 36px rgba(0,0,0,0.44)',
+  boxShadowSecondary: '0 7px 17px rgba(0,0,0,0.32)',
+  boxShadowCard: '0 7px 17px rgba(0,0,0,0.28)',
 };
 
-// 组件主题类型定义
-type ButtonToken = Partial<ComponentTokenMap['Button'] | AliasToken>;
-type SelectToken = Partial<ComponentTokenMap['Select'] | AliasToken>;
-type InputToken = Partial<ComponentTokenMap['Input'] | AliasToken>;
-type MenuToken = Partial<ComponentTokenMap['Menu'] | AliasToken>;
-type DatePickerToken = Partial<ComponentTokenMap['DatePicker'] | AliasToken>;
-type FormToken = Partial<ComponentTokenMap['Form'] | AliasToken>;
-type MessageToken = Partial<ComponentTokenMap['Message'] | AliasToken>;
-type NotificationToken = Partial<
-  ComponentTokenMap['Notification'] | AliasToken
->;
-type ModalToken = Partial<ComponentTokenMap['Modal'] | AliasToken>;
-type CardToken = Partial<ComponentTokenMap['Card'] | AliasToken>;
-type TableToken = Partial<ComponentTokenMap['Table'] | AliasToken>;
-type SegmentedToken = Partial<ComponentTokenMap['Segmented'] | AliasToken>;
+/** Shared control density for resource pages, editors, and administration. */
+export const getNewxComponentTheme = (
+  primaryColor: string,
+  isDark: boolean,
+): ThemeConfig['components'] => {
+  const paper = isDark ? '#1b1b1a' : '#ffffff';
+  const surface = isDark ? '#232322' : '#fafaf9';
+  const fill = isDark ? '#2a2a28' : '#f6f6f4';
+  const line = isDark ? '#2e2e2c' : '#ececea';
 
-// 组件级别的主题配置
-export const componentThemes: ThemeConfig['components'] = {
-  // Button 组件
-  Button: {
-    colorPrimary: themeTokens.colorPrimary,
-    borderRadius: themeTokens.borderRadius,
-    controlHeight: themeTokens.controlHeight,
-    fontSize: themeTokens.fontSize,
-    fontWeight: 400,
-    primaryShadow: 'none',
-    defaultShadow: 'none',
-    dangerShadow: 'none',
-    // 按钮特定配置
-    paddingInline: 15,
-    paddingBlock: 4,
-    onlyIconSize: 16,
-    groupBorderColor: 'transparent',
-  } as ButtonToken,
-
-  // Input 组件
-  Input: {
-    colorPrimary: themeTokens.colorPrimary,
-    borderRadius: themeTokens.borderRadius,
-    controlHeight: themeTokens.controlHeight,
-    fontSize: themeTokens.fontSize,
-    paddingInline: 11,
-    paddingBlock: 4,
-    activeBorderColor: themeTokens.colorPrimary,
-    hoverBorderColor: '#7B6EFF',
-    activeShadow: '0 0 0 2px rgba(81, 71, 255, 0.2)',
-    errorActiveShadow: '0 0 0 2px rgba(255, 77, 79, 0.2)',
-    warningActiveShadow: '0 0 0 2px rgba(255, 140, 0, 0.2)',
-  } as InputToken,
-
-  // Select 组件
-  Select: {
-    colorPrimary: themeTokens.colorPrimary,
-    borderRadius: themeTokens.borderRadius,
-    controlHeight: themeTokens.controlHeight,
-    fontSize: themeTokens.fontSize,
-    optionSelectedBg: 'rgba(81, 71, 255, 0.1)',
-    optionActiveBg: 'rgba(81, 71, 255, 0.05)',
-    optionSelectedColor: themeTokens.colorPrimary,
-    optionPadding: '5px 12px',
-    showArrowPaddingInlineEnd: 18,
-  } as SelectToken,
-
-  // Table 组件
-  Table: {
-    borderRadius: themeTokens.borderRadius,
-    fontSize: themeTokens.fontSize,
-    headerBg: '#fafafa',
-    headerColor: '#666666',
-    headerSortActiveBg: '#f0f0f0',
-    headerSortHoverBg: '#f5f5f5',
-    bodySortBg: '#fafafa',
-    rowHoverBg: 'rgba(81, 71, 255, 0.03)',
-    rowSelectedBg: 'rgba(81, 71, 255, 0.05)',
-    rowSelectedHoverBg: 'rgba(81, 71, 255, 0.08)',
-    rowExpandedBg: '#fbfbfb',
-    cellPaddingBlock: 16,
-    cellPaddingInline: 16,
-    cellPaddingBlockMD: 12,
-    cellPaddingInlineMD: 12,
-    cellPaddingBlockSM: 8,
-    cellPaddingInlineSM: 8,
-  } as TableToken,
-
-  // Card 组件
-  Card: {
-    borderRadius: themeTokens.borderRadiusLG,
-    paddingLG: themeTokens.paddingLG,
-    padding: themeTokens.padding,
-    paddingSM: themeTokens.paddingSM,
-    headerBg: 'transparent',
-    headerFontSize: themeTokens.fontSizeLG,
-    headerFontSizeSM: themeTokens.fontSize,
-    headerHeight: 56,
-    headerHeightSM: 36,
-    actionsBg: '#fafafa',
-    actionsLiMargin: '12px 0',
-    tabsMarginBottom: -17,
-  } as CardToken,
-
-  // Modal 组件
-  Modal: {
-    borderRadius: themeTokens.borderRadiusLG,
-    padding: themeTokens.paddingLG,
-    paddingLG: themeTokens.paddingLG,
-    titleFontSize: themeTokens.fontSizeLG,
-    titleLineHeight: 1.6,
-    contentBg: '#ffffff',
-    headerBg: '#ffffff',
-    footerBg: 'transparent',
-    maskBg: 'rgba(0, 0, 0, 0.45)',
-  } as ModalToken,
-
-  // Message 组件
-  Message: {
-    contentBg: '#ffffff',
-    contentPadding: '12px 16px',
-    borderRadius: themeTokens.borderRadius,
-    fontSize: themeTokens.fontSize,
-    zIndexPopup: 1010,
-  } as MessageToken,
-
-  // Notification 组件
-  Notification: {
-    borderRadius: themeTokens.borderRadius,
-    padding: themeTokens.padding,
-    paddingLG: themeTokens.paddingLG,
-    width: 384,
-    zIndexPopup: 1010,
-  } as NotificationToken,
-
-  // DatePicker 组件
-  DatePicker: {
-    colorPrimary: themeTokens.colorPrimary,
-    borderRadius: themeTokens.borderRadius,
-    controlHeight: themeTokens.controlHeight,
-    fontSize: themeTokens.fontSize,
-    cellActiveWithRangeBg: 'rgba(81, 71, 255, 0.1)',
-    cellHoverWithRangeBg: 'rgba(81, 71, 255, 0.05)',
-    cellRangeBorderColor: 'transparent',
-    cellBgDisabled: '#f5f5f5',
-    timeColumnWidth: 56,
-    timeColumnHeight: 224,
-    timeCellHeight: 28,
-  } as DatePickerToken,
-
-  // Form 组件
-  Form: {
-    labelFontSize: themeTokens.fontSize,
-    labelColor: '#000000d9',
-    labelRequiredMarkColor: themeTokens.colorError,
-    labelColonMarginInlineStart: 2,
-    labelColonMarginInlineEnd: 8,
-    itemMarginBottom: 24,
-    verticalLabelPadding: '0 0 8px',
-    verticalLabelMargin: 0,
-  } as FormToken,
-
-  // Menu 组件
-  Menu: {
-    borderRadius: themeTokens.borderRadius,
-    fontSize: themeTokens.fontSize,
-    itemBg: 'transparent',
-    itemColor: '#000000d9',
-    itemHoverBg: 'rgba(0, 0, 0, 0.06)',
-    itemHoverColor: '#000000d9',
-    itemSelectedBg: 'rgba(81, 71, 255, 0.1)',
-    itemSelectedColor: themeTokens.colorPrimary,
-    itemActiveBg: 'rgba(81, 71, 255, 0.15)',
-    subMenuItemBg: 'transparent',
-    itemMarginBlock: 4,
-    itemMarginInline: 4,
-    itemPaddingInline: 12,
-    itemHeight: 40,
-    collapsedWidth: 80,
-    iconSize: 14,
-    iconMarginInlineEnd: 10,
-  } as MenuToken,
-
-  // Segmented 组件
-  Segmented: {
-    borderRadius: themeTokens.borderRadius,
-    controlHeight: themeTokens.controlHeight,
-    fontSize: themeTokens.fontSize,
-    itemSelectedBg: '#fff',
-    itemSelectedColor: themeTokens.colorPrimary,
-    trackBg: '#f9f9f9',
-  } as SegmentedToken,
+  return {
+    Button: { fontWeight: 500, primaryShadow: 'none', defaultShadow: 'none' },
+    Input: { paddingBlock: 6, paddingInline: 10, activeShadow: 'none' },
+    InputNumber: { activeShadow: 'none' },
+    Select: { optionSelectedFontWeight: 500 },
+    Table: {
+      headerBg: surface,
+      headerColor: isDark ? '#a0a09c' : '#747471',
+      headerSplitColor: 'transparent',
+      borderColor: line,
+      rowHoverBg: surface,
+      cellPaddingBlock: 13,
+      cellPaddingInline: 16,
+      headerBorderRadius: 8,
+    },
+    Tabs: {
+      horizontalItemGutter: 24,
+      titleFontSize: 13,
+      inkBarColor: primaryColor,
+    },
+    Segmented: {
+      trackBg: fill,
+      itemSelectedBg: paper,
+      itemSelectedColor: primaryColor,
+      borderRadius: 6,
+      borderRadiusSM: 4,
+    },
+    Card: { headerFontSize: 14, headerHeight: 48, bodyPadding: 20 },
+    Modal: {
+      titleFontSize: 16,
+      titleLineHeight: 1.5,
+      contentBg: paper,
+      headerBg: paper,
+    },
+    Drawer: { footerPaddingBlock: 16, footerPaddingInline: 24 },
+    Menu: { itemHeight: 36, itemBorderRadius: 6, subMenuItemBg: surface },
+    Tree: { nodeHoverBg: surface, titleHeight: 30 },
+    Collapse: { headerBg: surface, contentBg: paper },
+    Descriptions: { labelBg: surface },
+  };
 };
 
 // 向后兼容的导出

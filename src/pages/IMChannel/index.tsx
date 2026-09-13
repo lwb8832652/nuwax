@@ -1,5 +1,6 @@
 import CustomPopover from '@/components/CustomPopover';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
+import { useWorkspaceLayoutContext } from '@/components/WorkspaceLayout/EmbeddedContext';
 import { SUCCESS_CODE } from '@/constants/codes.constants';
 import { IMPlatformEnum } from '@/constants/imChannel.constants';
 import { dict } from '@/services/i18nRuntime';
@@ -33,10 +34,16 @@ const IM_CHANNEL_ADD_RESOURCES = [
   },
 ];
 
-const IMChannel: React.FC = () => {
+interface IMChannelProps {
+  spaceId?: number;
+}
+
+const IMChannel: React.FC<IMChannelProps> = ({ spaceId: suppliedSpaceId }) => {
   const params = useParams() as any;
   const location = useLocation();
-  const spaceId = params.spaceId ? Number(params.spaceId) : undefined;
+  const { embedded } = useWorkspaceLayoutContext();
+  const spaceId =
+    suppliedSpaceId || (params.spaceId ? Number(params.spaceId) : undefined);
 
   // 平台过滤
   const [platform, setPlatform] = useState<PlatformType>();
@@ -131,7 +138,9 @@ const IMChannel: React.FC = () => {
       rightSlot={
         <Space size={12}>
           <Input.Search
-            placeholder={dict('PC.Pages.IMChannel.Index.searchPlaceholder')}
+            placeholder={dict(
+              'PC.Pages.IMChannel.Index.searchExpertPlaceholder',
+            )}
             value={keyword}
             allowClear
             onSearch={setKeyword}
@@ -162,7 +171,9 @@ const IMChannel: React.FC = () => {
       }
       contentPadding={0}
     >
-      <div className={cx(styles.mainContainer)}>
+      <div
+        className={cx(styles.mainContainer, { [styles.embedded]: embedded })}
+      >
         <div className={cx(styles.sidebar)}>
           <PlatformList
             value={platform}

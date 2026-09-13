@@ -46,7 +46,8 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
   };
 
   return (
-    <div
+    <button
+      type="button"
       className={cx(styles['conversation-item'], {
         [styles.active]: isActive,
       })}
@@ -72,12 +73,20 @@ const ConversationItem: React.FC<ConversationItemProps> = ({
           >
             {item.agent?.name}
           </Typography.Text>
+          {!!item.agent?.name && !!formatModifiedTime(item.modified) && (
+            <span
+              aria-hidden="true"
+              className={cx(styles['conversation-meta-separator'])}
+            >
+              ·
+            </span>
+          )}
           <span className={cx(styles['conversation-date'])}>
             {formatModifiedTime(item.modified)}
           </span>
         </div>
       </div>
-    </div>
+    </button>
   );
 };
 

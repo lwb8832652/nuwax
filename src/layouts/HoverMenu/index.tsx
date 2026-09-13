@@ -29,7 +29,7 @@ const HoverMenu: React.FC = () => {
     setMouseInHoverMenu,
   } = useModel('layout');
   const { token } = theme.useToken();
-  const { navigationStyle } = useUnifiedTheme();
+  const { navigationStyle, layoutStyle } = useUnifiedTheme();
   const { firstLevelMenus } = useModel('menuModel');
 
   // 计算动态导航宽度
@@ -97,6 +97,8 @@ const HoverMenu: React.FC = () => {
 
   return (
     <div
+      data-nav-theme={layoutStyle}
+      data-nav-style={navigationStyle}
       className={cx(
         styles['hover-menu'],
         showHoverMenu ? styles.visible : styles.hidden,
@@ -113,7 +115,7 @@ const HoverMenu: React.FC = () => {
         handleImmediateHideHoverMenu();
       }}
       style={{
-        width: NAVIGATION_LAYOUT_SIZES.SECOND_MENU_WIDTH,
+        width: NAVIGATION_LAYOUT_SIZES.getTotalMenuWidth(navigationStyle),
         left: firstMenuWidth,
         paddingLeft: token.padding,
       }}
@@ -124,18 +126,12 @@ const HoverMenu: React.FC = () => {
         <HoverScrollbar
           className={cx('h-full')}
           bodyWidth={
-            NAVIGATION_LAYOUT_SIZES.SECOND_MENU_WIDTH - token.padding * 2
+            NAVIGATION_LAYOUT_SIZES.getTotalMenuWidth(navigationStyle) -
+            token.padding * 2
           }
           style={{
             width: '100%',
             padding: '12px 0',
-            // 通过 style 设置 CSS 变量会导致类型报错，推荐通过 className + :root 或 styled 方案实现
-            // 这里临时用 as any 绕过类型检查，实际项目建议将变量写到全局 less 或 css module
-            ...({
-              ['--xagi-layout-second-menu-text-color']: token.colorText, // 悬浮菜单文字颜色 覆写
-              ['--xagi-layout-second-menu-text-color-secondary']:
-                token.colorTextSecondary, // 悬浮菜单文字颜色 覆写
-            } as React.CSSProperties),
             display: 'flex',
             flexDirection: 'column',
             height: '100%',

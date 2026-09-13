@@ -1,6 +1,9 @@
+import ResourceCatalogScope from '@/components/business-component/ResourceCatalogScope';
 import CreateWorkflow from '@/components/CreateWorkflow';
 import UploadImportConfig from '@/components/UploadImportConfig';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
+import SpaceSquare from '@/pages/SpaceSquare';
+import Square from '@/pages/Square';
 import { dict } from '@/services/i18nRuntime';
 import { apiComponentList } from '@/services/library';
 import { PublishStatusEnum } from '@/types/enums/common';
@@ -9,6 +12,10 @@ import {
   CreateListEnum,
   FilterStatusEnum,
 } from '@/types/enums/space';
+import {
+  SquareAgentTypeEnum,
+  SquareTemplateTargetTypeEnum,
+} from '@/types/enums/square';
 import type { ComponentInfo } from '@/types/interfaces/library';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
@@ -280,4 +287,29 @@ const SpaceWorkflow: React.FC = () => {
   );
 };
 
-export default SpaceWorkflow;
+const SpaceWorkflowCatalog: React.FC = () => (
+  <ResourceCatalogScope
+    discovery={<Square embedded resourceType={SquareAgentTypeEnum.Workflow} />}
+    published={
+      <SpaceSquare embedded resourceType={SquareAgentTypeEnum.Workflow} />
+    }
+    templates={
+      <Square
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.Workflow}
+      />
+    }
+    spaceTemplates={
+      <SpaceSquare
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.Workflow}
+      />
+    }
+  >
+    <SpaceWorkflow />
+  </ResourceCatalogScope>
+);
+
+export default SpaceWorkflowCatalog;

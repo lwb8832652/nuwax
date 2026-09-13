@@ -1,22 +1,52 @@
-@import '@/styles/color';
-@import '@/styles/token';
-
 .header {
-  gap: @marginXs;
-  color: @navSecondMenuText;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: var(--nx-nav-workspace-height, 36px);
+  padding: 0 8px;
+  border: 1px solid var(--nx-line, #ececea);
+  border-radius: 7px;
+  background: var(--xagi-color-bg-container, #fff);
+  color: var(--nx-ink, #292928);
+  cursor: pointer;
+  text-align: left;
 
-  .icon-down {
-    color: @navSecondMenuTextSecondary;
-    font-size: @fontSize;
+  &:hover {
+    border-color: var(--nx-muted, #9b9b98);
   }
 
-  :global {
-    .ant-typography {
-      color: @navSecondMenuText;
-    }
-
-    .anticon {
-      color: @navSecondMenuTextSecondary;
-    }
+  > svg {
+    width: 12px;
+    height: 12px;
+    color: var(--nx-muted, #9b9b98);
   }
+
+  &.collapsed {
+    justify-content: center;
+    padding: 0;
+    border-color: transparent;
+    background: transparent;
+  }
+}
+
+.space-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 21px;
+  width: 21px;
+  height: 21px;
+  border-radius: 4px;
+  background: var(--nx-ink, #292928);
+  color: var(--xagi-color-bg-container, #fff);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.name {
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 500;
 }

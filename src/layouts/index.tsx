@@ -2,6 +2,7 @@ import {
   ANIMATION_DURATION,
   MOBILE_BREAKPOINT,
   MOBILE_MENU_TOP_PADDING,
+  NAVIGATION_LAYOUT_SIZES,
 } from '@/constants/layout.constants';
 import useCategory from '@/hooks/useCategory';
 import { useUnifiedTheme } from '@/hooks/useUnifiedTheme';
@@ -59,6 +60,10 @@ const Layout: React.FC = () => {
     setFullMobileMenu,
     getCurrentMenuWidth,
   } = useModel('layout');
+
+  const menuWidth = isMobile
+    ? NAVIGATION_LAYOUT_SIZES.getTotalMenuWidth(navigationStyle)
+    : getCurrentMenuWidth();
 
   const { asyncSpaceListFun } = useModel('spaceModel');
   const { loadMenus } = useModel('menuModel');
@@ -149,7 +154,7 @@ const Layout: React.FC = () => {
       // 设置动画样式
       container.style.transform = fullMobileMenu
         ? 'translateX(0)'
-        : `translateX(-${getCurrentMenuWidth()}px)`;
+        : `translateX(-${menuWidth}px)`;
 
       // 清理函数
       return () => {
@@ -161,7 +166,7 @@ const Layout: React.FC = () => {
       setRealHidden(false);
       setFullMobileMenu(false); // 重置菜单状态
     }
-  }, [fullMobileMenu, isMobile, handleTransitionEnd, getCurrentMenuWidth]);
+  }, [fullMobileMenu, isMobile, handleTransitionEnd, menuWidth]);
 
   /**
    * 侧边栏样式配置
@@ -177,7 +182,7 @@ const Layout: React.FC = () => {
         height: '100%',
         transition: `transform ${ANIMATION_DURATION}ms ease-in-out`,
         zIndex: 999,
-        pointerEvents: 'auto',
+        pointerEvents: fullMobileMenu ? 'auto' : 'none',
         ...({
           ['--xagi-layout-second-menu-text-color']: token.colorText, // 悬浮菜单文字颜色 覆写
           ['--xagi-layout-second-menu-text-color-secondary']:
@@ -190,7 +195,7 @@ const Layout: React.FC = () => {
       position: 'relative',
       height: '100%',
     };
-  }, [isMobile]);
+  }, [isMobile, fullMobileMenu, token]);
 
   /**
    * 菜单栏容器样式类名
@@ -278,7 +283,7 @@ const Layout: React.FC = () => {
           <MobileMenu
             isOpen={fullMobileMenu}
             onToggle={toggleFullMobileMenu}
-            menuWidth={getCurrentMenuWidth()}
+            menuWidth={menuWidth}
           />
         )}
       </div>

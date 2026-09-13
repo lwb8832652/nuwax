@@ -101,7 +101,7 @@ const StencilContent = ({
 
   // 节点选择面板：Workflow 按分组展示；AgentFlow 合并为单一两列网格
   return (
-    <div className="stencil-content">
+    <div className="stencil-content newx-workflow-stencil">
       <p className="stencil-title">
         {t('PC.Pages.AntvX6Stencil.nodeSelectorTitle')}
       </p>

@@ -1,85 +1,61 @@
-@import '@/styles/color';
-@import '@/styles/token';
-@import '@/styles/custom-variate';
+@import (reference) '@/styles/newx-editor.less';
+@import (reference) '@/styles/newx-plugin-dialog.less';
 
 .modal-container {
-  width: 1000px !important;
+  width: min(1000px, calc(100vw - 32px)) !important;
+  .newx-plugin-dialog();
 
   .inner-container {
-    height: 690px;
-    padding: 0 20px 20px;
-    border-radius: 10px;
-    background: @WHITE03;
-    pointer-events: auto;
-
-    .header {
-      height: 60px;
-
-      h3 {
-        font-weight: @fontWeightStrong;
-      }
-    }
-
-    .section {
-      gap: 20px;
-
-      .p-title {
-        margin-bottom: 20px;
-        font-weight: @fontWeightStrong;
-      }
-
-      .table-wrap {
-        border: 1px solid @GRAY01;
-        border-radius: @antdTableBorderRadius;
-        overflow: hidden;
-
-        :global {
-          .ant-table-footer {
-            background-color: transparent;
-          }
-
-          .ant-table-tbody-virtual .ant-table-cell {
-            border-bottom: none;
-          }
-        }
-      }
-
-      .result-wrap {
-        color: @GRAY05;
-        background-color: @WHITE;
-
-        .loading-box {
-          gap: 10px;
-          font-size: 12px;
-        }
-
-        pre {
-          background-color: @BLANK12;
-          border-radius: 6px;
-          padding: 10px;
-          white-space: pre-wrap;
-          word-wrap: break-word;
-          overflow-wrap: break-word;
-          overflow-x: auto;
-        }
-      }
-    }
-
-    //.footer {
-    //  height: 72px;
-    //
-    //  .divider-vertical {
-    //    width: 1px;
-    //    height: 20px;
-    //    margin-left: 6px;
-    //    margin-right: 16px;
-    //    background-color: @GRAY01;
-    //  }
-    //}
+    height: min(690px, calc(100dvh - 48px));
   }
 
-  .param-desc {
-    color: @GRAY05;
-    font-size: 12px;
+  .section {
+    min-height: 0;
+    gap: 20px;
+    > div {
+      min-width: 0;
+      min-height: 0;
+    }
+  }
+
+  .result-wrap {
+    border: 1px solid var(--nx-line);
+    border-radius: var(--nx-radius-md);
+    background: var(--nx-surface);
+    color: var(--nx-sub);
+
+    .loading-box {
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 14px;
+      border-radius: var(--nx-radius);
+      background: var(--nx-surface2);
+      color: var(--nx-ink);
+      font-family: var(--nx-font-mono);
+      font-size: 12px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      overflow-x: auto;
+      .newx-editor-scrollbar();
+    }
+  }
+
+  @media (max-width: 720px) {
+    .section {
+      flex-direction: column;
+      overflow-y: auto;
+      .newx-editor-scrollbar();
+      > div {
+        flex: 0 0 auto;
+      }
+    }
+    .result-wrap {
+      min-height: 180px;
+    }
   }
 }

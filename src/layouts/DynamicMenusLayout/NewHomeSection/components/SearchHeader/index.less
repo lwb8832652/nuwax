@@ -1,72 +1,60 @@
-@import '@/styles/token.less';
-
-@searchWrapperMarginLeft: 3px;
-@newChatIconSize: 18px;
-
 .header-search-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 @paddingXs;
-  box-sizing: border-box;
+  gap: 5px;
   flex-shrink: 0;
-  margin: 17px 0 10px -3px;
-  gap: @paddingXs;
+  margin: 0 3px 8px;
 
   .search-input-wrapper {
     flex: 1;
     min-width: 0;
-    margin-left: @searchWrapperMarginLeft;
+  }
 
-    .search-input {
-      font-size: @fontSize;
-      border-radius: @borderRadius;
-      background-color: @colorFillSecondary;
-      border: none;
-      color: @navSecondMenuAdaptiveText;
+  .search-input {
+    height: 29px;
+    padding: 3px 8px;
+    border: 1px solid var(--nx-line, #ececea);
+    border-radius: 6px;
+    background: var(--xagi-color-bg-container, #fff);
+    color: var(--nx-sub, #747471);
+    font-size: 11px;
 
-      :global {
-        .ant-input {
-          font-size: @fontSize !important;
-          color: @navSecondMenuAdaptiveText !important;
-          background-color: transparent !important;
+    :global(.ant-input) {
+      font-size: 11px;
+      background: transparent;
 
-          &::placeholder {
-            color: @navSecondMenuAdaptiveTextTertiary !important;
-          }
-        }
-      }
-
-      .search-icon-inner {
-        color: @navSecondMenuAdaptiveTextTertiary;
-      }
-
-      &:hover,
-      &:focus {
-        background-color: @colorFillSecondary;
+      &::placeholder {
+        color: var(--nx-muted, #9b9b98);
       }
     }
   }
 
+  .search-icon-inner {
+    color: var(--nx-muted, #9b9b98);
+    font-size: 12px;
+  }
+
   .new-chat-btn {
-    width: @controlHeight;
-    height: @controlHeight;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: @borderRadiusSm;
+    display: grid;
+    place-items: center;
+    flex: 0 0 29px;
+    width: 29px;
+    height: 29px;
+    padding: 0;
+    border: 1px solid var(--nx-line, #ececea);
+    border-radius: 6px;
+    background: var(--xagi-color-bg-container, #fff);
+    color: var(--nx-sub, #747471);
     cursor: pointer;
-    color: @navSecondMenuAdaptiveTextSecondary;
-    transition: all 0.2s ease;
 
     &:hover {
-      color: @navSecondMenuAdaptiveText;
-      background-color: @colorBgTextHover;
+      background: var(--nx-surface2, #f6f6f4);
+      color: var(--nx-ink, #292928);
     }
+  }
 
-    .new-chat-svg {
-      width: @newChatIconSize;
-      height: @newChatIconSize;
-    }
+  .new-chat-svg {
+    width: 15px;
+    height: 15px;
   }
 }

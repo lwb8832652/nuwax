@@ -1,69 +1,80 @@
-@import '@/styles/token.less';
-
 .recommend-nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  row-gap: 8px;
-  column-gap: @marginSm;
+  gap: 8px;
   width: 100%;
-  margin: 0 auto 20px;
+  margin: 0 auto 18px;
 }
 
 .recommend-item {
   display: inline-flex;
   align-items: center;
-  gap: @marginXs;
-  max-width: 220px;
-  height: 32px;
-  padding: 0 @paddingSm;
-  border: @lineWidth @lineType transparent;
-  border-radius: @borderRadius;
-  background: @colorFillQuaternary;
-  color: @colorTextSecondary;
-  font-size: @fontSize;
-  font-weight: 500;
+  justify-content: center;
+  gap: 8px;
+  min-width: 150px;
+  max-width: 240px;
+  height: 45px;
+  padding: 0 17px;
+  border: 1px solid transparent;
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-surface);
+  color: var(--nx-sub);
+  font-size: 14px;
+  font-weight: 550;
   line-height: 1;
   cursor: pointer;
-  transition: all @motionDurationMid @motionEaseOut;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
 
   &:hover {
-    color: @colorText;
-    background: @colorFillTertiary;
+    border-color: var(--nx-line);
+    background: var(--nx-surface2);
+    color: var(--nx-ink);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--nx-accent);
+    outline-offset: 2px;
   }
 
   &.active {
-    color: @colorPrimary;
-    border-color: @colorPrimaryBorder;
-    background: @colorPrimaryBg;
+    color: var(--nx-ink);
+    background: var(--nx-surface2);
+    box-shadow: inset 0 0 0 1px var(--nx-line);
   }
 }
 
 .icon {
+  display: block;
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  border-radius: var(--nx-radius-sm);
   object-fit: cover;
-  display: block;
-  border-radius: @borderRadiusSm;
 }
 
 .label {
+  display: block;
   min-width: 0;
   overflow: hidden;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
-  line-height: 20px;
-  display: block;
 }
+
 @media (max-width: 768px) {
   .recommend-nav {
-    margin-top: 20px;
-    gap: @marginXs;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .recommend-item {
-    max-width: calc(50vw - 28px);
+    min-width: 0;
+    max-width: none;
+    height: 42px;
+    padding: 0 8px;
+    font-size: 13px;
   }
 }

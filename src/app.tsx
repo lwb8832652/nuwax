@@ -4,7 +4,11 @@ import React, { useEffect, useRef } from 'react';
 import { history, useAntdConfigSetter } from 'umi';
 import { SUCCESS_CODE } from './constants/codes.constants';
 import { ACCESS_TOKEN } from './constants/home.constants';
-import { darkThemeTokens, themeTokens } from './constants/theme.constants';
+import {
+  darkThemeTokens,
+  getNewxComponentTheme,
+  themeTokens,
+} from './constants/theme.constants';
 import { APP_NAME, APP_VERSION } from './constants/version';
 import useEventPolling from './hooks/useEventPolling';
 import { request as requestCommon } from './services/common';
@@ -227,11 +231,7 @@ const AppContainer: React.FC<{ children: React.ReactElement }> = ({
           theme: {
             algorithm,
             token: tokens as any,
-            components: {
-              Segmented: {
-                itemSelectedColor: data.primaryColor,
-              },
-            },
+            components: getNewxComponentTheme(data.primaryColor, darkMode),
             cssVar: { prefix: 'xagi' },
           },
           locale: getAntdLocale(data.language || getCurrentLang()),
@@ -240,6 +240,13 @@ const AppContainer: React.FC<{ children: React.ReactElement }> = ({
 
         // 统一主题服务会自动应用DOM样式，这里只设置 data 属性
         document.documentElement.setAttribute('data-theme', data.antdTheme);
+        // Keep custom NewX controls in sync with the existing theme selector.
+        const palette = antdTheme.getDesignToken({ algorithm, token: tokens });
+        const rootStyle = document.documentElement.style;
+        rootStyle.setProperty('--nx-accent', palette.colorPrimary);
+        rootStyle.setProperty('--nx-accent-hover', palette.colorPrimaryHover);
+        rootStyle.setProperty('--nx-accent-light', palette.colorPrimaryBg);
+        rootStyle.setProperty('--nx-accent-border', palette.colorPrimaryBorder);
         document.documentElement.setAttribute(
           'data-nav-theme',
           data.layoutStyle,

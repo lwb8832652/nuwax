@@ -1,12 +1,16 @@
-@import '@/styles/color';
-@import '@/styles/token';
+@import (reference) '@/styles/newx-editor.less';
 
 .title {
-  font-size: 18px;
-  font-weight: @fontWeightStrong;
-  color: @BLANK04;
+  margin: 0;
+  color: var(--nx-ink);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 24px;
 }
 
 .extra {
-  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  .newx-editor-controls();
 }

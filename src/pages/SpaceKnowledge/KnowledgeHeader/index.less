@@ -1,22 +1,22 @@
-@import '@/styles/color';
-@import '@/styles/token';
-
 .header {
-  height: 56px;
+  min-height: 64px;
+  flex-shrink: 0;
   gap: 12px;
-  padding: 8px 20px;
+  padding: 12px 24px;
   overflow-x: auto;
   overflow-y: hidden;
+  border-bottom: 1px solid var(--nx-line);
+  background: var(--nx-paper);
 
   .icon-back {
-    color: @BLANK17;
-    font-size: 18px;
+    color: var(--nx-sub);
+    font-size: 14px;
   }
 
   .logo {
-    width: 27px;
-    height: 27px;
-    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
     object-fit: cover;
   }
 
@@ -25,60 +25,53 @@
 
     .top-box {
       gap: 10px;
-      color: @BLANK04;
+      color: var(--nx-ink);
 
       .name {
-        max-width: 200px;
+        max-width: 220px;
         font-size: 14px;
-        font-weight: @fontWeightStrong;
+        font-weight: 600;
       }
 
       .bottom-box {
-        gap: 8px;
+        gap: 6px;
 
         .box {
           display: inline-block;
-          padding: 0 5px;
-          line-height: 18px;
-          background-color: @BLANK18;
-          color: @BLANK04;
-          font-size: 10px;
+          padding: 1px 6px;
+          border: 1px solid var(--nx-line);
           border-radius: 4px;
+          background: var(--nx-surface);
+          color: var(--nx-sub);
+          font-size: 10px;
+          line-height: 16px;
+          white-space: nowrap;
         }
       }
     }
   }
 
   .dropdown-icon {
-    font-size: 12px;
+    color: var(--nx-muted);
+    font-size: 11px;
   }
 }
 
-@media (max-width: 768px) {
-  .header {
-    margin-bottom: 10px;
-  }
+.radio-group-box {
+  flex-wrap: nowrap;
 
-  .radio-group-box {
-    flex-wrap: nowrap;
-
-    :global {
-      .ant-radio-button-label {
-        white-space: nowrap;
-      }
-
-      .ant-radio-group {
-        display: flex;
-        flex-wrap: nowrap; /* 禁止换行 */
-      }
-
-      .ant-radio-button {
-        flex: 0 0 auto; /* 防止按钮被压缩 */
-      }
+  :global {
+    .ant-radio-button-label {
+      white-space: nowrap;
     }
-  }
 
-  .box {
-    white-space: nowrap;
+    .ant-radio-group {
+      display: flex;
+      flex-wrap: nowrap;
+    }
+
+    .ant-radio-button {
+      flex: 0 0 auto;
+    }
   }
 }

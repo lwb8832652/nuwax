@@ -1,100 +1,68 @@
-@import '@/styles/color';
-
-.flex-end {
-  align-items: flex-end;
-}
-
-.flex-center {
-  align-items: center;
-}
-
-/** Safari 滚动条轨道宽 8px */
-@tabs-safari-scrollbar-lane: 8px;
-
-/**
- * 外层：继承一级栏完整宽度（60/80px），不参与滚动
- */
-.tabs-rail {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-  width: 100%;
-}
-
-/**
- * 内层滚动区：占满外层剩余高度
- */
-.tabs-scroll {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-}
+@import '../navigation-theme';
 
 .tabs-list {
-  width: 100%;
-}
-
-/**
- * Safari 列表：宽度与偏移由 TS 注入，避免滚动条遮挡选中态
- */
-.tabs-list-safari {
-  box-sizing: border-box;
-  flex-shrink: 0;
-}
-
-/**
- * Safari 浮动滚动条：透明轨道 + 圆角滑块，hover 时显示，贴栏右缘
- */
-.tabs-scroll-safari {
-  box-sizing: border-box;
-  width: 100%;
-  min-height: 0;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-
-  &::-webkit-scrollbar {
-    width: @tabs-safari-scrollbar-lane;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-track {
-    margin: 0;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border-radius: 999px;
-    border: none;
-    transition: background-color 0.2s ease;
-  }
-
-  &:hover {
-    scrollbar-color: @GRAY19 transparent;
-
-    &::-webkit-scrollbar-thumb {
-      background-color: @GRAY19;
-    }
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background-color: @GRAY;
-  }
-}
-
-/**
- * 非 Safari 内层滚动（配合全局 scroll-container）
- */
-.tabs-scroll-chrome {
   display: flex;
   flex-direction: column;
+  gap: var(--nx-nav-list-gap, 2px);
+  width: 100%;
+  padding: 1px;
+  box-sizing: border-box;
 }
 
-/**
- * Style1：栏 60px，Tab 40px。scroll-container 的 scrollbar-gutter 约 8px，再补 2px 视觉居中。
- */
-.tabs-padding-chrome-compact {
-  padding-right: 2px;
+.group-trigger {
+  width: 100%;
+}
+
+.flyout {
+  .newx-navigation-theme();
+
+  width: 244px;
+  max-width: calc(100vw - 80px);
+  max-height: min(680px, 80vh);
+  padding: 7px;
+  overflow: auto;
+  border: 1px solid var(--nx-line);
+  border-radius: 10px;
+  background: var(--nx-paper);
+  box-shadow: var(--nx-shadow-popover);
+  color: var(--nx-ink);
+}
+
+.flyout-title {
+  padding: 7px 9px 9px;
+  color: var(--nx-muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+}
+
+.flyout-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--nx-nav-row-height, 33px);
+  padding: var(--nx-nav-row-padding, 6px 8px);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--nx-sub);
+  font-size: var(--nx-nav-primary-font-size, 13px);
+  text-align: left;
+  cursor: pointer;
+
+  svg {
+    flex: 0 0 var(--nx-nav-icon-size, 16px);
+    width: var(--nx-nav-icon-size, 16px);
+    height: var(--nx-nav-icon-size, 16px);
+  }
+
+  &:hover,
+  &.active {
+    background: var(--nx-surface2);
+    color: var(--nx-ink);
+  }
+
+  &.active {
+    font-weight: 500;
+  }
 }

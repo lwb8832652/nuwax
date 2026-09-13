@@ -118,7 +118,7 @@ const User: React.FC<PropsWithChildren<UserProps>> = ({
           dict('PC.Components.UserMenu.defaultUserName')
         );
       case UserAvatarEnum.Setting:
-        return dict('PC.Components.UserMenu.profile');
+        return dict('PC.Pages.Setting.title');
       case UserAvatarEnum.Log_Out:
         return dict('PC.Components.UserMenu.logout');
       case UserAvatarEnum.My_Subscriptions:

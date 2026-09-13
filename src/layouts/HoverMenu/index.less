@@ -1,12 +1,15 @@
 @import '@/styles/color';
 @import '@/styles/token';
+@import '../DynamicMenusLayout/navigation-theme';
 
 .hover-menu {
+  .newx-navigation-theme();
+
   position: fixed;
   top: 0;
   height: 100%;
   // 使用与 layout 一致的背景色
-  background: @navSecondMenuBg;
+  background: var(--nx-surface);
   border-right: @lineWidth solid
     var(--xagi-layout-border-primary, @navBorderColor);
   z-index: 998; // 比一级菜单层级低一点
@@ -17,9 +20,9 @@
 
   &.hover-menu-container-collapsed {
     border-radius: 0 @borderRadius @borderRadius 0;
-    background: @colorBgContainer;
+    background: var(--nx-surface);
     border-right-width: 0;
-    box-shadow: 12px 0 24px -4px rgba(0, 0, 0, 12%);
+    box-shadow: var(--nx-shadow-popover);
   }
 
   &.hidden {

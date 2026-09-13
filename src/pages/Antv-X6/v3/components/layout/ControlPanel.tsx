@@ -158,6 +158,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </Popover>
         {showStencil && (
           <Popover
+            overlayClassName="newx-workflow-node-picker"
             content={
               <StencilContent
                 isLoop={foldWrapItem.type === NodeTypeEnum.Loop}

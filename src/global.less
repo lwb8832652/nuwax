@@ -1,12 +1,13 @@
 @import 'styles/color.less';
+@import 'styles/newx-tokens.less';
 @import 'styles/custom.less';
 @import 'styles/components.less';
 
 html {
   width: 100%;
   height: 100%;
-  min-width: 1200px; //TODO 这个要和UI 确认
-  background-color: #fff;
+  min-width: 320px;
+  background-color: var(--nx-paper);
 }
 
 #root {
@@ -16,9 +17,12 @@ html {
 
 body {
   position: relative;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, Roboto,
-    Ubuntu, Cantarell, 'Noto Sans', Arial, 'PingFang SC', 'Source Han Sans SC',
-    'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  color: var(--nx-ink);
+  -webkit-font-smoothing: antialiased;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+    Roboto, Ubuntu, Cantarell, 'Noto Sans', Arial, 'PingFang SC',
+    'Source Han Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei',
+    'Noto Sans CJK SC', sans-serif;
   margin: 0;
   padding: 0;
   transform: translate3d(0, 0, 0);
@@ -143,19 +147,19 @@ body {
   }
 }
 
-// 表格头部背景色及其分页边框颜色
+// 表格头部背景色及其分页边框颜色（NewX：低饱和 surface）
 .ant-pagination-options .ant-select-selector,
 .ant-table thead.ant-table-thead > tr > th,
 .ant-table thead.ant-table-thead .ant-table-cell-fix-left,
 .ant-table thead.ant-table-thead .ant-table-cell-fix-right,
 .ant-table-container thead.ant-table-thead > tr > th,
 .ant-table-content thead.ant-table-thead > tr > th {
-  background-color: #f0f2f5 !important;
+  background-color: var(--nx-surface) !important;
 }
 
 // 表格分页下拉框边框颜色
 .ant-pagination-options .ant-select-selector {
-  border-color: #f0f2f5 !important;
+  border-color: var(--nx-line) !important;
 }
 
 // XProTable 表格滚动条样式：显示滑块，隐藏轨道

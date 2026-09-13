@@ -4,7 +4,7 @@ import { SPACE_ID } from '@/constants/home.constants';
 import { updatePathUrlToLocalStorage } from '@/layouts/DynamicMenusLayout/utils';
 import { dict } from '@/services/i18nRuntime';
 import { RoleEnum } from '@/types/enums/common';
-import { AllowDevelopEnum, SpaceTypeEnum } from '@/types/enums/space';
+import { AllowDevelopEnum } from '@/types/enums/space';
 import type { PersonalSpaceContentType } from '@/types/interfaces/layouts';
 import type { SpaceInfo } from '@/types/interfaces/workspace';
 import { CheckOutlined, SearchOutlined } from '@ant-design/icons';
@@ -37,9 +37,10 @@ const PersonalSpaceContent: React.FC<PersonalSpaceContentType> = ({
   const location = useLocation();
   const params = useParams();
 
-  const { pathname } = location;
+  const { pathname, search, hash } = location;
   // 空间列表
-  const { spaceList, currentSpaceInfo } = useModel('spaceModel');
+  const { spaceList, currentSpaceInfo, setCurrentSpaceInfo } =
+    useModel('spaceModel');
   // 关闭移动端菜单
   const { handleCloseMobileMenu } = useModel('layout');
 
@@ -147,11 +148,18 @@ const PersonalSpaceContent: React.FC<PersonalSpaceContentType> = ({
   const handleClick = useCallback(
     (info: SpaceInfo) => {
       const spaceId = info.id;
+      setCurrentSpaceInfo(info);
       localStorage.setItem(SPACE_ID, spaceId.toString());
       resetSearchState();
       onClosePopover(false);
       // 关闭移动端菜单
       handleCloseMobileMenu();
+
+      // 全局空间切换在工作台/会话等页面只更新空间上下文，
+      // 保留当前 URL（包括 query/hash）及之前的工作空间导航记录。
+      if (pathname !== '/space' && !pathname.startsWith('/space/')) {
+        return;
+      }
 
       // 普通用户开发者功能如果关闭，首次进入空间菜单选中“空间广场”；
       const isUser_NotAllowDevelop =
@@ -192,24 +200,14 @@ const PersonalSpaceContent: React.FC<PersonalSpaceContentType> = ({
       }
       // 成员与设置
       else if (pathname.includes('team')) {
-        // 如果团队空间切换到个人空间，需要隐藏团队设置，同样需要切换到默认页'智能体开发'
-        if (info.type === SpaceTypeEnum.Personal) {
-          const defaultUrl = isUser_NotAllowDevelop
-            ? 'space-square'
-            : 'develop';
-          resolvedPath = `/space/${spaceId}/${defaultUrl}`;
-        } else {
-          // 个人空间时，不显示"成员与设置", 普通用户也不显示"成员与设置"
-          const isUser = info?.currentUserRole === RoleEnum.User;
-          // 如果不是普通用户，则跳转到本页面, 否则跳转
-          const defaultUrl = !isUser
-            ? 'team'
-            : isUser_NotAllowDevelop
-            ? 'space-square'
-            : 'develop';
-          // 团队空间互相切换时，只更新空间id即可
-          resolvedPath = `/space/${spaceId}/${defaultUrl}`;
-        }
+        // 个人空间与可管理的团队空间共用空间管理页；只有普通成员没有该页面权限。
+        const isUser = info.currentUserRole === RoleEnum.User;
+        const defaultUrl = !isUser
+          ? 'team'
+          : isUser_NotAllowDevelop
+          ? 'space-square'
+          : 'develop';
+        resolvedPath = `/space/${spaceId}/${defaultUrl}`;
       }
       // 组件库
       else if (
@@ -246,13 +244,29 @@ const PersonalSpaceContent: React.FC<PersonalSpaceContentType> = ({
         }
       }
 
+      // 留在同类目录时保留广场/团队页签、筛选与锚点。
+      if (
+        resolvedPath ===
+        pathname.replace(/^\/space\/[^/]+/, `/space/${spaceId}`)
+      ) {
+        resolvedPath += search + hash;
+      }
+
       // 修改或保存当前路径到本地缓存
       updatePathUrlToLocalStorage('workspace', resolvedPath);
 
       // 跳转
       history.push(resolvedPath);
     },
-    [pathname, params, onClosePopover, handleCloseMobileMenu, resetSearchState],
+    [
+      pathname,
+      search,
+      hash,
+      params,
+      onClosePopover,
+      handleCloseMobileMenu,
+      resetSearchState,
+    ],
   );
 
   /** 搜索框聚焦时：上下键选择空间，Enter 切换 */

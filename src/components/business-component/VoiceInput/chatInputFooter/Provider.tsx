@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { VoiceInputControl, VoiceSubmitMode } from '../types';
 import { VoiceFooterContext } from './context';
 
@@ -9,6 +15,7 @@ export interface VoiceFooterProviderProps {
   onFill: (text: string) => void;
   /** 转写后自动发送 */
   onSend: (text: string) => void;
+  onActiveChange?: (isActive: boolean) => void;
   children: React.ReactNode | ((isActive: boolean) => React.ReactNode);
 }
 
@@ -28,12 +35,16 @@ export const VoiceFooterProvider: React.FC<VoiceFooterProviderProps> = ({
   mock,
   onFill,
   onSend,
+  onActiveChange,
   children,
 }) => {
   const [voiceControl, setVoiceControl] = useState<VoiceInputControl | null>(
     null,
   );
   const isActive = voiceControl !== null;
+  useEffect(() => {
+    onActiveChange?.(isActive);
+  }, [isActive, onActiveChange]);
   const latestResultHandlersRef = useRef({ disabled, onFill, onSend });
   latestResultHandlersRef.current = { disabled, onFill, onSend };
 

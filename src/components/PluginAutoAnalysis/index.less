@@ -1,49 +1,17 @@
-@import '@/styles/color';
-@import '@/styles/token';
-@import '@/styles/custom-variate';
+@import (reference) '@/styles/newx-plugin-dialog.less';
 
 .modal-container {
-  width: 600px !important;
+  width: min(640px, calc(100vw - 32px)) !important;
+  .newx-plugin-dialog();
 
   .inner-container {
-    height: 700px;
-    padding: 0 20px 20px;
-    border-radius: 10px;
-    background: @WHITE03;
-    pointer-events: auto;
-
-    .header {
-      height: 60px;
-
-      h3 {
-        font-weight: @fontWeightStrong;
-      }
+    height: min(700px, calc(100dvh - 48px));
+    > div {
+      min-height: 0;
     }
-
-    .p-title {
-      margin-bottom: 20px;
-      font-weight: @fontWeightStrong;
+    > :global(.text-right) {
+      flex-shrink: 0;
+      padding-top: 16px;
     }
-
-    .table-wrap {
-      border: 1px solid @GRAY01;
-      border-radius: @antdTableBorderRadius;
-      overflow: hidden;
-
-      :global {
-        .ant-table-footer {
-          background-color: transparent;
-        }
-
-        .ant-table-tbody-virtual .ant-table-cell {
-          border-bottom: none;
-        }
-      }
-    }
-  }
-
-  .param-desc {
-    color: @GRAY05;
-    font-size: 12px;
   }
 }

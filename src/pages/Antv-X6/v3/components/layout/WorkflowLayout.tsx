@@ -42,6 +42,7 @@ import React, {
   useMemo,
 } from 'react';
 import VersionAction from '../../../components/VersionAction';
+import '../../newx-editor.less';
 import { clearPendingNodeCreateSession } from '../../utils/nodeCreateSession';
 import { returnBackgroundColor, returnImg } from '../../utils/workflowV3';
 import GraphContainer from '../graph/GraphContainer';
@@ -271,7 +272,7 @@ const WorkflowLayout: React.FC<WorkflowLayoutProps> = ({
     isAgentFlow && createdItem === AgentComponentTypeEnum.Agent;
 
   return (
-    <div id="container">
+    <div id="container" className="newx-workflow-editor">
       {/* AgentFlow 作为智能体子类型嵌入 EditAgent 时，顶部栏由 EditAgent 的 AgentHeader 提供，
           不再渲染工作流编辑器自带的 Header（避免出现第二条顶部栏，与 TaskAgent 一致） */}
       {!isAgentFlow && (
@@ -336,7 +337,10 @@ const WorkflowLayout: React.FC<WorkflowLayoutProps> = ({
         // AgentFlow 画布无顶部 Header（由 EditAgent 的 AgentHeader 提供），
         // 面板无需为 56px Header 预留 top；用内联样式覆盖，与 bottom:12 对称，
         // 且不依赖 LESS 重新编译（HMR 对内联样式可靠）。
-        style={isAgentFlow ? { top: 12 } : undefined}
+        style={{
+          background: 'var(--nx-paper)',
+          ...(isAgentFlow ? { top: 12 } : {}),
+        }}
         lineMargin
         title={foldWrapItem.name}
         visible={visible}

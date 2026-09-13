@@ -1,0 +1,475 @@
+// Workflow v3 owns its visual shell, including when embedded in an AgentFlow.
+// Keep graph geometry and state colors in the existing node/edge configuration.
+.newx-workflow-scrollbar() {
+  scrollbar-width: thin;
+  scrollbar-color: var(--nx-line) transparent;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: var(--nx-line);
+
+    &:hover {
+      background: var(--nx-muted);
+    }
+  }
+}
+
+.newx-workflow-controls() {
+  .ant-btn {
+    height: 32px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: none;
+  }
+
+  .ant-btn-default {
+    color: var(--nx-ink);
+    background: var(--nx-paper);
+    border-color: var(--nx-line);
+
+    &:not(:disabled):hover {
+      color: var(--nx-ink);
+      background: var(--nx-surface2);
+      border-color: var(--nx-muted);
+    }
+  }
+
+  .ant-btn-primary:not(.ant-btn-dangerous) {
+    color: var(--nx-paper);
+    background: var(--nx-ink);
+    border-color: var(--nx-ink);
+
+    &:not(:disabled):hover {
+      color: var(--nx-paper);
+      background: var(--nx-sub);
+      border-color: var(--nx-sub);
+    }
+  }
+
+  .ant-btn-text:not(:disabled) {
+    color: var(--nx-sub);
+
+    &:hover {
+      color: var(--nx-ink);
+      background: var(--nx-surface2);
+    }
+  }
+
+  .ant-btn:disabled {
+    color: var(--nx-muted);
+    border-color: var(--nx-line);
+    background: var(--nx-surface2);
+  }
+
+  .ant-input,
+  .ant-input-affix-wrapper,
+  .ant-input-number,
+  .ant-select:not(.ant-select-status-error) .ant-select-selector {
+    color: var(--nx-ink);
+    background: var(--nx-paper);
+    border-color: var(--nx-line);
+    border-radius: 6px;
+    font-size: 12px;
+    box-shadow: none;
+  }
+
+  .ant-input-affix-wrapper .ant-input {
+    border-radius: 0;
+  }
+
+  .ant-input::placeholder,
+  .ant-select-selection-placeholder {
+    color: var(--nx-muted);
+  }
+
+  .ant-input:focus,
+  .ant-input-affix-wrapper-focused,
+  .ant-input-number-focused,
+  .ant-select-focused:not(.ant-select-status-error) .ant-select-selector {
+    border-color: var(--nx-accent-border);
+    box-shadow: 0 0 0 2px var(--nx-accent-light);
+  }
+}
+
+#container.newx-workflow-editor {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--nx-surface);
+  color: var(--nx-ink);
+  font-family: var(--nx-font-family);
+  .newx-workflow-controls();
+
+  .fold-header-style {
+    position: relative;
+    flex: 0 0 56px;
+    height: 56px;
+    width: 100%;
+    min-width: 0;
+    padding: 0 20px;
+    gap: 12px;
+    background: var(--nx-paper);
+    border-bottom: 1px solid var(--nx-line);
+
+    > .dis-left {
+      min-width: 0;
+    }
+
+    .header-icon-style {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      margin-right: 10px;
+    }
+
+    .header-content-style {
+      min-width: 0;
+      color: var(--nx-sub);
+    }
+
+    .header-name-style {
+      max-width: min(32vw, 420px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--nx-ink);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.2px;
+    }
+
+    .back-icon-style,
+    .ico {
+      width: 28px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      color: var(--nx-sub);
+      font-size: 14px;
+
+      &:hover {
+        color: var(--nx-ink);
+        background: var(--nx-surface2);
+      }
+    }
+
+    .header-tag-style {
+      flex-shrink: 0;
+
+      .ant-tag {
+        margin-inline-end: 0;
+        padding: 2px 7px;
+        border-radius: 5px;
+        font-size: 11px;
+        line-height: 18px;
+      }
+    }
+  }
+
+  .newx-workflow-history-actions {
+    flex-shrink: 0;
+    gap: 2px;
+    padding-right: 10px;
+    border-right: 1px solid var(--nx-line);
+
+    .ant-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+    }
+  }
+
+  .spin-workflow-global-style {
+    flex: 1;
+    min-height: 0;
+    height: auto;
+
+    > div .ant-spin {
+      background: var(--nx-surface);
+    }
+  }
+
+  .x6-graph-background {
+    background-color: var(--nx-surface) !important;
+  }
+
+  .absolute-box {
+    height: 42px;
+    left: 16px;
+    bottom: 16px;
+
+    .action-section {
+      padding: 4px 6px;
+      background: var(--nx-paper);
+      border: 1px solid var(--nx-line);
+      border-radius: 10px;
+      box-shadow: var(--nx-shadow-raised);
+    }
+
+    .ant-select-selector {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .ant-btn-text {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+    }
+
+    &.absolute-box-compact {
+      height: 34px;
+      left: 10px;
+      bottom: 10px;
+
+      .action-section {
+        padding: 2px 4px;
+      }
+    }
+  }
+
+  .fold-wrap-style {
+    top: 68px;
+    right: 12px;
+    bottom: 12px;
+    width: min(380px, calc(100% - 24px));
+    padding-top: 0 !important;
+    color: var(--nx-ink);
+    border: 1px solid var(--nx-line);
+    border-radius: 12px;
+    box-shadow: var(--nx-shadow-raised);
+
+    // FoldWrap's first child is its editable title/description area.
+    > div:first-child {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    > div:nth-child(2) {
+      border-color: var(--nx-line);
+      margin-right: 16px;
+      margin-left: 16px;
+    }
+
+    > .overflow-y {
+      min-height: 0;
+      .newx-workflow-scrollbar();
+    }
+
+    .ant-select,
+    input.ant-input,
+    .ant-input-number {
+      min-height: 30px;
+      height: 30px;
+    }
+
+    textarea.ant-input {
+      min-height: 64px;
+      height: auto;
+      line-height: 1.6;
+    }
+  }
+
+  .dispose-node-style {
+    padding: 16px;
+
+    .ant-form-item {
+      margin-bottom: 12px;
+    }
+
+    .ant-form-item-label {
+      padding-bottom: 5px;
+
+      > label {
+        color: var(--nx-sub);
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+
+    .node-title-style,
+    .node-title-bold-style {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--nx-ink);
+    }
+
+    .node-title-grey-style,
+    .sub-item-title {
+      color: var(--nx-sub);
+      font-family: inherit;
+      font-size: 12px;
+    }
+
+    .node-item-style {
+      margin-bottom: 16px;
+      border-color: var(--nx-line);
+    }
+
+    .ant-empty {
+      width: 100%;
+      color: var(--nx-muted);
+    }
+
+    .ant-collapse {
+      background: var(--nx-surface);
+      border-color: var(--nx-line);
+      border-radius: 8px;
+    }
+
+    .ant-collapse-item,
+    .ant-collapse-content {
+      border-color: var(--nx-line);
+    }
+  }
+
+  .general-node,
+  .loop-node-style {
+    background: var(--nx-paper);
+    border: 1px solid var(--nx-line);
+    border-radius: 10px;
+    box-shadow: var(--nx-shadow-card);
+    color: var(--nx-ink);
+  }
+
+  .general-node-header {
+    background: var(--nx-paper) !important;
+  }
+
+  .loop-node-style {
+    background: var(--nx-paper) !important;
+  }
+
+  .selected-general-node {
+    border-color: var(--nx-accent) !important;
+    box-shadow: 0 0 0 2px var(--nx-accent-light), var(--nx-shadow-card);
+  }
+
+  .general-node-header-title {
+    color: var(--nx-ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .general-node-header-desc,
+  .general-node-content,
+  .qa-title-style,
+  .route-decision-name {
+    color: var(--nx-sub);
+  }
+
+  .condition-node-left-input,
+  .condition-node-right-input,
+  .exception-handle-style {
+    background: var(--nx-surface2);
+    border-color: var(--nx-line);
+    border-radius: 5px;
+    color: var(--nx-sub);
+  }
+
+  .exception-handle-content {
+    color: var(--nx-ink);
+  }
+
+  .error-list-style {
+    background: var(--nx-paper);
+    border: 1px solid var(--nx-line);
+    border-radius: 10px;
+    box-shadow: var(--nx-shadow-raised);
+    .newx-workflow-scrollbar();
+
+    .error-list-header {
+      height: 42px;
+      padding: 0 16px;
+      font-size: 13px;
+      border-color: var(--nx-line);
+    }
+
+    .error-list-content {
+      padding: 10px 16px 0;
+      .newx-workflow-scrollbar();
+    }
+
+    .error-list-item {
+      border-color: var(--nx-line);
+      box-shadow: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .fold-header-style {
+      padding: 0 12px;
+      gap: 8px;
+
+      .header-name-style {
+        max-width: 24vw;
+      }
+
+      .header-tag-style {
+        gap: 4px;
+
+        .ant-tag {
+          padding: 1px 4px;
+          font-size: 10px;
+        }
+      }
+    }
+  }
+}
+
+.newx-workflow-node-picker {
+  color: var(--nx-ink);
+  font-family: var(--nx-font-family);
+
+  .ant-popover-inner {
+    background: var(--nx-paper);
+    border: 1px solid var(--nx-line);
+    border-radius: 10px;
+    box-shadow: var(--nx-shadow-popover);
+  }
+}
+
+// Sidebar is shared by the toolbar popover and the port quick-add dialog.
+.stencil-content.newx-workflow-stencil {
+  padding: 2px;
+  color: var(--nx-ink);
+  font-family: var(--nx-font-family);
+  .newx-workflow-scrollbar();
+
+  .stencil-title,
+  .stencil-list-style .stencil-list-item .stencil-list-title {
+    color: var(--nx-muted);
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .stencil-list-style .stencil-list-item {
+    margin: 10px 0;
+
+    .stencil-list-content .child-content {
+      margin: 2px 0;
+      min-height: 34px;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      letter-spacing: 0;
+
+      &:hover {
+        color: var(--nx-ink);
+        background: var(--nx-surface2);
+      }
+    }
+  }
+}

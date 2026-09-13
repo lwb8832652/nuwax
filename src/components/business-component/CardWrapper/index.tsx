@@ -52,7 +52,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     return (
       <div
         className={cx('flex', 'flex-col', 'gap-2', styles.container, className)}
-        style={{ ...style, height: 170 }}
+        style={style}
       >
         <header className={cx('flex', styles.header)} style={{ gap: 8 }}>
           <Skeleton.Avatar
@@ -60,7 +60,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
             size="large"
             shape="square"
             className={styles.image}
-            style={{ width: 50, height: 50, borderRadius: 10 }}
+            style={{ width: 46, height: 46, borderRadius: 11 }}
           />
           <div
             className={cx(
@@ -70,7 +70,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
               'content-between',
               'overflow-hide',
             )}
-            style={{ height: 50 }}
+            style={{ height: 46 }}
           >
             <Skeleton.Input
               active

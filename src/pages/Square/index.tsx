@@ -1,4 +1,6 @@
+import knowledgeImage from '@/assets/images/knowledge_image.png';
 import squareBannerImage from '@/assets/images/square_banner_image2.png';
+import CardWrapper from '@/components/business-component/CardWrapper';
 import PaymentSubscriptionModal from '@/components/business-component/PaymentSubscriptionModal';
 import ButtonToggle from '@/components/ButtonToggle';
 import ConditionRender from '@/components/ConditionRender';
@@ -11,6 +13,7 @@ import useSubscription from '@/hooks/useSubscription';
 import { dict } from '@/services/i18nRuntime';
 import {
   apiPublishedAgentList,
+  apiPublishedKnowledgeList,
   apiPublishedPluginList,
   apiPublishedSkillCollect,
   apiPublishedSkillList,
@@ -27,15 +30,16 @@ import {
 import type { TenantConfigInfo } from '@/types/interfaces/login';
 import { Page } from '@/types/interfaces/request';
 import {
+  SquareAgentInfo,
   SquarePublishedItemInfo,
   SquarePublishedListParams,
   SquareSearchParams,
 } from '@/types/interfaces/square';
 import { getToolPricingPeriodLabel } from '@/utils/resourcePricing';
-import { Empty, Input, message, Select, Tag } from 'antd';
+import { Empty, Input, message, Modal, Select, Tag } from 'antd';
 import { SearchProps } from 'antd/es/input';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { history, useLocation, useModel, useRequest } from 'umi';
 import styles from './index.less';
 import SingleAgent from './SingleAgent';
@@ -46,14 +50,58 @@ const cx = classNames.bind(styles);
 /**
  * 广场
  */
-const Square: React.FC = () => {
-  const { templateList } = useModel('squareModel');
+interface SquareProps {
+  embedded?: boolean;
+  resourceType?: SquareAgentTypeEnum;
+  templateTarget?: SquareTemplateTargetTypeEnum;
+}
+
+const Square: React.FC<SquareProps> = ({
+  embedded = false,
+  resourceType,
+  templateTarget,
+}) => {
+  const scrollId = useId();
+  const [knowledgeDetail, setKnowledgeDetail] =
+    useState<SquarePublishedItemInfo | null>(null);
+  const {
+    templateList,
+    agentInfoList,
+    pageAppInfoList,
+    pluginInfoList,
+    workflowInfoList,
+    skillInfoList,
+  } = useModel('squareModel');
+  const [selectedCategory, setSelectedCategory] = useState<
+    string | undefined
+  >();
+  const categoryLists: Partial<Record<SquareAgentTypeEnum, SquareAgentInfo[]>> =
+    {
+      [SquareAgentTypeEnum.Agent]: agentInfoList,
+      [SquareAgentTypeEnum.PageApp]: pageAppInfoList,
+      [SquareAgentTypeEnum.Plugin]: pluginInfoList,
+      [SquareAgentTypeEnum.Workflow]: workflowInfoList,
+      [SquareAgentTypeEnum.Skill]: skillInfoList,
+    };
+  const templateCategories =
+    templateTarget === SquareTemplateTargetTypeEnum.ChatBot
+      ? agentInfoList
+      : templateTarget === SquareTemplateTargetTypeEnum.PageApp
+      ? pageAppInfoList
+      : templateTarget === SquareTemplateTargetTypeEnum.Workflow
+      ? workflowInfoList
+      : templateTarget === SquareTemplateTargetTypeEnum.Skill
+      ? skillInfoList
+      : templateList;
+  const resourceCategories: SquareAgentInfo[] = resourceType
+    ? categoryLists[resourceType] || []
+    : [];
   const { tenantConfigInfo } = useModel('tenantConfigInfo');
 
   // 是否开启订阅功能
   const isEnableSubscription = tenantConfigInfo?.enableSubscription !== 0;
 
-  const templateListTabs = templateList?.map((item: any) => ({
+  const templateListTabs = templateCategories?.map((item: any) => ({
     label: item.description,
     value: item.name,
   }));
@@ -64,7 +112,7 @@ const Square: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   // 标题
   const [title, setTitle] = useState<string>(
-    dict('PC.Pages.Square.Square.agent'),
+    dict('PC.Components.Newx.experts'),
   );
 
   // 过滤官方标识
@@ -207,11 +255,12 @@ const Square: React.FC = () => {
     categoryTypeRef.current = cate_type as SquareAgentTypeEnum;
     // 分类名称
     categoryNameRef.current = cate_name;
+    setSelectedCategory(cate_name || undefined);
 
     // 分类类型
     switch (cate_type) {
       case SquareAgentTypeEnum.Agent:
-        setTitle(dict('PC.Pages.Square.Square.agent'));
+        setTitle(dict('PC.Components.Newx.experts'));
         apiUrlRef.current = apiPublishedAgentList;
         break;
       case SquareAgentTypeEnum.PageApp:
@@ -219,12 +268,16 @@ const Square: React.FC = () => {
         apiUrlRef.current = apiPublishedAgentList;
         break;
       case SquareAgentTypeEnum.Skill:
-        setTitle(dict('PC.Pages.Square.Square.skill'));
+        setTitle(dict('PC.Components.Newx.skills'));
         apiUrlRef.current = apiPublishedSkillList;
         break;
       case SquareAgentTypeEnum.Plugin:
         setTitle(dict('PC.Pages.Square.Square.plugin'));
         apiUrlRef.current = apiPublishedPluginList;
+        break;
+      case SquareAgentTypeEnum.Knowledge:
+        setTitle(dict('PC.Common.Global.knowledge'));
+        apiUrlRef.current = apiPublishedKnowledgeList;
         break;
       case SquareAgentTypeEnum.Workflow:
         setTitle(dict('PC.Pages.Square.Square.workflow'));
@@ -238,13 +291,13 @@ const Square: React.FC = () => {
               setTitle(dict('PC.Pages.Square.Square.pageApp'));
               break;
             case SquareTemplateTargetTypeEnum.ChatBot:
-              setTitle(dict('PC.Pages.Square.Square.agent'));
+              setTitle(dict('PC.Components.Newx.experts'));
               break;
             case SquareTemplateTargetTypeEnum.Workflow:
               setTitle(dict('PC.Pages.Square.Square.workflow'));
               break;
             case SquareTemplateTargetTypeEnum.Skill:
-              setTitle(dict('PC.Pages.Square.Square.skill'));
+              setTitle(dict('PC.Components.Newx.skills'));
               break;
             default:
               setTitle(dict('PC.Pages.Square.Square.template'));
@@ -347,8 +400,11 @@ const Square: React.FC = () => {
 
     // 获取url search参数
     const searchParams = new URLSearchParams(location.search);
-    const cate_type = searchParams.get('cate_type') || '';
-    const cate_name = searchParams.get('cate_name') || '';
+    const cate_type =
+      resourceType ||
+      searchParams.get('cate_type') ||
+      SquareAgentTypeEnum.Agent;
+    const cate_name = templateTarget || searchParams.get('cate_name') || '';
 
     const params: SquareSearchParams = {
       cate_type,
@@ -358,7 +414,7 @@ const Square: React.FC = () => {
     setFilterOfficial(FilterOfficialEnum.All);
     initValues(params);
     effectLoadFn();
-  }, [location]);
+  }, [location, resourceType, templateTarget]);
 
   /**
    * 检查列表内容是否填满容器，如果未填满且还有更多数据，则自动加载下一页
@@ -431,6 +487,17 @@ const Square: React.FC = () => {
     handleQuery(1, keyword);
   };
 
+  const handleCategoryChange = (category: string | undefined) => {
+    cancelSquareList();
+    categoryNameRef.current = category || '';
+    setSelectedCategory(category);
+    setLoading(true);
+    setSquareComponentList([]);
+    setPage(1);
+    setHasMore(false);
+    handleQuery(1, keyword);
+  };
+
   // 获取订阅标签
   const getSubscribedLabel = (subscribed: boolean) => {
     return (
@@ -469,25 +536,35 @@ const Square: React.FC = () => {
   };
 
   return (
-    <div className={cx(styles.container, 'h-full', 'flex', 'flex-col')}>
-      <header
-        className={cx(styles.header)}
-        onClick={handleLink}
-        style={{
-          backgroundImage: `url(${
-            configInfo?.squareBanner || (squareBannerImage as string)
-          })`,
-        }}
-      >
-        <h3 className={cx('text-ellipsis-2')}>
-          {configInfo?.squareBannerText ||
-            dict('PC.Pages.Square.Square.bannerTitle')}
-        </h3>
-        <p className={cx('text-ellipsis-2')}>
-          {configInfo?.squareBannerSubText ||
-            dict('PC.Pages.Square.Square.bannerSubtitle')}
-        </p>
-      </header>
+    <div
+      className={cx(
+        styles.container,
+        embedded && styles.embedded,
+        'h-full',
+        'flex',
+        'flex-col',
+      )}
+    >
+      {!embedded && (
+        <header
+          className={cx(styles.header)}
+          onClick={handleLink}
+          style={{
+            backgroundImage: `url(${
+              configInfo?.squareBanner || (squareBannerImage as string)
+            })`,
+          }}
+        >
+          <h3 className={cx('text-ellipsis-2')}>
+            {configInfo?.squareBannerText ||
+              dict('PC.Pages.Square.Square.bannerTitle')}
+          </h3>
+          <p className={cx('text-ellipsis-2')}>
+            {configInfo?.squareBannerSubText ||
+              dict('PC.Pages.Square.Square.bannerSubtitle')}
+          </p>
+        </header>
+      )}
       <div
         className={cx(
           'flex',
@@ -507,6 +584,21 @@ const Square: React.FC = () => {
                 placeholder={dict('PC.Pages.Square.Square.selectCategory')}
                 allowClear
                 onChange={(value) => handleTabClick(value as React.Key)}
+              />
+            )}
+          {embedded &&
+            resourceType !== SquareAgentTypeEnum.Template &&
+            resourceCategories.length > 0 && (
+              <Select
+                style={{ width: 160 }}
+                options={resourceCategories.map((item) => ({
+                  label: item.description,
+                  value: item.name,
+                }))}
+                value={selectedCategory}
+                placeholder={dict('PC.Pages.Square.Square.selectCategory')}
+                allowClear
+                onChange={handleCategoryChange}
               />
             )}
           <ButtonToggle
@@ -536,13 +628,9 @@ const Square: React.FC = () => {
         />
       </div>
 
-      <div
-        id="scrollableDiv"
-        ref={containerRef}
-        className="scroll-container-hide"
-      >
+      <div id={scrollId} ref={containerRef} className="scroll-container-hide">
         <InfiniteScrollDiv
-          scrollableTarget="scrollableDiv"
+          scrollableTarget={scrollId}
           list={squareComponentList}
           hasMore={hasMore}
           showLoader={!loading}
@@ -563,6 +651,28 @@ const Square: React.FC = () => {
                     categoryTypeRef.current === SquareAgentTypeEnum.Skill
                   ) {
                     paymentExtra = getPaymentExtra(item);
+                  }
+
+                  if (
+                    categoryTypeRef.current === SquareAgentTypeEnum.Knowledge
+                  ) {
+                    return (
+                      <CardWrapper
+                        key={item.id}
+                        title={item.name}
+                        content={item.description}
+                        icon={item.icon}
+                        defaultIcon={knowledgeImage}
+                        avatar={item.publishUser?.avatar || ''}
+                        name={
+                          item.publishUser?.nickName ||
+                          item.publishUser?.userName ||
+                          ''
+                        }
+                        onClick={() => setKnowledgeDetail(item)}
+                        extra={<span>{item.category}</span>}
+                      />
+                    );
                   }
 
                   // 智能体模式下，显示智能体、网页应用组件
@@ -683,6 +793,19 @@ const Square: React.FC = () => {
 
         <ConditionRender condition={isEnableSubscription}>
           {/* 付费订阅套餐弹窗 */}
+          <Modal
+            open={!!knowledgeDetail}
+            title={knowledgeDetail?.name}
+            onCancel={() => setKnowledgeDetail(null)}
+            footer={null}
+          >
+            <p>{knowledgeDetail?.description}</p>
+            <p>
+              {knowledgeDetail?.publishUser?.nickName ||
+                knowledgeDetail?.publishUser?.userName}
+            </p>
+            <p>{knowledgeDetail?.created}</p>
+          </Modal>
           <PaymentSubscriptionModal
             open={openPaymentModal}
             targetType="Skill"

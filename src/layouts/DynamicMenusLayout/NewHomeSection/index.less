@@ -1,9 +1,9 @@
 @import '@/styles/token.less';
 
-@sectionMarginLeft: -16px;
-@sectionMarginTop: -9px;
-@listItemGap: 4px;
-@listMarginRight: -8px;
+@sectionMarginLeft: 0;
+@sectionMarginTop: 0;
+@listItemGap: 1px;
+@listMarginRight: 0;
 
 .new-home-section {
   display: flex;
@@ -13,27 +13,43 @@
   margin-left: @sectionMarginLeft;
   margin-top: @sectionMarginTop;
 
-  // 会话列表容器 - 可滚动区域
+  // Keep scrolling on the real list element, then draw the prototype's
+  // deliberately understated indicator above it.
+  .conversation-list-shell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
   .conversation-list-wrapper {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-height: 0;
     overflow-x: hidden;
-    overflow-y: hidden; // 默认隐藏原生滚动条
+    overflow-y: auto;
     padding: 0;
-    scrollbar-gutter: stable; // 始终保留滚动条通道，防止 layout shift
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
-    &:hover {
-      overflow-y: auto; // 鼠标移入时开启滚动，展现与全局一致的原生滚动条样式
+    &::-webkit-scrollbar {
+      width: 0;
+      height: 0;
     }
 
-    // 会话列表
+    &:focus-visible {
+      outline: 1px solid var(--nx-accent, #5e6ad2);
+      outline-offset: -1px;
+      border-radius: 6px;
+    }
+
     .conversation-list {
       display: flex;
       flex-direction: column;
       gap: @listItemGap;
-      padding: 0 @paddingXs;
+      padding: 2px 12px 8px 8px;
       margin-right: @listMarginRight;
 
       // 加载更多提示与无更多提示
@@ -51,5 +67,32 @@
         }
       }
     }
+  }
+
+  .conversation-scroll-thumb {
+    position: absolute;
+    top: 6px;
+    right: 4px;
+    width: 3px;
+    height: 28px;
+    box-sizing: border-box;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    appearance: none;
+    background: #d7d7d5;
+    opacity: 0.58;
+    cursor: grab;
+    touch-action: none;
+    transition: opacity 0.15s, background 0.15s, transform 0.08s linear;
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  .conversation-list-shell:hover .conversation-scroll-thumb {
+    background: #bdbdbb;
+    opacity: 0.82;
   }
 }

@@ -46,12 +46,17 @@ const SearchHeader: React.FC<SearchHeaderProps> = ({
           color="white"
           styles={{ body: { color: 'rgba(0, 0, 0, 0.88)' } }}
         >
-          <div className={cx(styles['new-chat-btn'])} onClick={onNewChat}>
+          <button
+            type="button"
+            aria-label={dict('PC.Constants.Menus.newChat')}
+            className={cx(styles['new-chat-btn'])}
+            onClick={onNewChat}
+          >
             <SvgIcon
               name="icons-nav-new_chat"
               className={cx(styles['new-chat-svg'])}
             />
-          </div>
+          </button>
         </Tooltip>
       )}
     </div>

@@ -110,24 +110,21 @@ const PluginCodeHeader: React.FC<PluginCodeHeaderProps> = ({
         onChange={onChange}
         options={PLUGIN_CODE_SEGMENTED_LIST}
       />
-      <ClockCircleOutlined
-        className={cx(styles.history, 'cursor-pointer')}
-        onClick={onToggleHistory}
-      />
-      <Button className={cx(styles['try-btn'])} type="primary" onClick={onSave}>
-        {dict('PC.Pages.SpacePluginCloudTool.save')}
-      </Button>
-      <Button
-        className={cx(styles['try-btn'])}
-        type="primary"
-        icon={<CaretRightOutlined />}
-        onClick={onTryRun}
-      >
-        {dict('PC.Pages.SpacePluginCloudTool.tryRun')}
-      </Button>
-      <Button type="primary" onClick={onPublish} disabled={disabledBtn}>
-        {dict('PC.Pages.SpacePluginCloudTool.publish')}
-      </Button>
+      <div className={styles.actions}>
+        <ClockCircleOutlined
+          className={cx(styles.history, 'cursor-pointer')}
+          onClick={onToggleHistory}
+        />
+        <Button onClick={onSave}>
+          {dict('PC.Pages.SpacePluginCloudTool.save')}
+        </Button>
+        <Button icon={<CaretRightOutlined />} onClick={onTryRun}>
+          {dict('PC.Pages.SpacePluginCloudTool.tryRun')}
+        </Button>
+        <Button type="primary" onClick={onPublish} disabled={disabledBtn}>
+          {dict('PC.Pages.SpacePluginCloudTool.publish')}
+        </Button>
+      </div>
     </header>
   );
 };

@@ -11,12 +11,13 @@ const cx = classNames.bind(styles);
 interface SpaceTitleProps {
   className?: string;
   name: string;
+  collapsed?: boolean;
 }
 
 /**
  * Popover弹窗-空间主题
  */
-const SpaceTitle: React.FC<SpaceTitleProps> = ({ name }) => {
+const SpaceTitle: React.FC<SpaceTitleProps> = ({ name, collapsed = false }) => {
   const [open, setOpen] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
 
@@ -42,30 +43,25 @@ const SpaceTitle: React.FC<SpaceTitleProps> = ({ name }) => {
           />
         }
       >
-        <div
-          className={cx(
-            'flex',
-            'items-center',
-            'cursor-pointer',
-            styles.header,
-          )}
+        <button
+          type="button"
+          className={cx(styles.header, collapsed && styles.collapsed)}
+          aria-label={name}
+          aria-expanded={open}
+          title={collapsed ? name : undefined}
         >
-          <div className={cx('flex-1', 'text-ellipsis')}>
-            <Typography.Title
-              level={5}
-              style={{ marginBottom: 0 }}
-              ellipsis={{
-                rows: 1,
-                expandable: false,
-                symbol: '...',
-                tooltip: true,
-              }}
-            >
-              {name}
-            </Typography.Title>
-          </div>
-          <SvgIcon name="icons-common-caret_down" rotate={open ? 180 : 0} />
-        </div>
+          <span className={styles['space-mark']} aria-hidden="true">
+            {name.slice(0, 1)}
+          </span>
+          {!collapsed && (
+            <>
+              <Typography.Text className={styles.name} ellipsis>
+                {name}
+              </Typography.Text>
+              <SvgIcon name="icons-common-caret_down" rotate={open ? 180 : 0} />
+            </>
+          )}
+        </button>
       </Popover>
       {/*创建团队空间*/}
       <CreateNewTeam open={openModal} onCancel={() => setOpenModal(false)} />

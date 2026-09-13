@@ -1,48 +1,39 @@
-@import '@/styles/color';
-@import '@/styles/token';
-
 .collapse-button {
-  position: absolute;
-  bottom: 44px;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: @colorBgElevated;
-  border: @lineWidth solid @colorSplit;
-  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 23px;
+  width: 23px;
+  height: 23px;
+  padding: 3px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--nx-muted, #9b9b98);
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  z-index: 999;
-  transform: translateX(-50%);
+  transition: color 0.15s, background 0.15s;
 
   &:hover {
-    transform: translateX(-50%) scale(1.1);
+    background: var(--nx-surface2, #f6f6f4);
+    color: var(--nx-ink, #292928);
+  }
+
+  &.collapsed {
+    position: absolute;
+    top: 18px;
+    right: -11px;
+    z-index: 25;
+    border: 1px solid var(--nx-line, #ececea);
+    background: var(--xagi-color-bg-container, #fff);
   }
 
   .icon {
-    color: @colorTextSecondary;
-    transition: color 0.2s ease-in-out;
+    width: 14px;
+    height: 14px;
   }
-
-  //&:hover .icon {
-  //  color: @colorText;
-  //}
-  //
-  //// 收起状态时的样式调整
-  //&.collapsed {
-  //  &:hover {
-  //    .icon {
-  //      color: @colorText;
-  //    }
-  //  }
-  //}
 }
 
-// 移动端隐藏收起按钮
-@media (max-width: 768px) {
+@media (max-width: 767px) {
   .collapse-button {
-    display: none !important;
+    display: none;
   }
 }

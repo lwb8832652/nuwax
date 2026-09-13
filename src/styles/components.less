@@ -1,7 +1,7 @@
 @import '@/styles/color';
 @import '@/styles/token';
 
-// 通用操作按钮样式
+// 通用操作按钮样式（NewX）
 .action-btn {
   width: 32px;
   height: 32px;
@@ -9,17 +9,106 @@
   display: flex !important;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  color: #6b7280;
-  background: #f9fafb;
-  transition: all 0.3s ease;
+  border-radius: var(--nx-radius);
+  border: 1px solid var(--nx-line);
+  color: var(--nx-sub);
+  background: var(--nx-surface);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
   cursor: pointer;
 
   &:hover {
     opacity: 1;
-    background: #f3f4f6 !important;
-    border-color: #d1d5db !important;
-    color: #374151 !important;
+    background: var(--nx-surface2) !important;
+    border-color: var(--nx-line) !important;
+    color: var(--nx-ink) !important;
   }
+}
+
+// ================================
+// NewX 全局组件观感（Linear/Notion 极简：低饱和、细线框、轻阴影）
+// ================================
+
+// ---------- 按钮：去投影、字重 500 ----------
+.ant-btn {
+  font-weight: 500;
+  box-shadow: none;
+  text-shadow: none;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+// ---------- 输入类：细线框，hover 用 NewX 强调描边 ----------
+.ant-input-outlined,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-picker,
+.ant-mentions {
+  &:hover {
+    border-color: var(--nx-accent-border);
+  }
+}
+
+// ---------- 表格：表头低饱和、字重 500 ----------
+.ant-table-wrapper .ant-table-thead > tr > th {
+  color: var(--nx-sub);
+  font-weight: 500;
+}
+
+// ---------- 卡片：1px 细线框 ----------
+.ant-card {
+  border-color: var(--nx-line);
+}
+
+// ---------- Modal / Drawer ----------
+.ant-modal .ant-modal-content {
+  border-radius: var(--nx-radius-lg);
+  box-shadow: var(--nx-shadow-modal);
+}
+
+// ---------- 弹层：统一中圆角 + 轻阴影 ----------
+.ant-dropdown .ant-dropdown-menu,
+.ant-select-dropdown,
+.ant-picker-dropdown .ant-picker-panel-container,
+.ant-cascader-dropdown .ant-cascader-menu,
+.ant-popover .ant-popover-inner {
+  border-radius: var(--nx-radius-md);
+  box-shadow: var(--nx-shadow-popover);
+}
+
+// ---------- Tooltip ----------
+.ant-tooltip .ant-tooltip-inner {
+  border-radius: var(--nx-radius);
+}
+
+// ---------- Message / Notification ----------
+.ant-message .ant-message-notice .ant-message-notice-content,
+.ant-notification .ant-notification-notice {
+  border-radius: var(--nx-radius-md);
+  box-shadow: var(--nx-shadow-popover);
+}
+
+// ---------- Menu：项圆角 ----------
+.ant-menu .ant-menu-item,
+.ant-menu .ant-menu-submenu .ant-menu-submenu-title {
+  border-radius: var(--nx-radius);
+}
+
+// ---------- Segmented：弱底 ----------
+.ant-segmented {
+  background: var(--nx-surface2);
+}
+
+// ---------- Pagination ----------
+.ant-pagination .ant-pagination-item {
+  border-color: var(--nx-line);
+  border-radius: var(--nx-radius);
+}
+
+// ---------- Form 标签：次文字色 ----------
+.ant-form .ant-form-item .ant-form-item-label > label {
+  color: var(--nx-sub);
+}
+
+// ---------- Tabs：次文字色 ----------
+.ant-tabs .ant-tabs-tab {
+  color: var(--nx-sub);
 }

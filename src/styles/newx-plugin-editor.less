@@ -1,0 +1,139 @@
+@import (reference) './newx-editor.less';
+
+.newx-plugin-editor() {
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    background: var(--nx-paper);
+    color: var(--nx-ink);
+    .newx-editor-controls();
+  }
+
+  .layout-wrapper {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    overflow: hidden;
+
+    .chat-section {
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 36%;
+      width: 36%;
+      min-width: 320px;
+      max-width: 520px;
+      height: 100%;
+      padding: 16px;
+      box-sizing: border-box;
+      border-right: 1px solid var(--nx-line);
+      background: var(--nx-surface);
+    }
+
+    .detail-section {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+
+      > div {
+        min-width: 0;
+        min-height: 0;
+      }
+    }
+  }
+
+  .container {
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    padding: 0;
+
+    .main-container {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      margin: 0;
+      padding: 28px clamp(20px, 3vw, 48px) 36px;
+      overflow-y: auto;
+      .newx-editor-scrollbar();
+
+      .title {
+        margin-top: 0;
+        color: var(--nx-ink);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 24px;
+      }
+      .request-select {
+        width: 112px;
+        min-width: 112px;
+        margin-right: 10px;
+      }
+      .select {
+        width: 120px;
+        max-width: 100%;
+      }
+      .table-wrap {
+        .newx-editor-table();
+        &.mb-24 {
+          margin-bottom: 32px;
+        }
+      }
+
+      > :global(.ant-form) {
+        margin-bottom: 32px;
+        padding: 20px 24px 0;
+        border: 1px solid var(--nx-line);
+        border-radius: var(--nx-radius-md);
+        background: var(--nx-surface);
+        overflow: hidden;
+      }
+    }
+  }
+
+  .version-history-header {
+    min-height: 72px;
+  }
+
+  @media (max-width: 900px) {
+    .layout-wrapper {
+      flex-direction: column;
+      overflow-y: auto;
+      .newx-editor-scrollbar();
+
+      .chat-section {
+        flex: 0 0 360px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        height: 360px;
+        border-right: 0;
+        border-bottom: 1px solid var(--nx-line);
+      }
+
+      .detail-section {
+        flex: 1 0 480px;
+        height: auto;
+      }
+      .detail-section.no-chat {
+        flex: 1;
+        height: 100%;
+      }
+    }
+    .container .main-container {
+      padding: 20px 16px 28px;
+      > :global(.ant-form) {
+        padding: 16px 16px 0;
+      }
+    }
+  }
+}

@@ -1,6 +1,9 @@
+import ResourceCatalogScope from '@/components/business-component/ResourceCatalogScope';
 import CreateNewPlugin from '@/components/CreateNewPlugin';
 import UploadImportConfig from '@/components/UploadImportConfig';
 import WorkspaceLayout from '@/components/WorkspaceLayout';
+import SpaceSquare from '@/pages/SpaceSquare';
+import Square from '@/pages/Square';
 import { dict } from '@/services/i18nRuntime';
 import { apiComponentList } from '@/services/library';
 import { PublishStatusEnum } from '@/types/enums/common';
@@ -9,6 +12,7 @@ import {
   CreateListEnum,
   FilterStatusEnum,
 } from '@/types/enums/space';
+import { SquareAgentTypeEnum } from '@/types/enums/square';
 import type { ComponentInfo } from '@/types/interfaces/library';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
@@ -277,4 +281,15 @@ const SpacePlugin: React.FC = () => {
   );
 };
 
-export default SpacePlugin;
+const SpacePluginCatalog: React.FC = () => (
+  <ResourceCatalogScope
+    discovery={<Square embedded resourceType={SquareAgentTypeEnum.Plugin} />}
+    published={
+      <SpaceSquare embedded resourceType={SquareAgentTypeEnum.Plugin} />
+    }
+  >
+    <SpacePlugin />
+  </ResourceCatalogScope>
+);
+
+export default SpacePluginCatalog;

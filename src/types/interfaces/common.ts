@@ -26,6 +26,7 @@ import type {
   AgentSelectedComponentInfo,
   CreatorInfo,
 } from '@/types/interfaces/agent';
+import type { CategoryItemInfo } from '@/types/interfaces/agentConfig';
 import { CardDataInfo } from '@/types/interfaces/cardInfo';
 import type { MessageInfo } from '@/types/interfaces/conversationInfo';
 import type {
@@ -525,7 +526,7 @@ export interface ManualComponentItemProps {
 
 // 聊天输入框组件
 export interface ChatInputProps extends ManualComponentItemProps {
-  className?: React.CSSProperties;
+  className?: string;
   // 所有组件禁用
   wholeDisabled?: boolean;
   // 清空按钮禁用
@@ -546,6 +547,10 @@ export interface ChatInputProps extends ManualComponentItemProps {
   ) => void;
   /** 是否启用 @ 提及功能，默认启用 */
   enableMention?: boolean;
+  /** 是否显示资源选择器入口；工作台可在无资源时显示真实空态 */
+  showResourceMention?: boolean;
+  /** 是否允许在 @ 选择器中使用当前会话的手动组件 */
+  enableManualResourceMention?: boolean;
   /** @ 提及弹窗的展示方向：auto | up | down，默认 auto */
   mentionPlacement?: 'auto' | 'up' | 'down';
   showAnnouncement?: boolean;
@@ -556,6 +561,22 @@ export interface ChatInputProps extends ManualComponentItemProps {
   showTaskAgentToggle?: boolean;
   isTaskAgentActive?: boolean;
   onToggleTaskAgent?: () => void;
+  /** 工作台 Ask / Agent 选择器与当前用户可用的专家。 */
+  workbenchModeEnabled?: boolean;
+  /** 会话忙碌、存在草稿或正在切换时禁用模式与专家切换。 */
+  workbenchModeDisabled?: boolean;
+  workbenchModeDisabledReason?: string;
+  onDraftStateChange?: (hasDraft: boolean) => void;
+  canUseWorkbenchAgentMode?: boolean;
+  workbenchExperts?: Pick<
+    CategoryItemInfo,
+    'targetId' | 'name' | 'agentType'
+  >[];
+  selectedWorkbenchExpertId?: number;
+  onWorkbenchModeSelect?: (mode: 'ask' | 'agent') => void;
+  onWorkbenchExpertSelect?: (
+    expert: Pick<CategoryItemInfo, 'targetId' | 'name' | 'agentType'>,
+  ) => void;
   // 电脑类型选择相关
   selectedComputerId?: string;
   onComputerSelect?: (id: string) => void;

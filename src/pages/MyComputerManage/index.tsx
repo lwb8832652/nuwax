@@ -1,4 +1,5 @@
 import WorkspaceLayout from '@/components/WorkspaceLayout';
+import { useWorkspaceLayoutContext } from '@/components/WorkspaceLayout/EmbeddedContext';
 import { SUCCESS_CODE } from '@/constants/codes.constants';
 import { dict } from '@/services/i18nRuntime';
 import {
@@ -49,6 +50,7 @@ import EditComputerModal from './components/EditComputerModal';
  * 我的电脑管理页面
  */
 const MyComputerManage: React.FC = () => {
+  const { embedded } = useWorkspaceLayoutContext();
   const [filter, setFilter] = useState<
     'all' | 'online' | 'offline' | 'deactivated'
   >('all');
@@ -217,10 +219,22 @@ const MyComputerManage: React.FC = () => {
       }
     >
       {loading ? (
-        <Row gutter={[24, 24]}>
+        <Row gutter={embedded ? [12, 12] : [24, 24]}>
           {[1, 2, 3, 4].map((item) => (
-            <Col xs={24} sm={12} md={8} lg={8} xl={8} xxl={6} key={item}>
-              <Card className={styles['computer-card']}>
+            <Col
+              xs={24}
+              sm={embedded ? 24 : 12}
+              md={embedded ? 12 : 8}
+              lg={embedded ? 12 : 8}
+              xl={embedded ? 12 : 8}
+              xxl={embedded ? 12 : 6}
+              key={item}
+            >
+              <Card
+                className={cx(styles['computer-card'], {
+                  [styles.embeddedCard]: embedded,
+                })}
+              >
                 <div
                   className={styles['cover-wrapper']}
                   style={{ backgroundColor: '#fff' }}
@@ -251,11 +265,21 @@ const MyComputerManage: React.FC = () => {
           ))}
         </Row>
       ) : filteredData.length > 0 ? (
-        <Row gutter={[24, 24]}>
+        <Row gutter={embedded ? [12, 12] : [24, 24]}>
           {filteredData.map((item) => (
-            <Col xs={24} sm={12} md={8} lg={8} xl={8} xxl={6} key={item.id}>
+            <Col
+              xs={24}
+              sm={embedded ? 24 : 12}
+              md={embedded ? 12 : 8}
+              lg={embedded ? 12 : 8}
+              xl={embedded ? 12 : 8}
+              xxl={embedded ? 12 : 6}
+              key={item.id}
+            >
               <Card
-                className={styles['computer-card']}
+                className={cx(styles['computer-card'], {
+                  [styles.embeddedCard]: embedded,
+                })}
                 cover={
                   <div className={styles['cover-wrapper']}>
                     {item.online ? (
@@ -390,7 +414,7 @@ const MyComputerManage: React.FC = () => {
         </Row>
       ) : (
         !loading && (
-          <div style={{ padding: '300px 0' }}>
+          <div style={{ padding: embedded ? '80px 0' : '300px 0' }}>
             <Empty
               description={dict(
                 'PC.Pages.MyComputerManage.emptyComputerConfig',

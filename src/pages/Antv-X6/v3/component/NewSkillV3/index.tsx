@@ -19,7 +19,7 @@ import { getImg } from '../../utils/workflowV3';
 import styles from './index.less';
 import SettingModal from './SettingModal';
 
-const cx = classNames.bind(styles);
+const cx = classNames;
 interface TreeOutput extends InputAndOutConfig {
   key: string;
 }
@@ -162,7 +162,7 @@ export const SkillList: React.FC<SkillProps> = ({
                         placement="right"
                         trigger="hover"
                       >
-                        <InfoCircleOutlined className={cx('white')} />
+                        <InfoCircleOutlined className={styles.white} />
                       </Popover>
                     )}
                   <Popover
@@ -170,7 +170,7 @@ export const SkillList: React.FC<SkillProps> = ({
                     trigger="hover"
                   >
                     <SettingOutlined
-                      className={cx('ml-12 cursor-pointer white')}
+                      className={cx('ml-12 cursor-pointer', styles.white)}
                       onClick={() => {
                         handleEdit(item);
                         setOpen(true);
@@ -183,7 +183,7 @@ export const SkillList: React.FC<SkillProps> = ({
                       trigger="hover"
                     >
                       <DeleteOutlined
-                        className={cx('ml-12  white')}
+                        className={cx('ml-12', styles.white)}
                         onClick={() => handleDelete(item)}
                       />
                     </Popover>

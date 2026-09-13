@@ -4,17 +4,17 @@
 @logoPosition: 40px;
 @logoBorderRadius: 10px;
 @logoZIndex: 10;
-@titleFontSize: 32px;
+@titleFontSize: 38px;
 @subTitleLineHeight: 24px;
 @subTitleMarginTop: 28px;
 @containerPaddingTop: 100px;
 @containerPaddingBottom: 100px;
 @boxMaxWidth: 540px;
 @contentPadding: @paddingMd;
-@subTitleFontSize: @fontSizeLg;
+@subTitleFontSize: 14px;
 
 .container {
-  background-image: @backgroundImage;
+  background: var(--nx-paper);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -22,12 +22,14 @@
   display: flex;
   flex-direction: row;
   width: 100%;
-  height: 100%;
+  min-height: 100dvh;
 
   // 左侧盒子
   .left-box {
     position: relative;
     flex: 1;
+    background: var(--nx-surface);
+    border-right: 1px solid var(--nx-line);
     display: flex;
     flex-direction: column;
 
@@ -56,13 +58,13 @@
       max-width: @boxMaxWidth; /* 最大宽度 */
       padding: @containerPaddingTop @contentPadding @containerPaddingBottom;
       box-sizing: border-box;
-      color: @navFirstMenuText;
+      color: var(--nx-ink);
       font-size: @titleFontSize;
       font-style: normal;
       font-weight: @fontWeightStrong;
       line-height: @lineHeightLg;
-      text-align: justify;
-      word-break: break-all;
+      text-align: left;
+      overflow-wrap: anywhere;
 
       .title {
         font-weight: @fontWeightStrong;
@@ -74,7 +76,8 @@
         font-style: normal;
         font-weight: @fontWeightStrong;
         line-height: @subTitleLineHeight;
-        opacity: 0.6;
+        color: var(--nx-sub);
+        font-weight: 400;
       }
     }
   }
@@ -85,7 +88,7 @@
     display: flex;
     justify-content: center; /* 水平居中 */
     align-items: center; /* 垂直居中 */
-    padding: 48px 64px;
+    padding: 40px;
     overflow: auto;
   }
 }
@@ -95,5 +98,20 @@
     .left-box {
       display: none;
     }
+  }
+}
+
+@media (max-width: 1000px) {
+  .container .left-box .left-title-box {
+    padding: 48px 32px;
+    font-size: 28px;
+  }
+  .container .right-box {
+    padding: 24px;
+  }
+}
+@media (max-width: 768px) {
+  .container .right-box {
+    padding: 24px 16px;
   }
 }

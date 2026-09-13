@@ -8,19 +8,27 @@
 
 .conversation-item {
   display: flex;
-  align-items: center;
-  gap: @paddingSm;
-  padding: @paddingXs @paddingXs;
-  border-radius: @borderRadius;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
-  color: @navSecondMenuAdaptiveTextSecondary;
+  color: var(--nx-sub, @navSecondMenuAdaptiveTextSecondary);
+  font: inherit;
+  text-align: left;
+  transition: background 0.1s, color 0.1s;
 
   // 头像部分
   .avatar-container {
-    width: @controlHeight;
-    height: @controlHeight;
-    border-radius: 50%;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -59,9 +67,10 @@
       .conversation-topic {
         flex: 1;
         min-width: 0;
-        font-size: @fontSize;
-        line-height: @lineHeight;
-        color: @navSecondMenuAdaptiveText;
+        color: var(--nx-sub, @navSecondMenuAdaptiveText);
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1.35;
       }
 
       .status-tag {
@@ -78,67 +87,85 @@
     .conversation-meta {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: @paddingXs;
+      min-width: 0;
+      margin-top: 4px;
+      overflow: hidden;
+      color: var(--nx-muted, @navSecondMenuAdaptiveTextTertiary);
+      font-family: var(--nx-font-mono, @fontFamilyCode);
+      font-size: 9px;
+      line-height: 12px;
+      white-space: nowrap;
 
       .conversation-agent-name {
-        flex: 1;
+        flex: 0 1 auto;
         min-width: 0;
-        font-size: @fontSizeSm;
-        line-height: @lineHeightSm;
-        color: @navSecondMenuAdaptiveTextSecondary;
+        overflow: hidden;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .conversation-meta-separator {
+        flex: 0 0 auto;
+        margin: 0 4px;
+        color: #c5c5c2;
+        font-weight: 400;
       }
 
       .conversation-date {
-        font-size: @fontSizeSm;
-        color: @navSecondMenuAdaptiveTextTertiary;
+        flex: 0 0 auto;
+        color: inherit;
+        font-family: inherit;
+        font-size: inherit;
+        line-height: inherit;
         white-space: nowrap;
-        flex-shrink: 0;
       }
     }
   }
 
   &:hover {
-    background-color: @colorBgContainer;
-    box-shadow: @boxShadowTertiary;
+    background: var(--nx-line-mid, #f5f5f3);
 
     .conversation-item-content {
       .conversation-topic-row {
         .conversation-topic {
-          color: @colorText;
+          color: var(--nx-ink, @colorText);
         }
       }
 
       .conversation-meta {
         .conversation-agent-name {
-          color: @colorTextSecondary;
+          color: var(--nx-muted, @colorTextSecondary);
         }
 
         .conversation-date {
-          color: @colorTextTertiary;
+          color: var(--nx-muted, @colorTextTertiary);
         }
       }
     }
   }
 
   &.active {
-    background-color: @colorBgContainer;
-    box-shadow: @boxShadowTertiary;
+    background: var(--nx-surface2, #f6f6f4);
 
     .conversation-item-content {
       .conversation-topic-row {
         .conversation-topic {
-          color: @colorPrimaryText;
+          color: var(--nx-ink, @colorText);
+          font-weight: 500;
         }
       }
 
       .conversation-meta {
         .conversation-agent-name {
-          color: @colorTextSecondary;
+          color: var(--nx-muted, @colorTextSecondary);
         }
 
         .conversation-date {
-          color: @colorTextTertiary;
+          color: var(--nx-muted, @colorTextTertiary);
         }
       }
     }

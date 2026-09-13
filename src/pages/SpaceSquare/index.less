@@ -1,42 +1,30 @@
-@import '@/styles/color';
-@import '@/styles/token';
+@import (reference) '@/styles/newx-resource.less';
 
 .container {
+  .newx-resource-page();
   height: 100%;
-  padding: 16px 16px 16px 24px;
+
+  > :global(.ant-space) {
+    .newx-resource-header();
+    justify-content: flex-start;
+    margin-bottom: 24px !important;
+  }
 
   .title {
-    line-height: 32px;
-    font-size: @fontSizeLg;
-    font-weight: 600;
-    color: @BLANK04;
-    margin-right: 20px;
+    .newx-resource-title();
   }
 
   .list-section {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-
-    /* 关键修复：确保内容从顶部开始排列，避免不均匀的间距分布 */
-    align-content: start;
+    .newx-resource-grid();
 
     .price-title {
-      font-size: @fontSizeSm;
-      color: #5e6470;
+      color: var(--nx-sub);
+      font-size: 11px;
       font-weight: 400;
     }
   }
+}
 
-  @media (min-width: 1200px) {
-    .list-section {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-  }
-
-  @media (min-width: 1440px) {
-    .list-section {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-  }
+.embedded {
+  padding-top: 22px;
 }

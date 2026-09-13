@@ -2,6 +2,7 @@ import { LeftOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import { history } from 'umi';
+import { useWorkspaceLayoutContext } from './EmbeddedContext';
 import styles from './index.less';
 
 const cx = classNames.bind(styles);
@@ -44,6 +45,7 @@ const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = ({
   back = false,
   onBack,
 }) => {
+  const { embedded, title: embeddedTitle } = useWorkspaceLayoutContext();
   const handleBack = () => {
     if (onBack) {
       onBack();
@@ -53,7 +55,11 @@ const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = ({
   };
 
   return (
-    <div className={cx(styles.container, 'flex', 'flex-col', 'h-full')}>
+    <div
+      className={cx(styles.container, 'flex', 'flex-col', 'h-full', {
+        [styles.embedded]: embedded,
+      })}
+    >
       <div
         className={cx(styles['header-area'])}
         style={{ padding: headerPadding }}
@@ -70,7 +76,7 @@ const WorkspaceLayout: React.FC<WorkspaceLayoutProps> = ({
               />
             ))}
           <h3 className={cx(styles.title)}>
-            {title || ''}
+            {embeddedTitle || title || ''}
             {tips && (
               <Tooltip title={tips}>
                 <QuestionCircleOutlined className={cx(styles['tips-icon'])} />

@@ -17,7 +17,7 @@
 }
 
 .stickyContainer {
-  padding: 0 @padding;
+  padding: 0;
 }
 
 .category-name {
@@ -64,21 +64,23 @@
 }
 
 .section {
-  // margin-bottom: 24px;
-
   .sectionTitle {
-    padding-top: @padding;
-    color: @colorTextTertiary;
-    font-size: @fontSize;
+    padding-top: 25px;
+    color: var(--nx-muted);
+    font-size: 14px;
     line-height: 20px;
   }
 
   .agentGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(246px, 1fr));
-    gap: @margin;
-    padding: @padding 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding: 16px 0 0;
     align-content: start;
+
+    @media (max-width: 1080px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 
     @media (max-width: 768px) {
       grid-template-columns: 1fr;
@@ -88,21 +90,30 @@
 }
 
 .contentContainer {
-  padding: 0 @padding;
+  padding: 0;
 }
 
 .emptyContainer {
-  margin-top: @margin;
-  margin-left: @margin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 164px;
+  margin-top: 16px;
+  border: 1px dashed var(--nx-line);
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-surface);
+
+  a {
+    color: var(--nx-sub);
+    font-size: 13px;
+  }
 }
 
 .activeSticky {
   :global {
     .ant-affix {
-      background-color: @pageContainerBg;
-      margin-left: calc(0px - @padding);
-      padding-left: @padding;
-      padding-right: @padding;
+      background-color: var(--nx-paper);
+      box-shadow: 0 8px 18px var(--nx-paper);
     }
   }
 }

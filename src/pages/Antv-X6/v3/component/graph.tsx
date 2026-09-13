@@ -312,7 +312,7 @@ const initGraph = ({
       type: 'dot',
       size: 22,
       args: {
-        color: '#606060',
+        color: '#d7d7d3',
         thickness: 1,
       },
     }, //
@@ -326,7 +326,7 @@ const initGraph = ({
       modifiers: ['ctrl', 'meta'],
     },
     background: {
-      color: '#f2f2f2', //
+      color: 'var(--nx-surface)',
     },
 
     connecting: {

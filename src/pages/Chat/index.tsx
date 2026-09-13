@@ -13,6 +13,7 @@ import ResizableSplit from '@/components/ResizableSplit';
 import { isAgentVersionControlEnabled } from '@/constants/agent.constants';
 import useAgentDetails from '@/hooks/useAgentDetails';
 import useExclusivePanels from '@/hooks/useExclusivePanels';
+import { isSessionStreamBusy } from '@/hooks/useExecutingTaskStatusPoll';
 import useMessageEventDelegate from '@/hooks/useMessageEventDelegate';
 import useSelectedComponent from '@/hooks/useSelectedComponent';
 import useSubscription from '@/hooks/useSubscription';
@@ -69,6 +70,7 @@ import { useChatFiles } from './hooks/useChatFiles';
 import { useChatSandbox } from './hooks/useChatSandbox';
 import { useChatVariables } from './hooks/useChatVariables';
 import { useChatViewMode } from './hooks/useChatViewMode';
+import { useChatWorkbenchComposer } from './hooks/useChatWorkbenchComposer';
 import styles from './index.less';
 
 const cx = classNames.bind(styles);
@@ -81,6 +83,7 @@ export interface ChatCoreProps {
   enableResizable?: boolean; // 是否开启拖拽分栏布局，默认 true
   showClearContext?: boolean; // 是否展示清除上下文按钮（刷子），默认 true
   defaultFileTreeVisible?: boolean; // 是否默认显示文件树，默认 false
+  workbenchComposerEnabled?: boolean; // 仅普通主页会话显示 Ask / Agent / 召唤专家
   renderTitle?: (props: {
     effectiveAgent: any;
     isAppSidebarMode: boolean;
@@ -100,6 +103,7 @@ export const ChatCore: React.FC<ChatCoreProps> = ({
   enableResizable = true,
   showClearContext = true,
   defaultFileTreeVisible = false,
+  workbenchComposerEnabled = false,
   renderTitle,
   renderHeaderRight,
 }) => {
@@ -277,6 +281,26 @@ export const ChatCore: React.FC<ChatCoreProps> = ({
   const effectiveAgent = useMemo(() => {
     return conversationInfo?.agent || agentDetail;
   }, [conversationInfo?.agent, agentDetail]);
+
+  const workbenchComposerProps = useChatWorkbenchComposer({
+    enabled: workbenchComposerEnabled && !isAppSidebarMode,
+    conversationId: id,
+    agentId,
+    agentName: effectiveAgent?.name,
+    agentType: effectiveAgent?.type,
+    hasPermission: effectiveAgent?.hasPermission,
+    defaultAgentId: tenantConfigInfo?.defaultAgentId,
+    defaultTaskAgentId: tenantConfigInfo?.defaultTaskAgentId,
+    busy:
+      loadingAsync ||
+      loadingConversation ||
+      isLoadingOtherInterface ||
+      loadingStopConversation ||
+      clearLoading ||
+      isConversationActive ||
+      isSessionStreamBusy(messageList) ||
+      conversationInfo?.taskStatus === TaskStatus.EXECUTING,
+  });
 
   const {
     setSelectedComputerId,
@@ -1235,6 +1259,10 @@ export const ChatCore: React.FC<ChatCoreProps> = ({
       effectiveAgent?.allowAtSkill === DefaultSelectedEnum.Yes,
     showAnnouncement: true,
     mentionPlacement: 'up',
+    chatInputProps:
+      workbenchComposerEnabled && !isAppSidebarMode
+        ? workbenchComposerProps
+        : undefined,
     messageViewRef,
     // 原 conversationInfo model 数据，传给独立版输入组件
     runStopConversation,
@@ -1445,6 +1473,7 @@ const ChatPage: React.FC = () => {
       showSidebar={true}
       showPayment={true}
       enableResizable={true}
+      workbenchComposerEnabled
     />
   );
 };

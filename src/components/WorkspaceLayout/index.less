@@ -1,90 +1,54 @@
-@import '@/styles/color';
-@import '@/styles/token';
+@import (reference) '@/styles/newx-resource.less';
 
 .container {
+  min-width: 0;
+  min-height: 0;
+  background: var(--nx-paper);
+  color: var(--nx-ink);
+
   .title {
-    line-height: 32px;
-    font-size: @fontSizeLg;
-    font-weight: 600;
-    color: @BLANK04;
-    margin-right: 20px;
+    .newx-resource-title();
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 7px;
   }
 
   .tips-icon {
-    font-size: 14px;
+    color: var(--nx-muted);
+    font-size: 13px;
     cursor: pointer;
-    transition: color 0.3s;
 
     &:hover {
-      color: @BLANK04;
+      color: var(--nx-ink);
     }
   }
 
   .icon-back {
-    color: @BLANK17;
-    font-size: 16px;
+    padding: 7px;
+    border-radius: 6px;
+    color: var(--nx-sub);
+    font-size: 14px;
+
+    &:hover {
+      background: var(--nx-surface2);
+    }
   }
 
   .header-area {
-    flex-shrink: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 15px 15px 10px 24px;
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      flex: 1;
-      min-width: 0;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-  }
-
-  @media (max-width: 768px) {
-    .header-area {
-      flex-direction: column;
-      align-items: flex-start;
-
-      .header-left {
-        width: 100%;
-
-        .title {
-          width: 100%;
-          margin-bottom: 4px;
-          margin-right: 0;
-        }
-      }
-
-      .header-right {
-        width: 100%;
-        justify-content: flex-start !important;
-        text-align: left !important;
-      }
-    }
+    .newx-resource-header();
+    margin: 0;
+    padding: 28px clamp(24px, 4vw, 64px) 20px;
   }
 
   .content {
+    min-height: 0;
     overflow-x: hidden;
     overflow-y: auto;
     height: 100%;
-    padding: 0 16px 16px 24px;
-    background-color: transparent;
+    padding: 24px clamp(24px, 4vw, 64px) 28px;
+    background: transparent;
 
-    // hideScroll：内容区占满页头以下剩余高度，由页面内部自行分配滚动
+    // Preserve the internal scroll boundary used by editors and split panes.
     &.scroll-container-hide {
       flex: 1;
       min-height: 0;
@@ -94,6 +58,65 @@
   }
 
   .extra-container {
-    padding: 0 16px 16px 24px;
+    flex-shrink: 0;
+    padding: 0 clamp(24px, 4vw, 64px) 24px;
+  }
+
+  @media (max-width: 768px) {
+    .header-area {
+      padding: 20px 16px 16px;
+    }
+
+    .content {
+      padding: 18px 16px 20px;
+    }
+
+    .extra-container {
+      padding: 0 16px 20px;
+    }
+  }
+}
+
+.container.embedded {
+  min-width: 0;
+  height: 100%;
+
+  .header-area {
+    min-height: 76px;
+    padding: 24px 62px 16px 28px;
+    gap: 14px;
+    align-items: flex-start;
+
+    .header-left {
+      flex: 1 1 100%;
+      gap: 14px;
+    }
+
+    .header-right {
+      flex: 1 1 auto;
+      justify-content: flex-end;
+    }
+  }
+
+  .title {
+    width: 100%;
+    margin: 0;
+    font-size: 17px;
+    line-height: 26px;
+  }
+
+  .content {
+    min-height: 0;
+    padding: 0 28px 24px;
+  }
+
+  @media (max-width: 600px) {
+    .header-area {
+      padding: 20px 44px 16px 16px;
+    }
+
+    .content {
+      padding: 0 16px 20px;
+    }
   }
 }

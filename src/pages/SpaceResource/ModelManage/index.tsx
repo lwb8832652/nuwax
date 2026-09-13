@@ -1,5 +1,6 @@
 import ButtonToggle from '@/components/ButtonToggle';
 import ConditionRender from '@/components/ConditionRender';
+import WorkspaceLayout from '@/components/WorkspaceLayout';
 import Loading from '@/components/custom/Loading';
 import { CREATE_LIST } from '@/constants/space.constants';
 import { dict } from '@/services/i18nRuntime';
@@ -27,10 +28,23 @@ import styles from './index.less';
 
 const cx = classNames.bind(styles);
 
-const SpaceModelManage: React.FC = () => {
+interface SpaceModelManageProps {
+  spaceId?: number;
+  embedded?: boolean;
+}
+
+const SpaceModelManage: React.FC<SpaceModelManageProps> = ({
+  spaceId: providedSpaceId,
+  embedded = false,
+}) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const params = useParams();
-  const spaceId = Number(params.spaceId);
+  const rawSpaceId = providedSpaceId ?? params.spaceId;
+  const parsedSpaceId = Number(rawSpaceId);
+  const spaceId =
+    Number.isFinite(parsedSpaceId) && parsedSpaceId > 0
+      ? parsedSpaceId
+      : undefined;
   const { userInfo } = useModel('userInfo');
 
   const [componentList, setComponentList] = useState<ComponentInfo[]>([]);
@@ -40,11 +54,16 @@ const SpaceModelManage: React.FC = () => {
     useState<ComponentInfo | null>(null);
   const [loading, setLoading] = useState(false);
   const [create, setCreate] = useState<CreateListEnum>(
-    Number(searchParams.get('create')) || CreateListEnum.All_Person,
+    embedded
+      ? CreateListEnum.All_Person
+      : Number(searchParams.get('create')) || CreateListEnum.All_Person,
   );
-  const [keyword, setKeyword] = useState(searchParams.get('keyword') || '');
+  const [keyword, setKeyword] = useState(
+    embedded ? '' : searchParams.get('keyword') || '',
+  );
 
   const handleChange = (key: string, value: string) => {
+    if (embedded) return;
     const newParams = new URLSearchParams(searchParams);
     if (value) newParams.set(key, value);
     else newParams.delete(key);
@@ -67,12 +86,13 @@ const SpaceModelManage: React.FC = () => {
   };
 
   useEffect(() => {
+    if (embedded) return;
     const c = Number(searchParams.get('create')) || CreateListEnum.All_Person;
     const k = searchParams.get('keyword') || '';
     setCreate(c);
     setKeyword(k);
     handleFilterList(c, k);
-  }, [searchParams]);
+  }, [embedded, searchParams]);
 
   const { run: runComponent } = useRequest(apiComponentList, {
     manual: true,
@@ -86,18 +106,23 @@ const SpaceModelManage: React.FC = () => {
   });
 
   useEffect(() => {
-    if (history.location.state) return;
+    if (!spaceId) {
+      componentAllRef.current = [];
+      setComponentList([]);
+      setLoading(false);
+      return;
+    }
+    if (!embedded && history.location.state) return;
     setLoading(true);
     runComponent(spaceId);
-  }, [spaceId]);
+  }, [embedded, spaceId]);
 
   useEffect(() => {
-    if (history.location.state) {
-      setSearchParams(new URLSearchParams());
-      setLoading(true);
-      runComponent(spaceId);
-    }
-  }, [history.location.state]);
+    if (embedded || !spaceId || !history.location.state) return;
+    setSearchParams(new URLSearchParams());
+    setLoading(true);
+    runComponent(spaceId);
+  }, [embedded, history.location.state, spaceId]);
 
   const handleDel = (id: number) => {
     setComponentList((prev) => prev.filter((item) => item.id !== id));
@@ -139,8 +164,133 @@ const SpaceModelManage: React.FC = () => {
 
   const handleConfirmModel = () => {
     setOpenModel(false);
-    runComponent(spaceId);
+    if (spaceId) runComponent(spaceId);
   };
+
+  const filterControls = (
+    <ButtonToggle
+      options={CREATE_LIST}
+      value={create}
+      onChange={(v) => {
+        const _v = v as CreateListEnum;
+        setCreate(_v);
+        handleFilterList(_v, keyword);
+        handleChange('create', _v.toString());
+      }}
+    />
+  );
+
+  const headerActions = (
+    <div className={cx(styles['header-actions'])}>
+      <Input
+        rootClassName={cx(styles.input)}
+        placeholder={dict('PC.Pages.SpaceLibrary.Index.searchModal')}
+        value={keyword}
+        onChange={(e) => {
+          const k = e.target.value;
+          setKeyword(k);
+          handleFilterList(create, k);
+          handleChange('keyword', k);
+        }}
+        prefix={<SearchOutlined />}
+        allowClear
+        onClear={() => {
+          setKeyword('');
+          handleFilterList(create, '');
+        }}
+        style={{ width: 214 }}
+      />
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        disabled={!spaceId}
+        onClick={() => {
+          setModelComponentInfo(null);
+          setOpenModel(true);
+        }}
+      >
+        {dict('PC.Pages.SpaceLibrary.Index.addModel')}
+      </Button>
+    </div>
+  );
+
+  const modelContent = loading ? (
+    <Loading />
+  ) : componentList.length > 0 ? (
+    <div
+      className={cx(
+        styles['main-container'],
+        'flex-1',
+        'scroll-container-hide',
+      )}
+    >
+      {componentList.map((info) => (
+        <ComponentItem
+          key={`${info.id}${info.type}`}
+          componentInfo={info}
+          onClick={() => handleClickComponent(info)}
+          onClickMore={(item) => handleClickMore(item, info)}
+        />
+      ))}
+    </div>
+  ) : (
+    <div
+      className={cx(
+        styles['empty-state'],
+        'flex',
+        'items-center',
+        'content-center',
+      )}
+    >
+      <Empty description={dict('PC.Pages.SpaceLibrary.Index.noResults')} />
+    </div>
+  );
+
+  const modelEditor = spaceId ? (
+    <ConditionRender condition={openModel}>
+      <CreateModel
+        mode={
+          modelComponentInfo
+            ? CreateUpdateModeEnum.Update
+            : CreateUpdateModeEnum.Create
+        }
+        spaceId={spaceId}
+        id={modelComponentInfo?.id}
+        open={openModel}
+        onCancel={() => setOpenModel(false)}
+        onConfirm={handleConfirmModel}
+      />
+    </ConditionRender>
+  ) : null;
+
+  if (embedded) {
+    return (
+      <WorkspaceLayout
+        title={dict('PC.Pages.SpaceModelManage.pageTitle')}
+        leftSlot={
+          <div className={cx(styles['embedded-toolbar'])}>
+            {filterControls}
+            {headerActions}
+          </div>
+        }
+        hideScroll
+        contentPadding={0}
+      >
+        <div
+          className={cx(
+            styles.container,
+            styles.embedded,
+            'flex',
+            'flex-col',
+            'h-full',
+          )}
+        >
+          {modelContent}
+        </div>
+        {modelEditor}
+      </WorkspaceLayout>
+    );
+  }
 
   return (
     <div className={cx(styles.container, 'flex', 'flex-col', 'h-full')}>
@@ -149,89 +299,12 @@ const SpaceModelManage: React.FC = () => {
           <h3 className={cx(styles.title)}>
             {dict('PC.Pages.SpaceModelManage.pageTitle')}
           </h3>
-          <ButtonToggle
-            options={CREATE_LIST}
-            value={create}
-            onChange={(v) => {
-              const _v = v as CreateListEnum;
-              setCreate(_v);
-              handleFilterList(_v, keyword);
-              handleChange('create', _v.toString());
-            }}
-          />
+          {filterControls}
         </div>
-        <div className={cx(styles['header-right'])}>
-          <Input
-            rootClassName={cx(styles.input)}
-            placeholder={dict('PC.Pages.SpaceLibrary.Index.searchModal')}
-            value={keyword}
-            onChange={(e) => {
-              const k = e.target.value;
-              setKeyword(k);
-              handleFilterList(create, k);
-              handleChange('keyword', k);
-            }}
-            prefix={<SearchOutlined />}
-            allowClear
-            onClear={() => {
-              setKeyword('');
-              handleFilterList(create, '');
-            }}
-            style={{ width: 214 }}
-          />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setModelComponentInfo(null);
-              setOpenModel(true);
-            }}
-          >
-            {dict('PC.Pages.SpaceLibrary.Index.addModel')}
-          </Button>
-        </div>
+        {headerActions}
       </div>
-
-      {loading ? (
-        <Loading />
-      ) : componentList.length > 0 ? (
-        <div
-          className={cx(
-            styles['main-container'],
-            'flex-1',
-            'scroll-container-hide',
-          )}
-        >
-          {componentList.map((info) => (
-            <ComponentItem
-              key={`${info.id}${info.type}`}
-              componentInfo={info}
-              onClick={() => handleClickComponent(info)}
-              onClickMore={(item) => handleClickMore(item, info)}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className={cx('flex', 'h-full', 'items-center', 'content-center')}>
-          <Empty description={dict('PC.Pages.SpaceLibrary.Index.noResults')} />
-        </div>
-      )}
-
-      {/* 创建模型弹窗 */}
-      <ConditionRender condition={openModel}>
-        <CreateModel
-          mode={
-            modelComponentInfo
-              ? CreateUpdateModeEnum.Update
-              : CreateUpdateModeEnum.Create
-          }
-          spaceId={spaceId}
-          id={modelComponentInfo?.id}
-          open={openModel}
-          onCancel={() => setOpenModel(false)}
-          onConfirm={handleConfirmModel}
-        />
-      </ConditionRender>
+      {modelContent}
+      {modelEditor}
     </div>
   );
 };

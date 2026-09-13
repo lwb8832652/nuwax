@@ -1,7 +1,8 @@
+import { ResourceTypeTabs } from '@/components/business-component/ResourceCatalogScope';
 import ButtonToggle from '@/components/ButtonToggle';
 import CreatedItem from '@/components/CreatedItem';
-import UploadImportConfig from '@/components/UploadImportConfig';
 import Loading from '@/components/custom/Loading';
+import UploadImportConfig from '@/components/UploadImportConfig';
 import { CREATE_LIST } from '@/constants/space.constants';
 import { apiTableAdd, apiTableDelete } from '@/services/dataTable';
 import { dict } from '@/services/i18nRuntime';
@@ -184,6 +185,7 @@ const SpaceStorage: React.FC = () => {
 
   return (
     <div className={cx(styles.container, 'flex', 'flex-col', 'h-full')}>
+      <ResourceTypeTabs contained />
       <div className={cx(styles['header-area'])}>
         <div className={cx(styles['header-left'])}>
           <h3 className={cx(styles.title)}>

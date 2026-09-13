@@ -322,32 +322,33 @@ const Header: React.FC<HeaderProp> = ({
         )}
       </div>
 
-      <div
-        className="flex items-center gap-8 mr-12"
-        style={{ display: 'flex', gap: '16px' }}
-      >
+      <div className="newx-workflow-history-actions flex items-center">
         <Tooltip
           title={t('PC.Pages.AntvX6Header.undoWithShortcut', undoShortcut)}
         >
-          <UndoOutlined
-            style={{
-              fontSize: '18px',
-              color: canUndo ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.25)',
-              cursor: canUndo ? 'pointer' : 'not-allowed',
-            }}
-            onClick={canUndo ? onUndo : undefined}
+          <Button
+            type="text"
+            aria-label={t(
+              'PC.Pages.AntvX6Header.undoWithShortcut',
+              undoShortcut,
+            )}
+            icon={<UndoOutlined />}
+            disabled={!canUndo}
+            onClick={onUndo}
           />
         </Tooltip>
         <Tooltip
           title={t('PC.Pages.AntvX6Header.redoWithShortcut', redoShortcut)}
         >
-          <RedoOutlined
-            style={{
-              fontSize: '18px',
-              color: canRedo ? 'rgba(0, 0, 0, 0.85)' : 'rgba(0, 0, 0, 0.25)',
-              cursor: canRedo ? 'pointer' : 'not-allowed',
-            }}
-            onClick={canRedo ? onRedo : undefined}
+          <Button
+            type="text"
+            aria-label={t(
+              'PC.Pages.AntvX6Header.redoWithShortcut',
+              redoShortcut,
+            )}
+            icon={<RedoOutlined />}
+            disabled={!canRedo}
+            onClick={onRedo}
           />
         </Tooltip>
       </div>

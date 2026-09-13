@@ -2,11 +2,13 @@
 
 .mobileMenuBtn {
   position: fixed;
+  pointer-events: auto;
+  cursor: pointer;
   top: 10px;
   // left 位置现在通过内联样式动态设置
   z-index: 1000;
   transition: margin-left 0.3s;
-  border-radius: 50%;
+  border-radius: 6px;
   border: @lineWidth solid @colorSplit;
   width: 20px;
   height: 20px;
@@ -31,5 +33,5 @@
 
 .mobileMenuMask {
   flex: 1;
-  background: transparent;
+  background: rgba(0, 0, 0, 16%);
 }

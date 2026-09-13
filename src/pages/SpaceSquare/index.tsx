@@ -11,14 +11,21 @@ import {
   apiPublishedTemplateList,
   apiPublishedWorkflowList,
 } from '@/services/square';
-import { SquareAgentTypeEnum } from '@/types/enums/square';
+import { AgentComponentTypeEnum } from '@/types/enums/agent';
+import {
+  SquareAgentTypeEnum,
+  SquareTemplateTargetTypeEnum,
+} from '@/types/enums/square';
 import { Page } from '@/types/interfaces/request';
-import { SquarePublishedItemInfo } from '@/types/interfaces/square';
+import {
+  SquarePublishedItemInfo,
+  SquarePublishedListParams,
+} from '@/types/interfaces/square';
 import { getToolPricingPeriodLabel } from '@/utils/resourcePricing';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 import { Button, Empty, Modal, Segmented, Space, Tag } from 'antd';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { useModel, useParams, useRequest, useSearchParams } from 'umi';
 // 复用广场中的组件
 import { ICON_MORE } from '@/constants/images.constants';
@@ -32,13 +39,33 @@ const cx = classNames.bind(styles);
 type IQuery = 'activeKey';
 
 // 空间广场
-const SpaceSection: React.FC = () => {
+interface SpaceSquareProps {
+  embedded?: boolean;
+  resourceType?: SquareAgentTypeEnum;
+  templateTarget?: SquareTemplateTargetTypeEnum;
+}
+
+const SpaceSection: React.FC<SpaceSquareProps> = ({
+  embedded = false,
+  resourceType,
+  templateTarget: suppliedTemplateTarget,
+}) => {
+  const scrollId = useId();
   // ✅ umi 中的 useSearchParams
   const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTemplateTarget = searchParams.get('templateTarget');
+  const templateTarget =
+    suppliedTemplateTarget ||
+    (Object.values(SquareTemplateTargetTypeEnum).includes(
+      requestedTemplateTarget as SquareTemplateTargetTypeEnum,
+    )
+      ? (requestedTemplateTarget as SquareTemplateTargetTypeEnum)
+      : undefined);
 
   // ✅ 当 select 改变时同步 URL
   const handleChange = (key: IQuery, value: string) => {
     // 更新 URL 参数
+    if (resourceType) return;
     const newParams = new URLSearchParams(searchParams);
     if (value) {
       newParams.set(key, value);
@@ -53,7 +80,7 @@ const SpaceSection: React.FC = () => {
   const targetComponentTypeRef = React.useRef<SquareAgentTypeEnum>();
   // tabs激活的key
   const [activeKey, setActiveKey] = useState<SquareAgentTypeEnum>(
-    searchParams.get('activeKey') || SquareAgentTypeEnum.Agent,
+    resourceType || searchParams.get('activeKey') || SquareAgentTypeEnum.Agent,
   );
   const [loading, setLoading] = useState<boolean>(false);
   // 当前页码
@@ -138,7 +165,7 @@ const SpaceSection: React.FC = () => {
     targetType: SquareAgentTypeEnum,
     pageIndex: number = 1,
   ) => {
-    const params = {
+    const params: SquarePublishedListParams = {
       page: pageIndex,
       pageSize: 48,
       category: targetType,
@@ -147,9 +174,30 @@ const SpaceSection: React.FC = () => {
       // 只返回空间的组件
       justReturnSpaceData: true,
     };
+    if (
+      resourceType === SquareAgentTypeEnum.Agent ||
+      resourceType === SquareAgentTypeEnum.PageApp
+    ) {
+      params.targetType = AgentComponentTypeEnum.Agent;
+      params.targetSubType =
+        resourceType === SquareAgentTypeEnum.PageApp ? 'PageApp' : 'ChatBot';
+    }
+    if (targetType === SquareAgentTypeEnum.Template && templateTarget) {
+      params.category = '';
+      if (
+        templateTarget === SquareTemplateTargetTypeEnum.ChatBot ||
+        templateTarget === SquareTemplateTargetTypeEnum.PageApp
+      ) {
+        params.targetType = AgentComponentTypeEnum.Agent;
+        params.targetSubType = templateTarget;
+      } else {
+        params.targetType = templateTarget as unknown as AgentComponentTypeEnum;
+      }
+    }
     // 分类类型
     switch (targetType) {
       case SquareAgentTypeEnum.Agent:
+      case SquareAgentTypeEnum.PageApp:
         runAgentList(params);
         break;
       case SquareAgentTypeEnum.Plugin:
@@ -191,12 +239,14 @@ const SpaceSection: React.FC = () => {
   // ✅ 监听 URL 改变（支持浏览器前进/后退）
   useEffect(() => {
     const activeKey =
-      searchParams.get('activeKey') || SquareAgentTypeEnum.Agent;
+      resourceType ||
+      searchParams.get('activeKey') ||
+      SquareAgentTypeEnum.Agent;
 
     setActiveKey(activeKey);
 
     handleTabClick(activeKey);
-  }, [searchParams, spaceId]);
+  }, [searchParams, spaceId, resourceType, templateTarget]);
 
   // 下架
   const handleOffShelf = (
@@ -294,7 +344,10 @@ const SpaceSection: React.FC = () => {
   // 获取子组件
   const getChildren = (type: SquareAgentTypeEnum) => {
     return squareComponentList.map((item, index) => {
-      if (type === SquareAgentTypeEnum.Agent) {
+      if (
+        type === SquareAgentTypeEnum.Agent ||
+        type === SquareAgentTypeEnum.PageApp
+      ) {
         const title = getTitle(item);
         return (
           <SingleAgent
@@ -408,28 +461,39 @@ const SpaceSection: React.FC = () => {
   }, [checkAndAutoFill]);
 
   return (
-    <div className={cx(styles.container, 'flex', 'flex-col')}>
+    <div
+      className={cx(
+        styles.container,
+        embedded && styles.embedded,
+        'flex',
+        'flex-col',
+      )}
+    >
       <Space style={{ marginBottom: 15 }}>
         <h3 className={cx(styles.title)}>
-          {dict('PC.Pages.SpaceSquare.title')}
+          {embedded
+            ? dict('PC.Components.ResourceCatalog.inSpace')
+            : dict('PC.Pages.SpaceSquare.title')}
         </h3>
-        <Segmented
-          className={cx(styles.segmented)}
-          options={spaceSquareSegmentedList}
-          value={activeKey}
-          onChange={handleTabClick}
-        />
+        {!resourceType && (
+          <Segmented
+            className={cx(styles.segmented)}
+            options={spaceSquareSegmentedList}
+            value={activeKey}
+            onChange={handleTabClick}
+          />
+        )}
       </Space>
       {loading ? (
         <Loading />
       ) : squareComponentList?.length > 0 ? (
         <div
           className={cx('flex-1', 'scroll-container-hide')}
-          id="scrollableDiv"
+          id={scrollId}
           ref={containerRef}
         >
           <InfiniteScrollDiv
-            scrollableTarget="scrollableDiv"
+            scrollableTarget={scrollId}
             list={squareComponentList}
             hasMore={hasMore}
             onScroll={handleScroll}

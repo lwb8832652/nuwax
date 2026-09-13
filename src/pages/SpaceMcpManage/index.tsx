@@ -1,10 +1,8 @@
+import { ResourceTypeTabs } from '@/components/business-component/ResourceCatalogScope';
 import ButtonToggle from '@/components/ButtonToggle';
 import Loading from '@/components/custom/Loading';
 import SelectList from '@/components/custom/SelectList';
-import {
-  FILTER_DEPLOY,
-  MCP_MANAGE_SEGMENTED_LIST,
-} from '@/constants/mcp.constants';
+import { FILTER_DEPLOY } from '@/constants/mcp.constants';
 import { CREATE_LIST } from '@/constants/space.constants';
 import { dict } from '@/services/i18nRuntime';
 import {
@@ -81,7 +79,9 @@ const SpaceLibrary: React.FC = () => {
     useState<boolean>(false);
   // 分段器
   const [segmentedValue, setSegmentedValue] = useState<McpManageSegmentedEnum>(
-    searchParams.get('segmentedValue') || McpManageSegmentedEnum.Custom,
+    (searchParams.get('scope') === 'discover'
+      ? McpManageSegmentedEnum.Official
+      : searchParams.get('segmentedValue')) || McpManageSegmentedEnum.Custom,
   );
   // 当前Mcp信息
   const currentMcpInfoRef = useRef<McpDetailInfo | null>(null);
@@ -128,7 +128,9 @@ const SpaceLibrary: React.FC = () => {
     const deployStatus =
       searchParams.get('deployStatus') || FilterDeployEnum.All;
     const segmentedValue =
-      searchParams.get('segmentedValue') || McpManageSegmentedEnum.Custom;
+      (searchParams.get('scope') === 'discover'
+        ? McpManageSegmentedEnum.Official
+        : searchParams.get('segmentedValue')) || McpManageSegmentedEnum.Custom;
     const keyword = searchParams.get('keyword') || '';
 
     setCreate(create);
@@ -224,34 +226,25 @@ const SpaceLibrary: React.FC = () => {
     },
   });
 
+  // Reload the corresponding real data source for scope links and browser history.
   useEffect(() => {
     const currentValue =
-      searchParams.get('segmentedValue') || McpManageSegmentedEnum.Custom;
+      (searchParams.get('scope') === 'discover'
+        ? McpManageSegmentedEnum.Official
+        : searchParams.get('segmentedValue')) || McpManageSegmentedEnum.Custom;
     setSegmentedValue(currentValue);
-
-    // 如果有 location.state，说明是点击菜单跳转过来的，会触发下面的 useEffect，这里就不需要请求了
-    if (history.location.state) {
-      return;
-    }
     setLoading(true);
     if (currentValue === McpManageSegmentedEnum.Custom) {
       runMcpList(spaceId);
     } else {
       runMcpOfficialList();
     }
-  }, [spaceId]);
-
-  // 监听菜单切换，重新加载数据
-  useEffect(() => {
-    if (history.location.state) {
-      setLoading(true);
-      if (segmentedValue === McpManageSegmentedEnum.Custom) {
-        runMcpList(spaceId);
-      } else {
-        runMcpOfficialList();
-      }
-    }
-  }, [history.location.state]);
+  }, [
+    spaceId,
+    searchParams.get('scope'),
+    searchParams.get('segmentedValue'),
+    history.location.state,
+  ]);
 
   // 切换创建者
   const handlerChangeCreate = (value: React.Key) => {
@@ -360,15 +353,13 @@ const SpaceLibrary: React.FC = () => {
 
   // 切换分段器
   const handleChangeSegmentedValue = (value: McpManageSegmentedEnum) => {
-    handleChange('segmentedValue', value);
+    const next = new URLSearchParams(searchParams);
+    next.set('segmentedValue', value);
+    if (value === McpManageSegmentedEnum.Official)
+      next.set('scope', 'discover');
+    else next.delete('scope');
+    setSearchParams(next);
     setSegmentedValue(value);
-    // setKeyword('');
-    setLoading(true);
-    if (value === McpManageSegmentedEnum.Custom) {
-      runMcpList(spaceId);
-    } else {
-      runMcpOfficialList();
-    }
   };
   const listLength = useMemo(() => {
     return mcpList.length;
@@ -377,14 +368,28 @@ const SpaceLibrary: React.FC = () => {
 
   return (
     <div className={cx(styles.container, 'flex', 'flex-col', 'h-full')}>
-      <div
-        className={cx('flex', 'content-between')}
-        style={{ marginBottom: 5 }}
-      >
-        <div style={{ flex: 1 }}>
+      <ResourceTypeTabs contained />
+      <div className={styles['scope-area']}>
+        <Segmented
+          options={[
+            {
+              value: McpManageSegmentedEnum.Custom,
+              label: dict('PC.Components.ResourceCatalog.mine'),
+            },
+            {
+              value: McpManageSegmentedEnum.Official,
+              label: dict('PC.Components.ResourceCatalog.discover'),
+            },
+          ]}
+          value={segmentedValue}
+          onChange={handleChangeSegmentedValue}
+        />
+      </div>
+      <div className={cx(styles['header-area'])}>
+        <div className={cx(styles['header-left'])}>
           <Space>
             <h3 className={cx(styles.title)}>
-              {dict('PC.Pages.SpaceMcpManage.title')}
+              {dict('PC.Components.Newx.connectors')}
             </h3>
             {segmentedValue === McpManageSegmentedEnum.Custom && (
               <>
@@ -405,17 +410,10 @@ const SpaceLibrary: React.FC = () => {
             )}
           </Space>
         </div>
-        <div>
-          <Segmented
-            options={MCP_MANAGE_SEGMENTED_LIST}
-            value={segmentedValue}
-            onChange={handleChangeSegmentedValue}
-          />
-        </div>
-        <div style={{ flex: 1, display: 'flex' }}>
+        <div className={cx(styles['header-right'])}>
           <Input
             rootClassName={cx(styles.input)}
-            placeholder={dict('PC.Pages.SpaceMcpManage.searchPlaceholder')}
+            placeholder={dict('PC.Components.Newx.searchConnectors')}
             value={keyword}
             onChange={handleQueryAgent}
             prefix={<SearchOutlined />}
@@ -423,7 +421,7 @@ const SpaceLibrary: React.FC = () => {
             onClear={handleClearKeyword}
           />
           <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
-            {dict('PC.Pages.SpaceMcpManage.createMcpService')}
+            {dict('PC.Components.Newx.createConnector')}
           </Button>
         </div>
       </div>

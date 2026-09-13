@@ -2,7 +2,7 @@
 
 .model-selector-container {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease-in-out;
@@ -16,40 +16,43 @@
 .model-selector {
   display: inline-flex;
   align-items: center;
-  margin-top: 3px;
-  height: 28px;
+  height: 31px;
+  margin-top: 0;
 
   .selector-btn {
-    padding: @paddingXxs @paddingXs;
-    border-radius: @borderRadius;
-    box-sizing: border-box;
-    color: @colorTextSecondary;
-    font-size: @fontSizeSm;
-    transition: background-color ease-in-out 0.3s;
-    word-wrap: normal;
-    white-space: nowrap;
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 5px;
+    height: 31px;
+    padding: 0 7px;
+    border-radius: 7px;
+    box-sizing: border-box;
+    color: var(--nx-sub);
+    font-size: 12px;
+    transition: background-color 0.15s, color 0.15s;
+    word-wrap: normal;
+    white-space: nowrap;
     cursor: pointer;
 
     span {
       display: inline-block;
-      max-width: 82px;
-      color: @colorTextSecondary;
-      font-size: @fontSizeSm;
+      max-width: 132px;
+      color: currentcolor;
+      font-size: 12px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
 
     &:hover {
-      background: @colorFillTertiary;
+      background: var(--nx-surface2);
+      color: var(--nx-ink);
     }
 
     .selector-icon {
-      font-size: @fontSize;
-      margin-right: @marginXxs;
+      font-size: 12px;
+      margin-right: 0;
     }
 
     .selector-arrow {
@@ -62,7 +65,7 @@
   }
 
   .selector-btn-active {
-    color: @colorTextSecondary;
+    color: var(--nx-sub);
   }
 
   .selector-btn-unavailable {
@@ -70,22 +73,41 @@
   }
 }
 
+:global(.newx-workbench-model) {
+  .model-selector {
+    height: 33px;
+
+    .selector-btn {
+      height: 33px;
+      padding: 0 10px;
+      border-radius: 8px;
+      background: var(--nx-surface2);
+      font-size: 13px;
+
+      span {
+        font-size: 13px;
+      }
+    }
+  }
+}
+
 .model-dropdown-container {
-  background-color: @colorBgElevated;
-  border-radius: @borderRadius;
-  box-shadow: @boxShadowSecondary;
-  padding: 4px 0 0;
+  padding: 5px;
+  border: 1px solid var(--nx-line);
+  border-radius: var(--nx-radius-md);
+  background-color: var(--nx-paper);
+  box-shadow: var(--nx-shadow-popover);
 
   :global {
     .ant-dropdown-menu {
       box-shadow: none !important;
-      border-radius: @borderRadius @borderRadius 0 0 !important;
+      border-radius: var(--nx-radius) !important;
     }
   }
 
   .add-button-wrap {
     padding: 4px;
-    border-top: 1px solid @colorBorderSecondary;
+    border-top: 1px solid var(--nx-line);
   }
 }
 
@@ -101,14 +123,14 @@
       background: transparent !important;
 
       &:hover {
-        background: @colorFillTertiary !important;
+        background: var(--nx-surface) !important;
       }
 
       &.ant-dropdown-menu-item-selected {
         background: transparent !important;
 
         &:hover {
-          background: @colorFillTertiary !important;
+          background: var(--nx-surface) !important;
         }
       }
     }
@@ -118,7 +140,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 200px;
+    width: 220px;
 
     .item-content {
       display: flex;
@@ -127,19 +149,19 @@
       min-width: 0;
 
       .item-name {
-        color: @colorTextSecondary;
-        font-size: @fontSizeSm;
-        font-weight: 500;
-        line-height: 28px;
+        color: var(--nx-ink);
+        font-size: 12px;
+        font-weight: 550;
+        line-height: 20px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
 
       .item-desc {
-        font-size: 11px;
-        color: @colorTextQuaternary;
-        // margin-top: 0px;
+        margin-top: 2px;
+        color: var(--nx-muted);
+        font-size: 10px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
@@ -154,15 +176,15 @@
 
       .action-icon {
         padding: @paddingXs;
-        border-radius: @borderRadius;
-        font-size: @fontSizeSm;
-        color: @colorTextQuaternary;
+        border-radius: var(--nx-radius-sm);
+        color: var(--nx-muted);
+        font-size: 12px;
         cursor: pointer;
         transition: all @motionDurationMid;
 
         &:hover {
-          color: @colorPrimary;
-          background: @colorFillTertiary;
+          color: var(--nx-accent);
+          background: var(--nx-accent-light);
         }
       }
     }
@@ -175,8 +197,8 @@
 
     .item-check {
       margin-left: @marginSm;
-      color: @colorPrimary;
-      font-size: @fontSizeSm;
+      color: var(--nx-accent);
+      font-size: 12px;
     }
   }
 }

@@ -11,7 +11,7 @@ import { Checkbox, Select } from 'antd';
 import classNames from 'classnames';
 import React, { useRef, useState } from 'react';
 import styles from './runResult.less';
-const cx = classNames.bind(styles);
+const cx = classNames;
 
 interface RunResultProps {
   /**

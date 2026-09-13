@@ -10,6 +10,10 @@ import React, {
 
 import { t } from '@/services/i18nRuntime';
 import { AgentTypeEnum } from '@/types/enums/space';
+import type {
+  AgentManualComponentInfo,
+  AgentSelectedComponentInfo,
+} from '@/types/interfaces/agent';
 import MentionPopup from '../MentionPopup';
 import type { MentionItem } from '../MentionPopup/types';
 import styles from '../index.less';
@@ -19,8 +23,12 @@ const cx = classNames.bind(styles);
 export type MentionPlacement = 'auto' | 'up' | 'down';
 
 export interface AtMentionIconProps {
-  /** 是否启用 @ 提及功能 */
+  /** 是否允许打开资源选择器 */
   enableMention: boolean;
+  /** 是否显示资源选择器入口；工作台可在无资源时显示真实空态 */
+  showResourceMention?: boolean;
+  /** 是否允许从技能库选择，保留 allowAtSkill 的权限语义 */
+  enableSkillMention?: boolean;
   /** @ 弹窗展示方向 */
   mentionPlacement: MentionPlacement;
   /** 是否开启订阅功能（租户配置） */
@@ -31,6 +39,10 @@ export interface AtMentionIconProps {
   usageScenarios?: AgentTypeEnum[];
   /** 是否禁用（置灰且不可点击） */
   disabled?: boolean;
+  /** 当前会话可手动启用的资源 */
+  manualComponents?: AgentManualComponentInfo[];
+  /** 当前已经启用的手动组件 */
+  selectedComponentList?: AgentSelectedComponentInfo[];
 }
 
 /**
@@ -42,11 +54,15 @@ export interface AtMentionIconProps {
  */
 const AtMentionIcon: React.FC<AtMentionIconProps> = ({
   enableMention,
+  showResourceMention = enableMention,
+  enableSkillMention = enableMention,
   mentionPlacement,
   enableSubscription = false,
   onSelectMention,
   usageScenarios,
   disabled = false,
+  manualComponents,
+  selectedComponentList,
 }) => {
   // 是否显示提及弹窗
   const [atIconShowMentionPopup, setAtIconShowMentionPopup] =
@@ -57,6 +73,9 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
     left: number;
     bottom?: number;
   }>({ top: 0, left: 0 });
+  const [atIconMentionMaxHeight, setAtIconMentionMaxHeight] = useState<
+    number | undefined
+  >();
 
   // 控制底部 @ 图标 Tooltip 显隐（避免弹窗关闭时 tooltip 又冒出来）
   const [mentionTooltipOpen, setMentionTooltipOpen] = useState<boolean>(false);
@@ -64,10 +83,11 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
   const [hasUsedMentionIcon, setHasUsedMentionIcon] = useState<boolean>(false);
 
   // 底部 @ 图标引用（用于定位弹窗）
-  const mentionIconRef = useRef<HTMLSpanElement | null>(null);
+  const mentionIconRef = useRef<HTMLButtonElement | null>(null);
 
-  const POPUP_ESTIMATED_HEIGHT = 320;
-  const POPUP_WIDTH = 280;
+  // 与 MentionPopup 的实际 CSS 尺寸保持一致，用于在窄屏时准确收边。
+  const POPUP_MAX_HEIGHT = 400;
+  const POPUP_WIDTH = 360;
   const margin = 8;
 
   const calcAndSetAtIconMentionPosition = useCallback(
@@ -80,24 +100,38 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
       let finalPlacement: 'up' | 'down' = 'down';
       if (mentionPlacement === 'auto') {
         const spaceBelow = viewportHeight - rect.bottom;
-        finalPlacement = spaceBelow >= POPUP_ESTIMATED_HEIGHT ? 'down' : 'up';
+        finalPlacement = spaceBelow >= POPUP_MAX_HEIGHT ? 'down' : 'up';
       } else {
         finalPlacement = mentionPlacement;
       }
 
+      const popupWidth = Math.min(
+        POPUP_WIDTH,
+        Math.max(0, viewportWidth - margin * 2),
+      );
       const left = Math.min(
-        Math.max(4, rect.left),
-        viewportWidth - POPUP_WIDTH - margin,
+        Math.max(margin, rect.left),
+        Math.max(margin, viewportWidth - popupWidth - margin),
       );
 
       if (finalPlacement === 'down') {
+        const availableHeight = Math.max(
+          96,
+          Math.min(POPUP_MAX_HEIGHT, viewportHeight - rect.bottom - margin),
+        );
         let top = rect.bottom + 4;
-        const maxTop = viewportHeight - POPUP_ESTIMATED_HEIGHT - 4;
-        if (top > maxTop) top = Math.max(4, maxTop);
+        const maxTop = viewportHeight - availableHeight - margin;
+        if (top > maxTop) top = Math.max(margin, maxTop);
+        setAtIconMentionMaxHeight(availableHeight);
         setAtIconMentionPosition({ left, top });
       } else {
+        const availableHeight = Math.max(
+          96,
+          Math.min(POPUP_MAX_HEIGHT, rect.top - margin),
+        );
         // up：固定弹窗底边贴近图标上方 4px，并进行 clamp
         const bottomCss = viewportHeight - (rect.top - 4);
+        setAtIconMentionMaxHeight(availableHeight);
         setAtIconMentionPosition({ left, bottom: bottomCss });
       }
     },
@@ -130,9 +164,9 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
    * 点击底部 @ 图标：打开 MentionPopup 并将弹窗锚定到图标附近
    */
   const handleMentionIconClick = useCallback(
-    (e: React.MouseEvent<HTMLSpanElement>) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       // 若禁用则不做任何事
-      if (disabled || !enableMention) {
+      if (disabled || !showResourceMention) {
         closeAtIconMentionPopup();
         return;
       }
@@ -154,7 +188,7 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
       setAtIconShowMentionPopup(true);
     },
     [
-      enableMention,
+      showResourceMention,
       disabled,
       closeAtIconMentionPopup,
       calcAndSetAtIconMentionPosition,
@@ -166,7 +200,7 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
    */
   useEffect(() => {
     // 若禁用或弹窗未显示，则不执行
-    if (!enableMention || !atIconShowMentionPopup) {
+    if (!showResourceMention || !atIconShowMentionPopup) {
       return;
     }
 
@@ -185,7 +219,7 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [enableMention, atIconShowMentionPopup, closeAtIconMentionPopup]);
+  }, [showResourceMention, atIconShowMentionPopup, closeAtIconMentionPopup]);
 
   /**
    * 窗口大小变化时，同步更新底部 @ 弹窗位置
@@ -211,11 +245,11 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
     () =>
       hasUsedMentionIcon
         ? ''
-        : t('PC.Components.ChatInputHomeAtMentionIcon.tryMentionSkill'),
+        : t('PC.Components.ChatInputHomeAtMentionIcon.tryMentionResource'),
     [hasUsedMentionIcon],
   );
 
-  if (!enableMention) return null;
+  if (!showResourceMention) return null;
 
   return (
     <>
@@ -225,8 +259,16 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
         onOpenChange={setMentionTooltipOpen}
       >
         {/* 底部 @ 图标 */}
-        <span
+        <button
+          type="button"
           ref={mentionIconRef}
+          data-resource-mention-trigger=""
+          aria-label={t(
+            'PC.Components.ChatInputHomeAtMentionIcon.tryMentionResource',
+          )}
+          aria-haspopup="dialog"
+          aria-expanded={atIconShowMentionPopup}
+          disabled={disabled}
           className={cx(
             'flex',
             'items-center',
@@ -240,7 +282,7 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
           onClick={handleMentionIconClick}
         >
           @
-        </span>
+        </button>
       </Tooltip>
 
       {/* @提及技能选择弹窗 */}
@@ -249,9 +291,13 @@ const AtMentionIcon: React.FC<AtMentionIconProps> = ({
         position={atIconMentionPosition}
         onSelect={handleAtIconMentionSelect}
         enableSubscription={enableSubscription}
+        enableSkillMention={enableSkillMention}
         onClose={closeAtIconMentionPopup}
         showSearchInput={true}
+        maxHeight={atIconMentionMaxHeight}
         usageScenarios={usageScenarios}
+        manualComponents={manualComponents}
+        selectedComponentList={selectedComponentList}
       />
     </>
   );

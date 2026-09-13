@@ -1,6 +1,9 @@
 import { dict } from '@/services/i18nRuntime';
 import type { CategoryInfo } from '@/types/interfaces/agentConfig';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import {
+  ArrowRightOutlined,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons';
 import type { DragEndEvent } from '@dnd-kit/core';
 import {
   closestCenter,
@@ -69,6 +72,8 @@ interface CategoryContainerProps {
   onCategoryDragEnd: (event: DragEndEvent) => void;
   /** 标签点击事件 */
   onTabClick: (type: string) => void;
+  /** 跳转专家广场 */
+  onDiscoverExperts?: () => void;
   /** 鼠标进入事件 */
   onMouseEnter: (text: string) => void;
   /** 鼠标离开事件 */
@@ -87,6 +92,7 @@ const CategoryContainer: React.FC<CategoryContainerProps> = ({
   dragHoverText,
   onCategoryDragEnd,
   onTabClick,
+  onDiscoverExperts,
   onMouseEnter,
   onMouseLeave,
   onDragStart,
@@ -161,10 +167,8 @@ const CategoryContainer: React.FC<CategoryContainerProps> = ({
             borderBottom: 'none',
           }}
           // 添加更多样式控制
-          tabBarGutter={8}
+          tabBarGutter={35}
           size="middle"
-          // 去除指示条 - 通过设置size为0来隐藏
-          indicator={{ size: 0 }}
           renderTabBar={(tabBarProps, DefaultTabBar) => (
             <DndContext
               sensors={[sensor]}
@@ -195,7 +199,17 @@ const CategoryContainer: React.FC<CategoryContainerProps> = ({
         />
       </div>
       <div className={cx(styles['tab-right'])}>
-        <Tooltip title={dict('PC.Pages.HomeDrag.dragAgentTip')}>
+        {onDiscoverExperts && (
+          <button
+            type="button"
+            className={cx(styles.discoverExperts)}
+            onClick={onDiscoverExperts}
+          >
+            {dict('PC.Pages.Home.discoverExperts')}
+            <ArrowRightOutlined />
+          </button>
+        )}
+        <Tooltip title={dict('PC.Pages.NewxHomeDrag.dragAgentTip')}>
           <ExclamationCircleOutlined className={cx(styles.icon)} />
         </Tooltip>
       </div>

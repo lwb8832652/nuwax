@@ -31,6 +31,14 @@ import { ModelSelectorProps } from './types';
 
 const cx = classNames.bind(styles);
 
+type ModelData =
+  | { source: 'agent'; agentId: number; models: ModelOptionDto[] }
+  | {
+      source: 'external';
+      externalList: ModelOptionDto[];
+      models: ModelOptionDto[];
+    };
+
 /**
  * 智能体模型选择器组件
  * 在 allowOtherModel 为开启状态时显示，允许用户选择要使用的自有模型
@@ -47,9 +55,18 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   const { spaceList } = useModel('spaceModel');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [modelList, setModelList] = useState<ModelOptionDto[]>([]);
-  const [initialized, setInitialized] = useState(false);
+  const [modelData, setModelData] = useState<ModelData>();
   const initializedRef = useRef(false);
+  const requestVersionRef = useRef(0);
+  const currentScopeRef = useRef({ agentId, isExternalList });
+  currentScopeRef.current = { agentId, isExternalList };
+  const initialized = isExternalList
+    ? modelData?.source === 'external' &&
+      modelData.externalList === externalModelList
+    : !!agentId &&
+      modelData?.source === 'agent' &&
+      modelData.agentId === agentId;
+  const modelList = initialized ? modelData?.models || [] : [];
 
   // 弹窗控制
   const [openModel, setOpenModel] = useState(false);
@@ -60,11 +77,23 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   // 获取模型选项列表
   const fetchModelOptions = useCallback(
     async (id: number, force = false) => {
-      if (initializedRef.current && !force) return;
+      if (
+        (initializedRef.current && !force) ||
+        currentScopeRef.current.isExternalList ||
+        currentScopeRef.current.agentId !== id
+      )
+        return;
 
+      const requestVersion = ++requestVersionRef.current;
       setLoading(true);
       try {
         const res = await apiAgentConversationModelOptions(id);
+        if (
+          requestVersion !== requestVersionRef.current ||
+          currentScopeRef.current.isExternalList ||
+          currentScopeRef.current.agentId !== id
+        )
+          return;
         if (res.code === SUCCESS_CODE && res.data) {
           // 根据智能体类型过滤模型
           const filteredData = res.data.filter((model: ModelOptionDto) => {
@@ -80,14 +109,15 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
             return model.usageScenarios.includes(agentType);
           });
 
-          setModelList(filteredData);
-          setInitialized(true);
+          setModelData({ source: 'agent', agentId: id, models: filteredData });
           initializedRef.current = true;
         }
       } catch (error) {
-        console.error('Failed to get agent model list:', error);
+        if (requestVersion === requestVersionRef.current) {
+          console.error('Failed to get agent model list:', error);
+        }
       } finally {
-        setLoading(false);
+        if (requestVersion === requestVersionRef.current) setLoading(false);
       }
     },
     [agentType],
@@ -96,20 +126,29 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({
   // 监听 agentId 的变化，当 agentId 改变时，重新加载数据并重置 initialized 状态与模型列表
   useEffect(() => {
     if (isExternalList) return;
+    initializedRef.current = false;
+    setModelData(undefined);
+    setLoading(false);
+    setShouldResetSelection(false);
     if (agentId) {
-      setInitialized(false);
-      initializedRef.current = false;
-      setModelList([]);
       fetchModelOptions(agentId, true);
     }
+    return () => {
+      ++requestVersionRef.current;
+    };
   }, [agentId, fetchModelOptions, isExternalList]);
 
   // 外部预加载模型列表：直接使用传入数据，跳过接口拉取
   useEffect(() => {
-    if (!isExternalList) return;
-    setModelList(externalModelList);
-    setInitialized(true);
+    if (!externalModelList) return;
+    setModelData({
+      source: 'external',
+      externalList: externalModelList,
+      models: externalModelList,
+    });
     initializedRef.current = true;
+    setLoading(false);
+    setShouldResetSelection(false);
   }, [isExternalList, externalModelList]);
 
   // 监听数据加载完成，自动应用默认选择

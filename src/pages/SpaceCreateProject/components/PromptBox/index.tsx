@@ -205,7 +205,9 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onSubmit }) => {
 
   return (
     <div className={cx(styles['prompt-box-card'])}>
+      <TabsList tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
       <ChatInputHome
+        className={styles.composer}
         key={currentTab.key}
         wholeDisabled={isSubmitting}
         onEnter={handleSend}
@@ -242,9 +244,6 @@ const PromptBox: React.FC<PromptBoxProps> = ({ onSubmit }) => {
               onModelSelect={setSelectedModelId}
             />
           ) : undefined
-        }
-        tabsSlot={
-          <TabsList tabs={tabs} activeTab={activeTab} onChange={setActiveTab} />
         }
       />
     </div>

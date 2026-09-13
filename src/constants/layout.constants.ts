@@ -8,12 +8,12 @@ import { ThemeNavigationStyleType } from '@/types/enums/theme';
 export const NAVIGATION_LAYOUT_SIZES = {
   // 一级菜单宽度配置
   FIRST_MENU_WIDTH: {
-    STYLE1: 60, // 紧凑模式：无文字导航
-    STYLE2: 80, // 展开模式：有文字导航
+    STYLE1: 56, // NewX 折叠导航
+    STYLE2: 56, // 两种导航设置共用同一单列布局
   },
 
   // 二级菜单宽度配置
-  SECOND_MENU_WIDTH: 240,
+  SECOND_MENU_WIDTH: 196, // 展开增量：56 + 196 = 252px
 
   // 菜单总宽度计算
   getTotalMenuWidth: (navigationStyle: string) => {

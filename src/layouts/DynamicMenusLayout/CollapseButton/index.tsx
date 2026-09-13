@@ -1,8 +1,5 @@
 import SvgIcon from '@/components/base/SvgIcon';
-import { NAVIGATION_LAYOUT_SIZES } from '@/constants/layout.constants';
-import { useUnifiedTheme } from '@/hooks/useUnifiedTheme';
 import { dict } from '@/services/i18nRuntime';
-import { ThemeNavigationStyleType } from '@/types/enums/theme';
 import { Tooltip } from 'antd';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
@@ -18,7 +15,6 @@ const cx = classNames.bind(styles);
 const CollapseButton: React.FC = () => {
   const { isSecondMenuCollapsed, setIsSecondMenuCollapsed } =
     useModel('layout');
-  const { navigationStyle } = useUnifiedTheme();
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
@@ -77,14 +73,6 @@ const CollapseButton: React.FC = () => {
     setIsSecondMenuCollapsed(false);
   }, [searchParams, setIsSecondMenuCollapsed, location.pathname]);
 
-  // 计算动态导航宽度
-  const firstMenuWidth =
-    navigationStyle === ThemeNavigationStyleType.STYLE2
-      ? NAVIGATION_LAYOUT_SIZES.FIRST_MENU_WIDTH.STYLE2
-      : NAVIGATION_LAYOUT_SIZES.FIRST_MENU_WIDTH.STYLE1;
-  const menuTotalWidth =
-    NAVIGATION_LAYOUT_SIZES.getTotalMenuWidth(navigationStyle);
-
   // 处理点击事件（保存用户操作到localStorage）
   const handleToggleCollapse = () => {
     const newState = !isSecondMenuCollapsed;
@@ -109,21 +97,25 @@ const CollapseButton: React.FC = () => {
       placement="right"
       arrow={false}
     >
-      <div
+      <button
+        type="button"
+        aria-label={
+          isSecondMenuCollapsed
+            ? dict('PC.Layouts.DynamicMenusLayout.CollapseButton.expandMenu')
+            : dict('PC.Layouts.DynamicMenusLayout.CollapseButton.collapseMenu')
+        }
+        aria-expanded={!isSecondMenuCollapsed}
         className={cx(styles['collapse-button'], {
           [styles.collapsed]: isSecondMenuCollapsed,
         })}
         onClick={handleToggleCollapse}
-        style={{
-          left: isSecondMenuCollapsed ? firstMenuWidth : menuTotalWidth,
-        }}
       >
         <SvgIcon
           name="icons-common-caret_left"
           rotate={isSecondMenuCollapsed ? 180 : 0}
           className={cx(styles.icon)}
         />
-      </div>
+      </button>
     </Tooltip>
   );
 };

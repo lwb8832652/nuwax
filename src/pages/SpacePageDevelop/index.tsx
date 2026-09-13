@@ -1,4 +1,5 @@
 import { CopyToSpaceComponent } from '@/components/business-component';
+import ResourceCatalogScope from '@/components/business-component/ResourceCatalogScope';
 import ButtonToggle from '@/components/ButtonToggle';
 import Loading from '@/components/custom/Loading';
 import SelectList from '@/components/custom/SelectList';
@@ -11,6 +12,8 @@ import {
   PAGE_DEVELOP_MORE_ACTIONS,
 } from '@/constants/pageDev.constants';
 import { CREATE_LIST, FILTER_STATUS_DEV } from '@/constants/space.constants';
+import SpaceSquare from '@/pages/SpaceSquare';
+import Square from '@/pages/Square';
 import { exportProject } from '@/services/appDev';
 import { dict } from '@/services/i18nRuntime';
 import {
@@ -28,6 +31,10 @@ import {
   PageProjectTypeEnum,
 } from '@/types/enums/pageDev';
 import { CreateListEnum, FilterStatusEnum } from '@/types/enums/space';
+import {
+  SquareAgentTypeEnum,
+  SquareTemplateTargetTypeEnum,
+} from '@/types/enums/square';
 import type { CustomPopoverItem } from '@/types/interfaces/common';
 import {
   CreateCustomPageInfo,
@@ -618,4 +625,29 @@ const SpacePageDevelop: React.FC = () => {
   );
 };
 
-export default SpacePageDevelop;
+const SpacePageDevelopCatalog: React.FC = () => (
+  <ResourceCatalogScope
+    discovery={<Square embedded resourceType={SquareAgentTypeEnum.PageApp} />}
+    published={
+      <SpaceSquare embedded resourceType={SquareAgentTypeEnum.PageApp} />
+    }
+    templates={
+      <Square
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.PageApp}
+      />
+    }
+    spaceTemplates={
+      <SpaceSquare
+        embedded
+        resourceType={SquareAgentTypeEnum.Template}
+        templateTarget={SquareTemplateTargetTypeEnum.PageApp}
+      />
+    }
+  >
+    <SpacePageDevelop />
+  </ResourceCatalogScope>
+);
+
+export default SpacePageDevelopCatalog;

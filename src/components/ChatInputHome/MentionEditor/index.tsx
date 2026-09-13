@@ -24,6 +24,7 @@
  */
 
 import { t } from '@/services/i18nRuntime';
+import { AgentComponentTypeEnum } from '@/types/enums/agent';
 import classNames from 'classnames';
 import React, {
   useCallback,
@@ -34,11 +35,12 @@ import React, {
   useState,
 } from 'react';
 import MentionPopup from '../MentionPopup';
-import type {
-  MentionEditorHandle,
-  MentionEditorProps,
-  MentionItem,
-  MentionPopupHandle,
+import {
+  getMentionItemKey,
+  type MentionEditorHandle,
+  type MentionEditorProps,
+  type MentionItem,
+  type MentionPopupHandle,
 } from '../MentionPopup/types';
 import styles from './index.less';
 
@@ -335,6 +337,15 @@ const detectMention = (
   };
 };
 
+const getMentionItemFromChip = (chip: HTMLElement): MentionItem => ({
+  targetId: Number(chip.dataset.mentionId),
+  name: chip.dataset.mentionName || '',
+  targetType:
+    (chip.dataset.mentionType as AgentComponentTypeEnum) ??
+    AgentComponentTypeEnum.Skill,
+  source: chip.dataset.mentionSource as MentionItem['source'] | undefined,
+});
+
 /**
  * MentionEditor 主组件
  * 使用 forwardRef 暴露组件方法给父组件
@@ -352,11 +363,14 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
       className,
       inlinePrefixWidth = 0,
       onMentionSelect,
+      onMentionRemove,
       enableSubscription = false,
       onUnsubscribedSkillSelect,
       onSkillIdsChange,
       // 是否启用 @ 提及功能，默认启用
       enableMention = true,
+      // 是否允许从技能库选择，保留 allowAtSkill 的权限语义
+      enableSkillMention = enableMention,
       // @ 弹窗展示方向：auto | up | down
       mentionPlacement = 'auto',
       // 默认需要回显为 mention chip 的技能列表（按顺序渲染）
@@ -364,6 +378,8 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
       minRows = 2,
       maxRows = 6,
       usageScenarios,
+      manualComponents,
+      selectedComponentList,
     },
     ref,
   ) => {
@@ -390,6 +406,8 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
     const savedRangeRef = useRef<Range | null>(null);
     /** 保存的文本节点，用于在选择提及时操作 DOM */
     const savedTextNodeRef = useRef<Node | null>(null);
+    /** DOM 中已同步的 mention 快照，用于统一处理删除、剪切和撤销/重做 */
+    const selectedMentionsRef = useRef<MentionItem[]>([]);
 
     // ==================== State ====================
     /** 是否显示提及弹窗 */
@@ -446,29 +464,48 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
       (pendingMention?: MentionItem) => {
         if (!enableMention || !editorRef.current) return;
 
-        setSelectedMentions((prev) => {
-          const prevMap = new Map(
-            prev.map((mention) => [String(mention.targetId), mention]),
+        const previousMentions = selectedMentionsRef.current;
+        const previousMentionMap = new Map(
+          previousMentions.map((mention) => [
+            getMentionItemKey(mention),
+            mention,
+          ]),
+        );
+        if (pendingMention) {
+          previousMentionMap.set(
+            getMentionItemKey(pendingMention),
+            pendingMention,
           );
-          if (pendingMention) {
-            prevMap.set(String(pendingMention.targetId), pendingMention);
-          }
+        }
 
-          return Array.from(
-            editorRef.current!.querySelectorAll('[data-mention-id]'),
-          ).map((chip) => {
-            const el = chip as HTMLElement;
-            const mentionId = el.dataset.mentionId!;
-            return (
-              prevMap.get(mentionId) ?? {
-                targetId: Number(mentionId),
-                name: el.dataset.mentionName || '',
-              }
-            );
-          });
+        const nextMentions = Array.from(
+          editorRef.current.querySelectorAll<HTMLElement>('[data-mention-id]'),
+        ).map((chip) => {
+          const item = getMentionItemFromChip(chip);
+          return previousMentionMap.get(getMentionItemKey(item)) ?? item;
+        });
+        const nextMentionKeys = new Set(
+          nextMentions.map((mention) => getMentionItemKey(mention)),
+        );
+        const previousMentionKeys = new Set(
+          previousMentions.map((mention) => getMentionItemKey(mention)),
+        );
+
+        selectedMentionsRef.current = nextMentions;
+        setSelectedMentions(nextMentions);
+
+        previousMentions.forEach((mention) => {
+          if (!nextMentionKeys.has(getMentionItemKey(mention))) {
+            onMentionRemove?.(mention);
+          }
+        });
+        nextMentions.forEach((mention) => {
+          if (!previousMentionKeys.has(getMentionItemKey(mention))) {
+            onMentionSelect?.(mention);
+          }
         });
       },
-      [enableMention],
+      [enableMention, onMentionRemove, onMentionSelect],
     );
 
     /** 记录当前 DOM 快照到撤销栈 */
@@ -621,7 +658,16 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
     useEffect(() => {
       // 去重技能ID列表
       const nextSkillIds = Array.from(
-        new Set(selectedMentions?.map((item) => item.targetId as number)),
+        new Set(
+          selectedMentions
+            ?.filter(
+              (item) =>
+                (item.source ?? 'skill') === 'skill' &&
+                (!item.targetType ||
+                  item.targetType === AgentComponentTypeEnum.Skill),
+            )
+            .map((item) => item.targetId as number),
+        ),
       );
       onSkillIdsChange?.(nextSkillIds);
     }, [onSkillIdsChange, selectedMentions]);
@@ -634,7 +680,7 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
       // 如果启用 @ 提及功能，则显示默认占位符文本
       if (enableMention) {
         return t(
-          'PC.Components.ChatInputHomeMentionEditor.placeholderWithMention',
+          'PC.Components.ChatInputHomeMentionEditor.placeholderWithResourceMention',
         );
       }
       return t(
@@ -732,6 +778,7 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
       isHistoryActionRef.current = true;
       editorRef.current.innerHTML = '';
       resetUndoStack('');
+      selectedMentionsRef.current = [];
       setSelectedMentions([]);
       setIsEditorEmpty(true);
       lastEmittedValueRef.current = '';
@@ -744,23 +791,16 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
 
     // ==================== Mention Chip 操作方法 ====================
 
-    /**
-     * 删除指定的 mention chip
-     * 通过 data-mention-id 属性查找并删除 DOM 元素
-     *
-     * @param mentionId - 要删除的提及项 ID
-     */
+    /** 删除指定的 mention chip。 */
     const removeMentionChip = useCallback(
-      (mentionId: string) => {
+      (mentionKey: string) => {
         if (!editorRef.current) return;
 
-        // 通过 data 属性查找对应的 chip 元素
-        const mentionChip = editorRef.current.querySelector(
-          `[data-mention-id="${mentionId}"]`,
-        );
+        const mentionChip = Array.from(
+          editorRef.current.querySelectorAll<HTMLElement>('[data-mention-key]'),
+        ).find((chip) => chip.dataset.mentionKey === mentionKey);
 
         if (mentionChip) {
-          // 从 DOM 中移除
           mentionChip.remove();
           commitEditorChange();
           editorRef.current.focus();
@@ -825,6 +865,10 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
         mentionSpan.contentEditable = 'false'; // 不可编辑
         mentionSpan.dataset.mentionId = String(item.targetId);
         mentionSpan.dataset.mentionName = item.name;
+        mentionSpan.dataset.mentionType =
+          item.targetType ?? AgentComponentTypeEnum.Skill;
+        mentionSpan.dataset.mentionSource = item.source ?? 'skill';
+        mentionSpan.dataset.mentionKey = getMentionItemKey(item);
 
         // 创建内容容器
         const contentSpan = document.createElement('span');
@@ -838,12 +882,13 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
         // 创建删除按钮
         const deleteBtn = document.createElement('span');
         deleteBtn.className = styles['mention-delete'];
+        deleteBtn.dataset.mentionDelete = 'true';
+        deleteBtn.setAttribute('role', 'button');
+        deleteBtn.setAttribute(
+          'aria-label',
+          t('PC.Components.ChatInputHomeMentionEditor.removeResourceMention'),
+        );
         deleteBtn.innerHTML = '×';
-        deleteBtn.onclick = (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          removeMentionChip(String(item.targetId));
-        };
 
         // 组装 DOM 结构
         contentSpan.appendChild(nameSpan);
@@ -852,7 +897,7 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
 
         return mentionSpan;
       },
-      [removeMentionChip],
+      [],
     );
 
     /**
@@ -860,7 +905,14 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
      */
     const notifyUnsubscribedSkillSelect = useCallback(
       (item: MentionItem) => {
-        if (enableSubscription && item.paymentRequired && !item.subscribed) {
+        if (
+          (item.source ?? 'skill') === 'skill' &&
+          (item.targetType ?? AgentComponentTypeEnum.Skill) ===
+            AgentComponentTypeEnum.Skill &&
+          enableSubscription &&
+          item.paymentRequired &&
+          !item.subscribed
+        ) {
           onUnsubscribedSkillSelect?.(item);
         }
       },
@@ -878,6 +930,14 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
         if (!editorRef.current || !enableMention) return;
 
         const container = editorRef.current;
+        const mentionKey = getMentionItemKey(item);
+        if (
+          Array.from(
+            container.querySelectorAll<HTMLElement>('[data-mention-key]'),
+          ).some((chip) => chip.dataset.mentionKey === mentionKey)
+        ) {
+          return;
+        }
         const chip = createMentionChip(item);
         const spaceNode = document.createTextNode(' ');
         container.appendChild(chip);
@@ -959,6 +1019,7 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
       }
 
       // 同步内部状态和 onChange
+      selectedMentionsRef.current = defaultMentions;
       setSelectedMentions(defaultMentions);
       const serializedText = getSerializedEditorText(container);
       setIsEditorEmpty(serializedText.trim().length === 0);
@@ -975,6 +1036,30 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
 
     // ==================== 核心事件处理 ====================
 
+    const removePendingMentionQuery = useCallback(() => {
+      const savedRange = savedRangeRef.current;
+      const savedTextNode = savedTextNodeRef.current;
+      if (!savedRange || savedTextNode?.nodeType !== Node.TEXT_NODE) return;
+
+      const textNode = savedTextNode as Text;
+      const text = textNode.textContent || '';
+      const cursorPosition = Math.min(savedRange.startOffset, text.length);
+      const atIndex = text.substring(0, cursorPosition).lastIndexOf('@');
+      if (atIndex < 0) return;
+
+      textNode.textContent = `${text.substring(0, atIndex)}${text.substring(
+        cursorPosition,
+      )}`;
+      const selection = window.getSelection();
+      if (selection) {
+        const nextRange = document.createRange();
+        nextRange.setStart(textNode, atIndex);
+        nextRange.setEnd(textNode, atIndex);
+        selection.removeAllRanges();
+        selection.addRange(nextRange);
+      }
+    }, []);
+
     /**
      * 处理从弹窗中选择提及项
      * 将选中的提及插入到编辑器中，替换 @ 和搜索文本
@@ -984,6 +1069,20 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
     const handleMentionSelect = useCallback(
       (item: MentionItem) => {
         if (!editorRef.current) return;
+
+        const mentionKey = getMentionItemKey(item);
+        if (
+          Array.from(
+            editorRef.current.querySelectorAll<HTMLElement>(
+              '[data-mention-key]',
+            ),
+          ).some((chip) => chip.dataset.mentionKey === mentionKey)
+        ) {
+          removePendingMentionQuery();
+          closeMentionPopup();
+          commitEditorChange();
+          return;
+        }
 
         const selection = window.getSelection();
         if (!selection) return;
@@ -1068,7 +1167,6 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
           editorRef.current.focus();
         }
 
-        onMentionSelect?.(item);
         notifyUnsubscribedSkillSelect(item);
         closeMentionPopup();
         commitEditorChange({ pendingMention: item });
@@ -1079,6 +1177,7 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
         onMentionSelect,
         createMentionChip,
         notifyUnsubscribedSkillSelect,
+        removePendingMentionQuery,
       ],
     );
 
@@ -1425,6 +1524,27 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
       mentionPopupHeight,
     ]);
 
+    const handleEditorClick = useCallback(
+      (event: React.MouseEvent<HTMLDivElement>) => {
+        const deleteControl = (event.target as HTMLElement).closest(
+          '[data-mention-delete]',
+        );
+        if (deleteControl) {
+          const mentionChip =
+            deleteControl.closest<HTMLElement>('[data-mention-key]');
+          if (mentionChip?.dataset.mentionKey) {
+            event.preventDefault();
+            event.stopPropagation();
+            removeMentionChip(mentionChip.dataset.mentionKey);
+            closeMentionPopup();
+          }
+          return;
+        }
+        handleClick();
+      },
+      [closeMentionPopup, handleClick, removeMentionChip],
+    );
+
     // ==================== Effects ====================
 
     /**
@@ -1511,7 +1631,7 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
           onPaste={handlePasteEvent}
           onBlur={handleBlur}
           // 点击事件
-          onClick={handleClick}
+          onClick={handleEditorClick}
           // 输入法组合开始事件
           onCompositionStart={handleCompositionStart}
           /** 输入法组合结束事件 */
@@ -1523,6 +1643,7 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
               '--mention-inline-prefix-offset': `${inlinePrefixWidth}px`,
             } as React.CSSProperties
           }
+          data-chat-editor=""
           data-placeholder={placeholderText}
           suppressContentEditableWarning
         />
@@ -1540,6 +1661,9 @@ const MentionEditor = React.forwardRef<MentionEditorHandle, MentionEditorProps>(
             maxHeight={mentionPopupMaxHeight}
             onHeightChange={handlePopupHeightChange}
             usageScenarios={usageScenarios}
+            enableSkillMention={enableSkillMention}
+            manualComponents={manualComponents}
+            selectedComponentList={selectedComponentList}
           />
         </div>
       </div>

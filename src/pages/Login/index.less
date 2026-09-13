@@ -11,16 +11,18 @@
 
 .login-form-box {
   // width: 100%; /* 宽度自适应 */
-  width: 470px;
-  max-height: 680px;
-  min-height: 680px;
-  height: 100%;
-  padding: 48px 64px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 60%);
-  background: rgba(255, 255, 255, 85%);
-  box-shadow: 0 8px 48px 0 rgba(0, 0, 0, 16%);
-  backdrop-filter: blur(12px);
+  width: 420px;
+  max-width: 100%;
+  box-sizing: border-box;
+  max-height: none;
+  min-height: 540px;
+  height: auto;
+  padding: 40px 32px;
+  border-radius: 14px;
+  border: 1px solid var(--nx-line);
+  background: var(--nx-paper);
+  box-shadow: var(--nx-shadow-raised);
+
   overflow: auto;
 
   .phone-input-compact {
@@ -89,7 +91,7 @@
 
     // 输入框自动填充样式
     input:-webkit-autofill {
-      -webkit-text-fill-color: #000 !important; /* 保证字体颜色正常 */
+      -webkit-text-fill-color: var(--nx-ink) !important; /* 保证字体颜色正常 */
       box-shadow: 0 0 0 1000px transparent inset !important; /* 背景覆盖成透明 */
       transition: background-color 5000s ease-in-out 0s;
     }
@@ -153,5 +155,12 @@
   .protocol-wrapper {
     display: flex !important;
     align-items: flex-start !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form-box {
+    padding: 28px 20px;
+    min-height: 500px;
   }
 }

@@ -1,79 +1,233 @@
-@import '@/styles/color';
 @import '@/styles/token';
-
-.mobile-container {
-  box-shadow: 12px 0 24px -4px rgba(0, 0, 0, 12%);
-  border-radius: 0 @borderRadiusLg @borderRadiusLg 0;
-}
+@import './navigation-theme';
 
 .container {
-  overflow: hidden;
-  // background-color: @colorBgLayout;
+  .newx-navigation-theme();
 
-  .first-menus {
-    // 使用动态导航宽度token
-    width: @navFirstMenuWidth;
-    padding-top: 14px;
-    background: @navFirstMenuBg;
-    color: @navFirstMenuText;
-    box-shadow: @navFirstMenuShadow;
-    transition: width 0.3s ease, background-color 0.3s ease;
+  position: relative;
+  z-index: 20;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  padding: 18px 10px 12px;
+  box-sizing: border-box;
+  color: var(--nx-ink, #292928);
+  background: var(--nx-surface, #fafaf9);
+  border-right: 1px solid var(--nx-line, #ececea);
+  transition: width 0.2s ease;
 
-    // 风格2适配
-    .xagi-nav-style2 & {
-      width: @navFirstMenuWidthStyle2;
-    }
+  .brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    height: 28px;
+    padding: 0 5px;
+  }
+
+  .workspace-switch {
+    flex-shrink: 0;
+    margin: 22px 0 16px;
+  }
+
+  .primary-navigation {
+    min-height: 34px;
+    max-height: 42%;
+    flex-shrink: 0;
+    overflow: auto;
+    scrollbar-width: thin;
   }
 
   .nav-menus {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: column;
-    height: 100%;
-    padding-top: @padding;
-    // width: 200px;
-    box-sizing: border-box;
-    border-left: @lineWidth solid var(--xagi-layout-border-primary);
-    transition: width 0.3s ease-in-out, opacity 0.3s ease-in-out,
-      padding-left 0.3s ease-in-out, background-color 0.3s ease;
+    min-height: 80px;
+    margin-top: 10px;
+    padding-top: 0;
+  }
+
+  .nav-menus[hidden] {
+    display: none;
+  }
+
+  .menu-title {
+    flex-shrink: 0;
+    padding: 4px 10px 2px;
+    color: var(--nx-muted, #9b9b98);
+    font-family: var(--nx-font-mono, 'JetBrains Mono', monospace);
+    font-size: 10px;
+    line-height: 16px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+
+  .nav-menus-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .history-scroll {
     overflow: hidden;
-    position: relative;
-    background: @navSecondMenuBg;
-    border-radius: @borderRadiusLg 0 0 @borderRadiusLg;
+  }
 
-    .nav-menus-scroll {
+  .sidebar-footer {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 10px;
+  }
+
+  .account-navigation {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .integral-footer {
+    margin-bottom: 9px;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  .credits-card {
+    background: var(--nx-paper);
+    border-color: var(--nx-line);
+    border-radius: 6px;
+    box-shadow: none;
+
+    :global(.ant-btn) {
+      background: var(--nx-surface2);
+      color: var(--nx-sub);
+    }
+  }
+
+  .utility-navigation {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 3px;
+    margin-left: auto;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  .account-button {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    min-height: 40px;
+    padding: 6px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--nx-sub, #747471);
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--nx-surface2, #f6f6f4);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--nx-accent, #bc734a);
+      outline-offset: 2px;
+    }
+
+    > div:first-child {
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      margin: 0;
+
+      img {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+      }
+    }
+  }
+
+  .account-copy {
+    flex: 1;
+    min-width: 0;
+
+    strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--nx-ink, #292928);
+      font-size: 12px;
+      line-height: 18px;
+      font-weight: 600;
+    }
+  }
+
+  &.collapsed {
+    padding-inline: 7px;
+
+    .brand-row {
+      justify-content: center;
+      padding: 0;
+    }
+
+    .primary-navigation {
+      max-height: none;
       flex: 1;
-      min-height: 0;
     }
 
-    .integral-footer {
-      padding: @marginSm 0 0;
-      margin-right: @margin;
+    .utility-navigation {
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-left: 0;
     }
 
-    .menu-title {
-      color: @navSecondMenuText;
+    .sidebar-footer {
+      flex-direction: column;
     }
 
-    // 风格2下的二级导航背景适配
-    .xagi-nav-style2 & {
-      background: var(--xagi-color-bg-container);
+    .account-navigation {
+      flex: none;
+      width: 100%;
+    }
+
+    .account-button {
+      justify-content: center;
     }
   }
 }
-// 风格1下的二级导航样式适配
-:global(.xagi-nav-style1) {
+
+.mobile-container {
+  box-shadow: 12px 0 36px rgba(0, 0, 0, 10%);
+}
+
+@media (max-height: 680px) {
   .container {
+    padding-top: 12px;
+
+    .workspace-switch {
+      margin-block: 12px;
+    }
+
+    .primary-navigation {
+      max-height: 35%;
+    }
+
     .nav-menus {
-      border-radius: 0 !important; // 风格1时移除所有圆角，使用!important确保优先级
+      margin-top: 10px;
+      padding-top: 0;
     }
   }
-}
-
-.collection-title {
-  margin-top: @margin;
-  padding: @paddingXs;
-  line-height: @fontHeightSm;
-  font-size: @fontSize;
-  font-weight: @fontWeightStrong;
-  color: @navSecondMenuTextSecondary;
 }

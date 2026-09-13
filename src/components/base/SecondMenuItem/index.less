@@ -2,13 +2,14 @@
 @import '@/styles/token';
 
 .row {
-  padding: @paddingXs;
+  min-height: var(--nx-nav-row-height, 33px);
+  padding: var(--nx-nav-row-padding, 6px 8px);
   cursor: default;
   color: @navSecondMenuTextSecondary;
 
   .name {
     color: @navSecondMenuTextSecondary;
-    font-size: @fontSize !important;
+    font-size: var(--nx-nav-row-font-size, 12px) !important;
     white-space: nowrap;
   }
 
@@ -18,21 +19,22 @@
     :global {
       .ant-typography {
         margin-left: @marginXs;
-        font-size: @fontSizeLg;
-        line-height: @fontHeightLg;
+        font-size: var(--nx-nav-row-font-size, 12px);
+        line-height: 20px;
       }
     }
   }
 
   &.active {
-    background-color: @colorBgContainer;
-    color: @colorPrimary;
+    background-color: var(--xagi-color-bg-container, #fff);
+    color: var(--nx-ink);
     border-radius: @borderRadius;
-    box-shadow: @boxShadowTertiary;
+    box-shadow: 0 0 0 1px var(--nx-line);
 
     :global {
       .ant-typography {
-        color: @colorPrimary;
+        color: var(--nx-ink);
+        font-weight: 500;
       }
     }
 
@@ -41,10 +43,9 @@
     }
   }
 
-  &:hover {
-    background-color: @colorBgContainer;
+  &:not(.active):hover {
+    background-color: var(--nx-surface2);
     border-radius: @borderRadius;
-    box-shadow: @boxShadowTertiary;
     color: @colorTextSecondary;
 
     :global {
@@ -67,14 +68,14 @@
   }
 
   .icon-box {
-    font-size: 20px;
+    font-size: var(--nx-nav-icon-size, 16px);
     border-radius: @borderRadiusSm;
     overflow: hidden;
     flex-shrink: 0;
 
     .icon-image {
-      width: 20px;
-      height: 20px;
+      width: var(--nx-nav-icon-size, 16px);
+      height: var(--nx-nav-icon-size, 16px);
     }
   }
 

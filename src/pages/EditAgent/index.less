@@ -2,6 +2,7 @@
 @import '@/styles/token';
 
 .container {
+  background-color: var(--nx-surface);
   background-image: @backgroundImage;
   background-size: cover;
   background-position: center;
@@ -32,9 +33,9 @@
 
   .section {
     overflow: hidden;
-    border-radius: @pageContainerBorderRadius;
-    border: @lineWidth solid @colorSplit;
-    margin: 0 @marginSm @marginSm;
+    border-radius: 10px;
+    border: 1px solid var(--nx-line);
+    margin: 0 12px 12px;
     background-color: @colorBgContainer;
 
     .edit-info {

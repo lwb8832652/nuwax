@@ -1,0 +1,85 @@
+@import (reference) '@/styles/newx-tokens.less';
+
+// 导航主题独立于页面深浅色，只在侧栏和折叠悬浮菜单内部生效。
+.newx-navigation-theme() {
+  --nx-accent: var(--xagi-color-primary, @nx-accent);
+  --nx-accent-light: @nx-accent-light;
+  --nx-accent-border: @nx-accent-border;
+  --nx-violet: @nx-violet;
+  --nx-ink: @nx-ink;
+  --nx-sub: @nx-sub;
+  --nx-muted: @nx-muted;
+  --nx-paper: @nx-paper;
+  --nx-surface: @nx-surface;
+  --nx-surface2: @nx-surface2;
+  --nx-line: @nx-line;
+  --nx-line-mid: @nx-line-mid;
+  --nx-shadow-popover: @nx-shadow-popover;
+
+  &[data-nav-theme='dark'] {
+    --nx-accent-light: @nx-dark-accent-light;
+    --nx-accent-border: @nx-dark-accent-border;
+    --nx-violet: @nx-dark-violet;
+    --nx-ink: @nx-dark-ink;
+    --nx-sub: @nx-dark-sub;
+    --nx-muted: @nx-dark-muted;
+    --nx-paper: @nx-dark-bg;
+    --nx-surface: @nx-dark-surface;
+    --nx-surface2: @nx-dark-surface2;
+    --nx-line: @nx-dark-line;
+    --nx-line-mid: @nx-dark-line-mid;
+    --nx-shadow-popover: @nx-dark-shadow-popover;
+    color-scheme: dark;
+  }
+
+  // 保持既有导航组件使用的两套文字、交互和背景变量一致。
+  --xagi-layout-text-primary: var(--nx-ink);
+  --xagi-layout-text-secondary: var(--nx-sub);
+  --xagi-layout-text-tertiary: var(--nx-muted);
+  --xagi-layout-second-menu-text-color: var(--nx-ink);
+  --xagi-layout-second-menu-text-color-secondary: var(--nx-sub);
+  --xagi-layout-second-menu-adaptive-text: var(--nx-ink);
+  --xagi-layout-second-menu-adaptive-text-secondary: var(--nx-sub);
+  --xagi-layout-second-menu-adaptive-text-tertiary: var(--nx-muted);
+  --xagi-layout-border-primary: var(--nx-line);
+  --xagi-layout-border-secondary: var(--nx-line-mid);
+  --xagi-layout-bg-card: var(--nx-paper);
+  --xagi-layout-bg-container: var(--nx-surface);
+  --xagi-color-bg-container: var(--nx-paper);
+  --xagi-color-bg-elevated: var(--nx-paper);
+  --xagi-color-bg-layout: var(--nx-surface);
+  --xagi-color-text: var(--nx-ink);
+  --xagi-color-text-secondary: var(--nx-sub);
+  --xagi-color-text-tertiary: var(--nx-muted);
+  --xagi-color-border: var(--nx-line);
+  --xagi-color-fill-secondary: var(--nx-surface2);
+  --xagi-color-bg-text-hover: var(--nx-surface2);
+
+  // 两种导航设置保留为紧凑/舒适密度，均使用 NewX 单列结构。
+  --nx-nav-row-height: 33px;
+  --nx-nav-row-padding: 6px 8px;
+  --nx-nav-row-font-size: 12px;
+  --nx-nav-primary-font-size: 13px;
+  --nx-nav-icon-size: 16px;
+  --nx-nav-list-gap: 2px;
+  --nx-nav-conversation-height: 48px;
+  --nx-nav-conversation-padding: 6px;
+  --nx-nav-conversation-title-size: 11px;
+  --nx-nav-conversation-avatar-size: 24px;
+  --nx-nav-workspace-height: 36px;
+  color-scheme: light;
+
+  &[data-nav-style='style2'] {
+    --nx-nav-row-height: 40px;
+    --nx-nav-row-padding: 9px 10px;
+    --nx-nav-row-font-size: 13px;
+    --nx-nav-primary-font-size: 14px;
+    --nx-nav-icon-size: 18px;
+    --nx-nav-list-gap: 4px;
+    --nx-nav-conversation-height: 58px;
+    --nx-nav-conversation-padding: 9px 6px;
+    --nx-nav-conversation-title-size: 12px;
+    --nx-nav-conversation-avatar-size: 28px;
+    --nx-nav-workspace-height: 40px;
+  }
+}

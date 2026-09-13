@@ -1,9 +1,7 @@
 import Loading from '@/components/custom/Loading';
-import { useScrollSync } from '@/hooks/useScrollSync';
 import { apiUpdateAgentSort } from '@/services/agentDev';
 import { dict } from '@/services/i18nRuntime';
 import type {
-  CategoryInfo,
   CategoryItemInfo,
   HomeAgentCategoryInfo,
 } from '@/types/interfaces/agentConfig';
@@ -24,6 +22,7 @@ import styles from './index.less';
 const cx = classNames.bind(styles);
 
 interface DraggableHomeContentProps {
+  expertMarketplacePath?: string | null;
   /** 首页分类信息 */
   homeCategoryInfo: HomeAgentCategoryInfo;
   /** 当前激活的标签 */
@@ -43,6 +42,7 @@ interface DraggableHomeContentProps {
  * 支持栏目和智能体的拖拽排序功能，支持分类左右滑动
  */
 const DraggableHomeContent: React.FC<DraggableHomeContentProps> = ({
+  expertMarketplacePath = '/square?cate_type=Agent',
   homeCategoryInfo,
   activeTab,
   onTabClick,
@@ -57,21 +57,20 @@ const DraggableHomeContent: React.FC<DraggableHomeContentProps> = ({
   const [dragHoverText, setDragHoverText] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
   const [activeSticky, setActiveSticky] = useState<boolean>(false);
-  // 使用滚动同步 Hook
-  const {
-    sectionRefs,
-    contentContainerRef,
-    handleTabClick: handleScrollSyncTabClick,
-  } = useScrollSync({
-    categories: homeCategoryInfo?.categories || [],
-    activeTab,
-    onTabClick,
-    observerOptions: {
-      threshold: 0.3,
-      rootMargin: '-20% 0px -60% 0px',
-    },
-    scrollDelay: 1000,
-  });
+  const categories = homeCategoryInfo?.categories || [];
+  const selectedCategory = useMemo(
+    () =>
+      categories.find((category) => category.type === activeTab) ||
+      categories[0],
+    [activeTab, categories],
+  );
+  const selectedAgents = useMemo(
+    () =>
+      selectedCategory
+        ? homeCategoryInfo?.categoryItems[selectedCategory.type] || []
+        : [],
+    [homeCategoryInfo?.categoryItems, selectedCategory],
+  );
 
   // 更新排序API请求
   const { run: runUpdateSort } = useRequest(apiUpdateAgentSort, {
@@ -155,14 +154,10 @@ const DraggableHomeContent: React.FC<DraggableHomeContentProps> = ({
 
   // 跳转到广场页面
   const handleLinkToSquare = useCallback(() => {
-    history.push('/square?cate_type=Agent');
-  }, []);
+    if (expertMarketplacePath) history.push(expertMarketplacePath);
+  }, [expertMarketplacePath]);
 
-  // 计算是否为空状态
-  const isEmpty = useMemo(() => {
-    const items = homeCategoryInfo?.categoryItems || {};
-    return Object.keys(items).length === 0;
-  }, [homeCategoryInfo?.categoryItems]);
+  const isSelectedCategoryEmpty = !selectedCategory || !selectedAgents.length;
 
   // 渲染加载状态
   if (isUpdating) {
@@ -200,11 +195,14 @@ const DraggableHomeContent: React.FC<DraggableHomeContentProps> = ({
           {/*</Space>*/}
           {/* 分类标签容器 */}
           <CategoryContainer
-            categories={homeCategoryInfo?.categories || []}
-            activeCategory={activeTab}
+            categories={categories}
+            activeCategory={selectedCategory?.type}
             dragHoverText={dragHoverText}
             onCategoryDragEnd={handleCategoryDragEnd}
-            onTabClick={handleScrollSyncTabClick}
+            onTabClick={onTabClick}
+            onDiscoverExperts={
+              expertMarketplacePath ? handleLinkToSquare : undefined
+            }
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onDragStart={handleDragStart}
@@ -213,28 +211,38 @@ const DraggableHomeContent: React.FC<DraggableHomeContentProps> = ({
       </Affix>
 
       {/* 内容区域 */}
-      {isEmpty ? (
+      {isSelectedCategoryEmpty ? (
         <div className={cx(styles.emptyContainer)}>
-          <a onClick={handleLinkToSquare} className={cx('empty-link')}>
-            {dict('PC.Pages.HomeDrag.emptyExplore')} {'>'} {'>'}
-          </a>
+          {expertMarketplacePath ? (
+            <a
+              href={expertMarketplacePath}
+              onClick={(event) => {
+                event.preventDefault();
+                handleLinkToSquare();
+              }}
+              className={cx('empty-link')}
+            >
+              {dict('PC.Components.Newx.emptyExplore')} →
+            </a>
+          ) : (
+            <span>{dict('PC.Common.Global.emptyData')}</span>
+          )}
         </div>
       ) : (
-        <div ref={contentContainerRef} className={styles.contentContainer}>
-          {homeCategoryInfo?.categories?.map((item: CategoryInfo) => (
+        <div className={styles.contentContainer}>
+          {selectedCategory && (
             <AgentSection
-              key={item.type}
-              category={item}
-              agents={homeCategoryInfo?.categoryItems[item.type] || []}
+              key={selectedCategory.type}
+              category={selectedCategory}
+              agents={selectedAgents}
               dragHoverText={dragHoverText}
               onAgentClick={onAgentClick}
               onToggleCollect={onToggleCollect}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
               onAgentDragEnd={handleAgentDragEnd}
-              sectionRef={(el) => (sectionRefs.current[item.type] = el)}
             />
-          ))}
+          )}
         </div>
       )}
     </div>

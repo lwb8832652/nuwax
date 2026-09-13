@@ -91,44 +91,43 @@ const PluginHeader: React.FC<PluginHeaderProps> = ({
           </div>
         </div>
       </section>
-      <div className={cx(styles['bottom-box'], 'flex', 'items-center')}>
-        <span className={cx(styles['update-time'])}>
-          {dict(
-            'PC.Pages.SpacePluginTool.PluginHeader.configSavedAt',
-            dayjs(pluginInfo?.modified).format('HH:mm'),
-          )}
-        </span>
-
-        <span>
-          {/* 发布时间，如果不为空，与当前modified时间做对比，如果发布时间小于modified，则前端显示：有更新未发布 */}
-          {pluginInfo?.publishDate !== null &&
-            dayjs(pluginInfo?.publishDate).isBefore(pluginInfo?.modified) && (
-              <Tag bordered={false} color="volcano" style={{ marginRight: 0 }}>
-                {dict(
-                  'PC.Pages.SpacePluginTool.PluginHeader.updateUnpublished',
-                )}
-              </Tag>
+      <div className={styles.actions}>
+        <div className={cx(styles['bottom-box'], 'flex', 'items-center')}>
+          <span className={cx(styles['update-time'])}>
+            {dict(
+              'PC.Pages.SpacePluginTool.PluginHeader.configSavedAt',
+              dayjs(pluginInfo?.modified).format('HH:mm'),
             )}
-        </span>
+          </span>
+
+          <span>
+            {/* 发布时间，如果不为空，与当前modified时间做对比，如果发布时间小于modified，则前端显示：有更新未发布 */}
+            {pluginInfo?.publishDate !== null &&
+              dayjs(pluginInfo?.publishDate).isBefore(pluginInfo?.modified) && (
+                <Tag
+                  bordered={false}
+                  color="volcano"
+                  style={{ marginRight: 0 }}
+                >
+                  {dict(
+                    'PC.Pages.SpacePluginTool.PluginHeader.updateUnpublished',
+                  )}
+                </Tag>
+              )}
+          </span>
+        </div>
+        <ClockCircleOutlined
+          className={cx(styles.history, 'cursor-pointer')}
+          onClick={onToggleHistory}
+        />
+        <Button onClick={onSave}>{dict('PC.Common.Global.save')}</Button>
+        <Button icon={<CaretRightOutlined />} onClick={onTryRun}>
+          {dict('PC.Pages.SpacePluginTool.PluginHeader.tryRun')}
+        </Button>
+        <Button type="primary" onClick={onPublish} disabled={disabledBtn}>
+          {dict('PC.Pages.SpacePluginTool.PluginHeader.publish')}
+        </Button>
       </div>
-      <ClockCircleOutlined
-        className={cx(styles.history, 'cursor-pointer')}
-        onClick={onToggleHistory}
-      />
-      <Button className={cx(styles['try-btn'])} type="primary" onClick={onSave}>
-        {dict('PC.Common.Global.save')}
-      </Button>
-      <Button
-        className={cx(styles['try-btn'])}
-        type="primary"
-        icon={<CaretRightOutlined />}
-        onClick={onTryRun}
-      >
-        {dict('PC.Pages.SpacePluginTool.PluginHeader.tryRun')}
-      </Button>
-      <Button type="primary" onClick={onPublish} disabled={disabledBtn}>
-        {dict('PC.Pages.SpacePluginTool.PluginHeader.publish')}
-      </Button>
     </header>
   );
 };

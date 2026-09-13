@@ -1,0 +1,249 @@
+// Resource editors share NewX controls, while keeping graph/code semantics intact.
+.newx-editor-scrollbar() {
+  scrollbar-width: thin;
+  scrollbar-color: var(--nx-line) transparent;
+
+  &::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background: var(--nx-line);
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background: var(--nx-muted);
+  }
+}
+
+.newx-editor-controls() {
+  :global {
+    .ant-btn {
+      border-radius: var(--nx-radius);
+      font-size: 12px;
+      box-shadow: none;
+    }
+
+    .ant-btn-default {
+      border-color: var(--nx-line);
+      background: var(--nx-paper);
+      color: var(--nx-sub);
+
+      &:hover:not(:disabled) {
+        border-color: var(--nx-muted);
+        background: var(--nx-surface);
+        color: var(--nx-ink);
+      }
+    }
+
+    .ant-btn-primary:not(.ant-btn-dangerous):not(:disabled) {
+      border-color: var(--nx-ink);
+      background: var(--nx-ink);
+      color: var(--nx-paper);
+
+      &:hover {
+        border-color: var(--nx-sub);
+        background: var(--nx-sub);
+      }
+    }
+
+    .ant-input:not(.ant-input-status-error),
+    .ant-input-affix-wrapper:not(.ant-input-affix-wrapper-status-error),
+    .ant-input-number:not(.ant-input-number-status-error),
+    .ant-select:not(.ant-select-status-error) .ant-select-selector {
+      border-color: var(--nx-line);
+      border-radius: var(--nx-radius);
+      background: var(--nx-paper);
+      color: var(--nx-ink);
+      font-size: 12px;
+    }
+
+    .ant-input::placeholder,
+    .ant-select-selection-placeholder {
+      color: var(--nx-muted);
+    }
+
+    .ant-input:focus,
+    .ant-input-affix-wrapper-focused,
+    .ant-input-number-focused,
+    .ant-select-focused .ant-select-selector {
+      border-color: var(--nx-accent-border);
+      box-shadow: 0 0 0 2px var(--nx-accent-light);
+    }
+
+    .ant-form-item-label > label {
+      color: var(--nx-sub);
+      font-size: 12px;
+    }
+
+    .ant-segmented {
+      padding: 3px;
+      border-radius: 8px;
+      background: var(--nx-surface2);
+      font-size: 12px;
+    }
+
+    .ant-segmented-item {
+      border-radius: var(--nx-radius);
+      color: var(--nx-sub);
+    }
+
+    .ant-segmented-item-selected {
+      background: var(--nx-paper);
+      color: var(--nx-ink);
+      box-shadow: 0 1px 3px rgb(0 0 0 / 5%);
+    }
+
+    .ant-tabs-tab {
+      color: var(--nx-sub);
+    }
+    .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+      color: var(--nx-ink);
+    }
+    .ant-tabs-ink-bar {
+      background: var(--nx-ink);
+    }
+  }
+}
+
+.newx-editor-table() {
+  border: 1px solid var(--nx-line);
+  border-radius: var(--nx-radius-md);
+  background: var(--nx-paper);
+  overflow: hidden;
+
+  :global {
+    .ant-table {
+      background: var(--nx-paper);
+      font-size: 12px;
+    }
+    .ant-table-thead > tr > th {
+      padding: 11px 14px;
+      border-color: var(--nx-line);
+      background: var(--nx-surface);
+      color: var(--nx-sub);
+      font-weight: 500;
+    }
+    .ant-table-tbody > tr > td {
+      padding: 12px 14px;
+      border-color: var(--nx-line);
+      color: var(--nx-ink);
+    }
+    .ant-table-tbody > tr.ant-table-row:hover > td {
+      background: var(--nx-surface);
+    }
+    .ant-table-tbody > tr:last-child > td {
+      border-bottom: 0;
+    }
+    .ant-table-footer {
+      border-top: 1px solid var(--nx-line);
+      background: var(--nx-paper);
+    }
+    .ant-table-content,
+    .ant-table-body {
+      .newx-editor-scrollbar();
+    }
+  }
+}
+
+.newx-editor-header() {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 0;
+  min-height: 72px;
+  padding: 14px 24px;
+  gap: 12px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--nx-line);
+  background: var(--nx-paper);
+  color: var(--nx-ink);
+  .newx-editor-controls();
+
+  .icon-back,
+  .history {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: var(--nx-radius);
+    color: var(--nx-sub);
+    font-size: 15px;
+    &:hover {
+      background: var(--nx-surface2);
+      color: var(--nx-ink);
+    }
+  }
+
+  .logo {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border: 1px solid var(--nx-line);
+    border-radius: 9px;
+    object-fit: cover;
+  }
+
+  .section {
+    min-width: 0;
+    gap: 5px;
+  }
+  .top-box {
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+  }
+  .name {
+    min-width: 0;
+    max-width: 280px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 22px;
+  }
+  .circle {
+    color: var(--nx-success);
+  }
+  .edit-ico {
+    color: var(--nx-muted);
+    font-size: 14px;
+  }
+  .bottom-box {
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .box {
+    padding: 1px 6px;
+    border-radius: var(--nx-radius-sm);
+    background: var(--nx-surface2);
+    color: var(--nx-sub);
+    line-height: 16px;
+  }
+  .update-time {
+    color: var(--nx-muted);
+    white-space: nowrap;
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+  }
+
+  @media (max-width: 1000px) {
+    flex-wrap: wrap;
+    padding: 12px 16px;
+    .section {
+      flex-basis: calc(100% - 100px);
+    }
+  }
+}

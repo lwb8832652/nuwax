@@ -2,15 +2,19 @@
 @import '@/styles/token';
 
 .system-manage-container {
-  padding: 16px 24px;
+  padding: 28px 32px;
+  background-color: var(--nx-paper);
+  color: var(--nx-ink);
   // background-color: @colorBgLayout;
 }
 
 .system-manage-title {
   font-weight: @fontWeightStrong;
-  font-size: 18px;
+  font-size: 22px;
+  letter-spacing: -0.5px;
+  color: var(--nx-ink);
   // color: #3d3d3d;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .table-column-fixed {
@@ -42,11 +46,11 @@
 }
 
 .dot-red {
-  background-color: #f53f3f;
+  background-color: var(--nx-error);
 }
 
 .dot-green {
-  background-color: #009a29;
+  background-color: var(--nx-success);
 }
 
 // .table-row-divider {
@@ -61,6 +65,7 @@
 
 @media (max-width: 768px) {
   .system-manage-container {
+    padding: 20px 16px;
     :global {
       .ant-pagination-total-text {
         display: none;

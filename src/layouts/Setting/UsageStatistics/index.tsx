@@ -1,4 +1,5 @@
 import { XProTable } from '@/components/ProComponents';
+import CreditsBalance from '@/components/business-component/CreditsBalance';
 import { SUCCESS_CODE } from '@/constants/codes.constants';
 import type { UserMetricUsageInfo } from '@/services/account';
 import { apiGetUserMetricUsage } from '@/services/account';
@@ -7,6 +8,7 @@ import type { ActionType, ProColumns } from '@ant-design/pro-components';
 import { Button } from 'antd';
 import classNames from 'classnames';
 import React, { useCallback, useRef } from 'react';
+import { useModel } from 'umi';
 import styles from './index.less';
 
 const cx = classNames.bind(styles);
@@ -29,6 +31,8 @@ interface UsageTableItem {
  * 用量统计
  */
 const UsageStatistics: React.FC = () => {
+  const { tenantConfigInfo } = useModel('tenantConfigInfo');
+  const showCredits = tenantConfigInfo?.enableSubscription !== 0;
   // 表格操作引用，用于手动触发刷新
   const actionRef = useRef<ActionType>();
   /**
@@ -168,6 +172,11 @@ const UsageStatistics: React.FC = () => {
   return (
     <div className={cx(styles.container)}>
       <h3>{dict('PC.Layouts.Setting.UsageStatistics.title')}</h3>
+      {showCredits && (
+        <div className={styles.creditsSection}>
+          <CreditsBalance showFooter={false} className={styles.creditsCard} />
+        </div>
+      )}
       <div className={cx('text-right')}>
         <Button
           type="primary"

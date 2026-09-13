@@ -16,6 +16,9 @@ const GreetingHeader: React.FC = () => {
       <h1 className={cx(styles['greeting-title'])}>
         {dict('PC.Pages.SpaceCreateProject.greetingTitle', nickname)}
       </h1>
+      <p className={styles['greeting-description']}>
+        {dict('PC.Pages.SpaceCreateProject.createDescription')}
+      </p>
     </div>
   );
 };

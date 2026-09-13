@@ -1,90 +1,75 @@
-@import '@/styles/token';
-
 .buttonToggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 3px;
 
   .toggleButton {
     position: relative;
-    transition: all 0.2s ease-in-out;
-    border-radius: 6px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    box-shadow: none;
+    font-size: 12px;
+    transition: background 0.12s, color 0.12s;
 
     &:not(:last-child) {
       margin-right: 0;
     }
 
-    // 默认状态
     &:not(.selected) {
-      background-color: @colorBgContainer;
-      border: none;
-      color: @colorText;
+      background: transparent;
+      color: var(--nx-sub);
       box-shadow: none !important;
 
       &:hover:not(.disabled) {
-        background-color: @colorBgTextHover;
-        border-color: @colorPrimaryHover;
-        color: @colorPrimaryHover;
+        background: var(--nx-surface);
+        border-color: transparent;
+        color: var(--nx-ink);
       }
     }
 
-    // 选中状态
     &.selected {
-      background-color: @colorPrimaryBg;
-      border: none;
-      color: @colorPrimary;
-      font-weight: @fontWeightStrong;
+      background: var(--nx-surface2);
+      border-color: transparent;
+      color: var(--nx-ink);
+      font-weight: 600;
       box-shadow: none;
 
-      &:hover:not(.disabled) {
-        background-color: @colorPrimaryBg;
-        border: none;
-        color: @colorPrimaryHover;
-      }
-
+      &:hover:not(.disabled),
       &:focus:not(.disabled) {
-        background-color: @colorPrimaryBg;
-        border: none;
-        color: @colorPrimaryActive;
+        background: var(--nx-surface2);
+        border-color: var(--nx-line);
+        color: var(--nx-ink);
       }
     }
 
-    // 禁用状态
     &.disabled {
       cursor: not-allowed;
-      opacity: 0.6;
-
-      &:hover {
-        background-color: inherit;
-        border-color: inherit;
-        color: inherit;
-      }
+      opacity: 0.5;
     }
   }
 
-  // 大小变体
   &.size-small {
-    gap: 4px;
+    gap: 3px;
 
     .toggleButton {
-      padding: 4px 8px;
-      font-size: 12px;
-      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 5px;
     }
   }
 
   &.size-large {
-    gap: 12px;
+    gap: 5px;
 
     .toggleButton {
-      padding: 8px 16px;
-      font-size: 16px;
+      padding: 6px 12px;
+      font-size: 14px;
       border-radius: 8px;
     }
   }
 }
 
-// 紧凑模式 - 按钮之间无间隙
 .buttonToggle.compact {
   gap: 0;
 
@@ -100,18 +85,9 @@
       border-top-right-radius: 6px;
       border-bottom-right-radius: 6px;
     }
-
-    &:not(:first-child) {
-      border-left: none;
-    }
-
-    &.selected + .toggleButton:not(.selected) {
-      border-left: 1px solid @colorPrimary;
-    }
   }
 }
 
-// 垂直布局
 .buttonToggle.vertical {
   flex-direction: column;
   align-items: stretch;
@@ -119,17 +95,5 @@
   .toggleButton {
     width: 100%;
     justify-content: center;
-  }
-}
-
-// 响应式设计
-@media (max-width: 768px) {
-  .buttonToggle {
-    gap: 4px;
-
-    .toggleButton {
-      padding: 6px 12px;
-      font-size: 14px;
-    }
   }
 }

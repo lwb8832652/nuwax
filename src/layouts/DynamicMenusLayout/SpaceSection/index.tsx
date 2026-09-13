@@ -20,7 +20,9 @@ const cx = classNames.bind(styles);
 const SpaceSection: React.FC<{
   activeTab: string;
   style?: React.CSSProperties;
-}> = ({ activeTab, style }) => {
+  showTitle?: boolean;
+  onTitleChange?: (title: string) => void;
+}> = ({ activeTab, style, showTitle = true, onTitleChange }) => {
   const { spaceId } = useParams();
 
   const { spaceList, currentSpaceInfo, handleCurrentSpaceInfo, getSpaceId } =
@@ -35,6 +37,10 @@ const SpaceSection: React.FC<{
 
   // 动态空间名称，用于显示空间名称
   const [dynamicTitle, setDynamicTitle] = useState<string>('');
+
+  useEffect(() => {
+    onTitleChange?.(dynamicTitle);
+  }, [dynamicTitle, onTitleChange]);
 
   useEffect(() => {
     if (!currentSpaceInfo) {
@@ -110,9 +116,11 @@ const SpaceSection: React.FC<{
 
   return (
     <div className={cx('h-full', 'overflow-y', styles.container)} style={style}>
-      <div style={{ padding: '0 12px 12px' }}>
-        <SpaceTitle name={dynamicTitle} />
-      </div>
+      {showTitle && (
+        <div style={{ padding: '0 0 12px' }}>
+          <SpaceTitle name={dynamicTitle} />
+        </div>
+      )}
 
       {/* 空间菜单列表 */}
       <DynamicSecondMenu parentCode={activeTab} />

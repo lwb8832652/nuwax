@@ -536,10 +536,10 @@
   rgba(0, 0, 0, 0.45)
 );
 
-// 导航交互状态颜色（使用主题色）
-@navItemHoverBg: #ffffff;
-@navItemActiveBg: #ffffff;
-@navItemSelectedBg: #ffffff;
+// 导航交互状态颜色（NewX：hover 弱底，选中容器底）
+@navItemHoverBg: var(--nx-surface2);
+@navItemActiveBg: var(--xagi-color-bg-container, #fff);
+@navItemSelectedBg: var(--xagi-color-bg-container, #fff);
 
 // 导航边框和分割线（使用独立的布局风格变量）
 @navBorderColor: var(--xagi-layout-border-primary, rgba(0, 0, 0, 0.15));
@@ -550,8 +550,8 @@
   rgba(0, 0, 0, 0.15)
 );
 
-// 导航阴影（使用独立的布局风格变量）
-@navShadow: var(--xagi-layout-shadow, 0 2px 8px rgba(0, 0, 0, 0.15));
+// 导航阴影（NewX：1px 描边环；修复原裸色值导致 box-shadow 无效的问题）
+@navShadow: 0 0 0 1px var(--nx-line);
 @navFirstMenuShadow: none;
 @navSecondMenuShadow: none;
 
