@@ -4381,6 +4381,7 @@ export const EN_US: SystemLangMap = {
   "PC.Pages.SystemConfig.LangContent.updateSuccess": "Updated successfully",
   "PC.Pages.SystemConfig.pageTitle": "System Settings",
   "PC.Pages.SystemConfig.saveSuccess": "Saved successfully",
+  "PC.Pages.SystemConfig.uploadNotFinished": "The image upload is not finished or failed. Please upload again before saving.",
   "PC.Pages.SystemConfigBaseFormItem.enterDomain": "Please enter domain",
   "PC.Pages.SystemConfigCategoryManage.add": "Add",
   "PC.Pages.SystemConfigCategoryManage.addSuccessWithType": "{0} category added successfully",

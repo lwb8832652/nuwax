@@ -4149,6 +4149,7 @@ export const JA_JP: SystemLangMap = {
   "PC.Pages.SystemConfig.LangContent.updateSuccess": "正常に更新されました",
   "PC.Pages.SystemConfig.pageTitle": "システム設定",
   "PC.Pages.SystemConfig.saveSuccess": "正常に保存されました",
+  "PC.Pages.SystemConfig.uploadNotFinished": "画像のアップロードが完了していないか失敗しました。再度アップロードしてから保存してください。",
   "PC.Pages.SystemConfigBaseFormItem.enterDomain": "ドメインを入力してください",
   "PC.Pages.SystemConfigCategoryManage.add": "追加",
   "PC.Pages.SystemConfigCategoryManage.addSuccessWithType": "{0} カテゴリが正常に追加されました",

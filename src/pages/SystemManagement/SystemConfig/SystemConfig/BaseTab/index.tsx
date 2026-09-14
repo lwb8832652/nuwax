@@ -18,6 +18,9 @@ import styles from './index.less';
 
 const cx = classNames.bind(styles);
 
+// 基础配置中的图片类字段
+const FILE_FIELDS = ['siteLogo', 'faviconUrl', 'squareBanner'];
+
 const BaseTab = forwardRef(
   (
     {
@@ -64,8 +67,31 @@ const BaseTab = forwardRef(
 
     const onFinish = async (values: any) => {
       const params: any = {};
+      // 图片类配置：上传未完成/失败时不能写入空值，否则会清掉已有图片（如站点 LOGO）
+      let hasUnfinishedUpload = false;
+
       Object.keys(values).forEach((key) => {
         const value = values[key];
+
+        if (currentTab === 'BaseConfig' && FILE_FIELDS.includes(key)) {
+          if (typeof value === 'string') {
+            // 未改动，原样回传（保留已有图片地址）
+            params[key] = value;
+          } else if (value?.file) {
+            const url = value.file.response?.data?.url;
+            if (url) {
+              params[key] = url;
+            } else {
+              // 上传中或上传失败，无可用地址
+              hasUnfinishedUpload = true;
+            }
+          } else {
+            // 用户主动移除图片，允许置空
+            params[key] = '';
+          }
+          return;
+        }
+
         // 处理清空的情况，传 -1 给后端
         if (value === undefined || value === null) {
           params[key] = -1;
@@ -76,11 +102,9 @@ const BaseTab = forwardRef(
         }
       });
 
-      // 处理删除图片保存失效的问题（仅在基础配置标签页下处理）
-      if (currentTab === 'BaseConfig') {
-        params.siteLogo ||= '';
-        params.faviconUrl ||= '';
-        params.squareBanner ||= '';
+      if (hasUnfinishedUpload) {
+        message.error(t('PC.Pages.SystemConfig.uploadNotFinished'));
+        return;
       }
 
       await apiSystemConfigUpdate(params);

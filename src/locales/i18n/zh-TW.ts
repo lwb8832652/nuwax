@@ -4148,6 +4148,7 @@ export const ZH_TW: SystemLangMap = {
   "PC.Pages.SystemConfig.LangContent.updateSuccess": "更新成功",
   "PC.Pages.SystemConfig.pageTitle": "系統設定",
   "PC.Pages.SystemConfig.saveSuccess": "儲存成功",
+  "PC.Pages.SystemConfig.uploadNotFinished": "圖片尚未上傳完成或上傳失敗，請重新上傳後再儲存",
   "PC.Pages.SystemConfigBaseFormItem.enterDomain": "請輸入域名",
   "PC.Pages.SystemConfigCategoryManage.add": "新增",
   "PC.Pages.SystemConfigCategoryManage.addSuccessWithType": "{0}分類新增成功",
