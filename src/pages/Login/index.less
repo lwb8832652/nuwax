@@ -321,3 +321,123 @@
     padding: 20px 18px;
   }
 }
+
+// ===== 大屏适配：卡片等比放大 =====
+@media (min-width: 1440px) {
+  .login-form-box {
+    width: 420px;
+    padding: 22px 28px 28px;
+
+    .welcome-box {
+      margin-top: 44px;
+
+      .welcome-title {
+        font-size: 24px;
+        line-height: 36px;
+      }
+    }
+
+    .form {
+      margin-top: 30px;
+
+      .input {
+        height: 42px;
+      }
+
+      .phone-input-compact {
+        height: 42px;
+      }
+
+      .btn {
+        height: 42px;
+      }
+    }
+  }
+}
+
+@media (min-width: 1920px) {
+  .login-form-box {
+    width: 448px;
+    padding: 24px 30px 30px;
+
+    .welcome-box {
+      margin-top: 48px;
+
+      .welcome-title {
+        font-size: 26px;
+        line-height: 39px;
+      }
+
+      .welcome-sub {
+        font-size: 12px;
+        line-height: 18px;
+      }
+    }
+
+    .form {
+      margin-top: 32px;
+
+      .field {
+        :global {
+          .ant-form-item-label > label {
+            font-size: 12px;
+            line-height: 18px;
+          }
+        }
+      }
+
+      .input {
+        height: 44px;
+        font-size: 13px;
+      }
+
+      .phone-input-compact {
+        height: 44px;
+      }
+
+      .btn {
+        height: 44px;
+        font-size: 13px;
+      }
+    }
+
+    .help-row {
+      margin-top: 24px;
+      font-size: 11px;
+    }
+  }
+}
+
+@media (min-width: 2560px) {
+  .login-form-box {
+    width: 500px;
+    padding: 28px 34px 34px;
+
+    .welcome-box {
+      .welcome-title {
+        font-size: 30px;
+        line-height: 45px;
+      }
+
+      .welcome-sub {
+        font-size: 13px;
+      }
+    }
+
+    .form {
+      .input {
+        height: 48px;
+        font-size: 14px;
+      }
+
+      .phone-input-compact {
+        height: 48px;
+      }
+
+      .btn {
+        height: 48px;
+        font-size: 14px;
+      }
+    }
+  }
+}

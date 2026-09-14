@@ -22,10 +22,8 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    max-width: @login-page-max;
     height: 100%;
-    margin: 0 auto;
-    padding: 0 @login-page-padding;
+    padding: 0 40px;
     box-sizing: border-box;
   }
 
@@ -57,6 +55,7 @@
   display: grid;
   grid-template-columns: minmax(0, 430px) minmax(0, 384px);
   justify-content: space-between;
+  align-content: center;
   column-gap: 64px;
   width: 100%;
   max-width: @login-page-max;
@@ -269,7 +268,7 @@
   .main {
     grid-template-columns: minmax(0, 1fr) minmax(0, 384px);
     column-gap: 40px;
-    padding: 56px 32px 56px;
+    padding: 56px 32px;
   }
 
   .sidebar {
@@ -306,5 +305,265 @@
   .panel {
     justify-content: center;
     width: 100%;
+  }
+}
+
+// ===== 大屏适配：整体等比放大 =====
+@media (min-width: 1440px) {
+  .header .header-inner {
+    padding: 0 48px;
+  }
+
+  .main {
+    max-width: 1360px;
+    grid-template-columns: minmax(0, 520px) minmax(0, 440px);
+    column-gap: 72px;
+    padding: 96px 60px 84px;
+  }
+
+  .sidebar {
+    .title {
+      font-size: 36px;
+      line-height: 46px;
+    }
+
+    .sub-title {
+      font-size: 14px;
+      line-height: 24px;
+      max-width: 420px;
+    }
+
+    .feature-grid {
+      margin-top: 44px;
+    }
+
+    .feature-card {
+      padding: 10px 12px;
+    }
+
+    .feature-icon {
+      width: 28px;
+      height: 28px;
+      font-size: 13px;
+    }
+
+    .feature-title {
+      font-size: 12px;
+    }
+
+    .feature-sub {
+      font-size: 10px;
+    }
+
+    .trait-list {
+      margin-top: 44px;
+    }
+
+    .quote {
+      margin-top: 44px;
+      font-size: 12px;
+    }
+  }
+}
+
+@media (min-width: 1920px) {
+  .header {
+    height: 96px;
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+    }
+
+    .brand-name {
+      font-size: 17px;
+      line-height: 25px;
+    }
+  }
+
+  .main {
+    max-width: 1760px;
+    grid-template-columns: minmax(0, 640px) minmax(0, 500px);
+    column-gap: 88px;
+    padding: 110px 72px 96px;
+  }
+
+  .sidebar {
+    padding-top: 40px;
+
+    .slogan {
+      font-size: 10px;
+    }
+
+    .title {
+      font-size: 42px;
+      line-height: 54px;
+    }
+
+    .sub-title {
+      margin-top: 18px;
+      font-size: 16px;
+      line-height: 27px;
+      max-width: 480px;
+    }
+
+    .feature-grid {
+      margin-top: 52px;
+      gap: 10px;
+    }
+
+    .feature-card {
+      padding: 12px 14px;
+      gap: 10px;
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      font-size: 15px;
+      border-radius: 8px;
+    }
+
+    .feature-title {
+      font-size: 13px;
+      line-height: 19px;
+    }
+
+    .feature-sub {
+      font-size: 11px;
+      line-height: 16px;
+    }
+
+    .trait-list {
+      margin-top: 56px;
+      padding-top: 26px;
+      gap: 18px;
+    }
+
+    .trait-no {
+      width: 44px;
+      font-size: 11px;
+    }
+
+    .trait-bar {
+      width: 12px;
+    }
+
+    .trait-title {
+      font-size: 14px;
+      line-height: 21px;
+    }
+
+    .trait-desc {
+      font-size: 12px;
+      line-height: 18px;
+    }
+
+    .quote {
+      margin-top: 56px;
+      font-size: 13px;
+    }
+  }
+}
+
+@media (min-width: 2560px) {
+  .main {
+    max-width: 2080px;
+    grid-template-columns: minmax(0, 720px) minmax(0, 560px);
+    column-gap: 104px;
+  }
+
+  .sidebar {
+    .title {
+      font-size: 48px;
+      line-height: 62px;
+    }
+
+    .sub-title {
+      font-size: 18px;
+      line-height: 30px;
+      max-width: 560px;
+    }
+
+    .feature-grid {
+      margin-top: 64px;
+      gap: 12px;
+    }
+
+    .feature-card {
+      padding: 14px 16px;
+    }
+
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      font-size: 17px;
+    }
+
+    .feature-title {
+      font-size: 15px;
+    }
+
+    .feature-sub {
+      font-size: 12px;
+    }
+
+    .trait-list {
+      margin-top: 68px;
+      padding-top: 30px;
+      gap: 22px;
+    }
+
+    .trait-no {
+      width: 50px;
+      font-size: 12px;
+    }
+
+    .trait-title {
+      font-size: 16px;
+    }
+
+    .trait-desc {
+      font-size: 13px;
+    }
+
+    .quote {
+      margin-top: 68px;
+      font-size: 15px;
+    }
+  }
+}
+
+// ===== 矮屏紧凑：内容过高时回到顶部对齐并压缩间距 =====
+@media (max-height: 800px) {
+  .main {
+    align-content: start;
+    padding-top: 48px;
+    padding-bottom: 48px;
+  }
+
+  .sidebar {
+    .title {
+      font-size: 28px;
+      line-height: 36px;
+    }
+
+    .sub-title {
+      margin-top: 12px;
+    }
+
+    .feature-grid {
+      margin-top: 28px;
+    }
+
+    .trait-list {
+      margin-top: 32px;
+      padding-top: 18px;
+      gap: 12px;
+    }
+
+    .quote {
+      margin-top: 32px;
+    }
   }
 }
