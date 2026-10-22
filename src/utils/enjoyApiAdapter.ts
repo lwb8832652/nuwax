@@ -15,6 +15,8 @@ const API_PREFIX_REWRITE_RULES: Array<[RegExp, string]> = [
   [/^\/api\/file\//, '/app-api/ai/file/'],
   // 二维码生成（img 直接访问）
   [/^\/api\/qr\//, '/app-api/ai/qr/'],
+  // 菜单：迁移后由前端本地默认菜单兜底
+  [/^\/api\/user\/list-menu/, '/admin-api/ai/base/menus'],
   // 前端基础数据（i18n/租户配置/空间列表），迁移后由 /ai/base 提供
   [/^\/api\/i18n\/query/, '/admin-api/ai/base/i18n/query'],
   [/^\/api\/tenant\/config/, '/admin-api/ai/base/tenant/config'],

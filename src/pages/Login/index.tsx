@@ -129,8 +129,17 @@ const Login: React.FC = () => {
         } catch (error) {
           console.error('[Login] Sync language after login failed:', error);
         }
-        await loadMenus(true);
-        await initI18n(true);
+        // 菜单与 i18n 属辅助初始化，失败不应阻断登录跳转
+        try {
+          await loadMenus(true);
+        } catch (error) {
+          console.error('[Login] Load menus failed:', error);
+        }
+        try {
+          await initI18n(true);
+        } catch (error) {
+          console.error('[Login] Init i18n failed:', error);
+        }
         const redirect = decodeURIComponent(searchParams.get('redirect') || '');
         if (isWeakNumber(redirect)) {
           history.go(Number(redirect));
@@ -210,7 +219,9 @@ const Login: React.FC = () => {
               ? Promise.resolve()
               : Promise.reject(new Error(dict('PC.Pages.Login.invalidEmail')));
           } else {
-            return isValidPhone(value)
+            // enjoy-cloud 使用用户名登录，兼容手机号 / 用户名两种输入
+            const isAccount = /^[A-Za-z0-9_.@-]{3,64}$/.test(value);
+            return isValidPhone(value) || isAccount
               ? Promise.resolve()
               : Promise.reject(new Error(dict('PC.Pages.Login.invalidPhone')));
           }
