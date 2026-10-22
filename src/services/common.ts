@@ -96,8 +96,8 @@ const beSilentRequestList = (url: string): boolean => {
 
   // 不展示错误消息的API路径列表
   const list = [
-    '/api/notify/event/collect/batch', // 事件轮询
-    '/api/notify/event/clear', // 事件清除
+    '/notify/event/collect/batch', // 事件轮询（重写后路径）
+    '/notify/event/clear', // 事件清除（重写后路径）
     '/api/user/getLoginInfo', // 获取登录信息
     '/api/custom-page/keepalive', // 开发页面保活
     '/api/custom-page/start-dev', // 开发页面启动

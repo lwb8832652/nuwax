@@ -11,6 +11,8 @@
 const API_PREFIX_REWRITE_RULES: Array<[RegExp, string]> = [
   // 默认图标（img src 直接访问，无需鉴权）
   [/^\/api\/logo\//, '/app-api/ai/logo/'],
+  // 站内通知与事件轮询（需登录态）
+  [/^\/api\/notify\//, '/admin-api/ai/notify/'],
   // 开放端（沙箱回调、开放 API）
   [/^\/api\/v1\/4sandbox\//, '/app-api/ai/v1/4sandbox/'],
   [/^\/api\/v1\//, '/app-api/ai/v1/'],

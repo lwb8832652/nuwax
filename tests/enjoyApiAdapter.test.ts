@@ -48,6 +48,15 @@ describe('rewriteEnjoyApiUrl', () => {
     ).toBe('/admin-api/ai/knowledge/accuracytest/history?kbId=1');
   });
 
+  it('站内通知映射到管理端', () => {
+    expect(rewriteEnjoyApiUrl('/api/notify/event/collect/batch')).toBe(
+      '/admin-api/ai/notify/event/collect/batch',
+    );
+    expect(rewriteEnjoyApiUrl('/api/notify/message/unread/count')).toBe(
+      '/admin-api/ai/notify/message/unread/count',
+    );
+  });
+
   it('默认图标映射到开放端', () => {
     expect(rewriteEnjoyApiUrl('/api/logo/knowledge/111')).toBe(
       '/app-api/ai/logo/knowledge/111',
@@ -61,8 +70,8 @@ describe('rewriteEnjoyApiUrl', () => {
     expect(rewriteEnjoyApiUrl('/api/user/getLoginInfo')).toBe(
       '/api/user/getLoginInfo',
     );
-    expect(rewriteEnjoyApiUrl('/api/notify/event/collect/batch')).toBe(
-      '/api/notify/event/collect/batch',
+    expect(rewriteEnjoyApiUrl('/api/custom-page/keepalive')).toBe(
+      '/api/custom-page/keepalive',
     );
     expect(rewriteEnjoyApiUrl('/api/custom-page/keepalive')).toBe(
       '/api/custom-page/keepalive',
