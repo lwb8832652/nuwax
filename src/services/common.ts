@@ -10,6 +10,7 @@ import { ACCESS_TOKEN } from '@/constants/home.constants';
 import { I18N_STORAGE_KEYS } from '@/constants/i18n.constants';
 import { dict } from '@/services/i18nRuntime';
 import type { RequestResponse } from '@/types/interfaces/request';
+import { getEnjoyTenantId, rewriteEnjoyApiUrl } from '@/utils/enjoyApiAdapter';
 import { redirectToLogin } from '@/utils/router';
 import { RequestConfig } from '@@/plugin-request/request';
 import { message, Modal } from 'antd';
@@ -150,6 +151,20 @@ const errorHandler = (error: any, opts: any) => {
         return Promise.reject();
       }
 
+      // enjoy-cloud：统一处理 401（未登录/登录失效）与 403（无权限）
+      if (String(code) === '401') {
+        localStorage.clear();
+        clearLoginStatusCache();
+        redirectToLogin(-1);
+        return Promise.reject();
+      }
+      if (String(code) === '403') {
+        if (shouldShowErrorMessage(errorMessage || '没有该操作权限')) {
+          message.warning(errorMessage || '没有该操作权限');
+        }
+        return Promise.reject();
+      }
+
       // 根据错误码处理不同情况
       switch (code) {
         // 用户未登录，跳转到登录页
@@ -232,9 +247,10 @@ const errorHandler = (error: any, opts: any) => {
  * 对所有请求进行预处理
  */
 const requestInterceptors = [
-  // 添加基础URL
+  // 添加基础URL（先按 enjoy-cloud 前缀重写，再拼接 BASE_URL）
   (url: string, options: any) => {
-    const newUrl = process.env.BASE_URL + url;
+    const rewrittenUrl = rewriteEnjoyApiUrl(url);
+    const newUrl = process.env.BASE_URL + rewrittenUrl;
     return { url: newUrl, options };
   },
 
@@ -244,6 +260,15 @@ const requestInterceptors = [
     const token = localStorage.getItem(ACCESS_TOKEN) ?? '';
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // enjoy-cloud：管理端/开放端请求统一带租户标识
+    const requestUrl: string = config.url || '';
+    if (
+      requestUrl.includes('/admin-api/') ||
+      requestUrl.includes('/app-api/ai/')
+    ) {
+      config.headers['tenant-id'] = getEnjoyTenantId();
     }
 
     // FormData 上传不需要设置 Content-Type，浏览器会自动设置 multipart/form-data; boundary=...
@@ -287,6 +312,16 @@ const responseInterceptors = [
 
     // 如果响应类型是blob，直接返回响应对象
     if (config?.responseType === 'blob') {
+      return response;
+    }
+
+    // enjoy-cloud：yudao 成功码为数字 0，统一归一化为原前端的 '0000'
+    if (String(data.code) === '0' || data.code === '0') {
+      data.code = SUCCESS_CODE;
+      data.success = true;
+      if (data.message === undefined && data.msg !== undefined) {
+        data.message = data.msg;
+      }
       return response;
     }
 

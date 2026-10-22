@@ -21,14 +21,44 @@ import type { RequestResponse } from '@/types/interfaces/request';
 import { request } from 'umi';
 import { clearLoginStatusCache } from './userService';
 
-// 账号密码登录
+// enjoy-cloud（yudao）认证接口
+const ENJOY_LOGIN_PATH = '/admin-api/system/auth/login';
+const ENJOY_USER_PATH = '/admin-api/system/user/profile/get';
+const ENJOY_LOGOUT_PATH = '/admin-api/system/auth/logout';
+
+const isEnjoySuccess = (res: any): boolean =>
+  !!res && (res.code === '0000' || String(res.code) === '0');
+
+// 账号密码登录（适配 enjoy-cloud / yudao，返回结构归一化为原前端 ILoginResult）
 export async function apiLogin(
   data: LoginFieldType,
 ): Promise<RequestResponse<ILoginResult>> {
-  return request('/api/user/passwordLogin', {
+  const res: any = await request(ENJOY_LOGIN_PATH, {
     method: 'POST',
-    data,
+    data: {
+      username: data.phoneOrEmail,
+      password: data.password,
+      captchaVerifyParam: data.captchaVerifyParam,
+    },
   });
+  if (isEnjoySuccess(res)) {
+    const token = res.data?.accessToken || res.data?.token || '';
+    return {
+      code: '0000',
+      displayCode: '',
+      message: res.message || 'success',
+      success: true,
+      debugInfo: {},
+      tid: '',
+      data: {
+        token,
+        expireDate: res.data?.expiresTime || '',
+        resetPass: 0,
+        redirect: null,
+      },
+    } as RequestResponse<ILoginResult>;
+  }
+  return res;
 }
 
 // 发送验证码
@@ -64,8 +94,8 @@ export async function apiSetPassword(
 // 退出登录接口
 export async function apiLogout(): Promise<RequestResponse<null>> {
   clearLoginStatusCache();
-  return request('/api/user/logout', {
-    method: 'GET',
+  return request(ENJOY_LOGOUT_PATH, {
+    method: 'POST',
   });
 }
 
@@ -91,9 +121,41 @@ export async function apiUserUpdate(
 
 // 查询当前登录用户信息
 export async function apiUserInfo(): Promise<RequestResponse<UserInfo>> {
-  return request('/api/user/getLoginInfo', {
+  const res: any = await request(ENJOY_USER_PATH, {
     method: 'GET',
   });
+  // enjoy-cloud：将 yudao 用户结构映射为前端 UserInfo
+  if (isEnjoySuccess(res) && res.data) {
+    const user = res.data;
+    const tenantId = Number(
+      (typeof localStorage !== 'undefined' &&
+        (localStorage.getItem('tenant-id') ||
+          localStorage.getItem('tenantId'))) ||
+        1,
+    );
+    res.data = {
+      id: user.id,
+      tenantId,
+      userName: user.username || '',
+      nickName: user.nickname || user.username || '',
+      avatar: user.avatar || '',
+      password: '',
+      resetPass: 0,
+      status: 'Enabled',
+      role:
+        Array.isArray(user.roles) && user.roles.some((r: any) => r?.id === 1)
+          ? 'Admin'
+          : 'User',
+      email: user.email || '',
+      phone: user.mobile || '',
+      lastLoginTime: user.loginDate
+        ? new Date(user.loginDate).toISOString()
+        : '',
+      created: user.createTime ? new Date(user.createTime).toISOString() : '',
+      modified: '',
+    } as UserInfo;
+  }
+  return res;
 }
 
 // 重置密码
