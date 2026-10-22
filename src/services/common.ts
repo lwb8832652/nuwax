@@ -24,6 +24,26 @@ import { clearLoginStatusCache } from './userService';
  */
 const errorMessageCache = new Map<string, number>();
 
+/**
+ * 业务文案 → 本地业务码映射
+ *
+ * 迁移后后端统一返回 { code, msg }：参数/业务异常为 4000，未登录 401，无权限 403。
+ * nuwax 业务层仍有按本地码（0001/0007）分支的逻辑，这里按文案补齐映射。
+ */
+const BIZ_MESSAGE_CODE_MAP: Array<[RegExp, string]> = [
+  [/智能体.*(不存在|已下架)/, AGENT_NOT_EXIST],
+  [/沙箱/, SANDBOX_TEST_ERROR],
+];
+
+const mapBizCode = (code: any, message: string): any => {
+  for (const [pattern, target] of BIZ_MESSAGE_CODE_MAP) {
+    if (pattern.test(message || '')) {
+      return target;
+    }
+  }
+  return code;
+};
+
 // 错误消息去重的时间窗口（毫秒），默认 2 秒
 const ERROR_MESSAGE_DEBOUNCE_TIME = 2000;
 
@@ -144,7 +164,8 @@ const errorHandler = (error: any, opts: any) => {
     // 处理业务错误
     const errorInfo: RequestResponse<null> | undefined = error.info;
     if (errorInfo) {
-      const { code, message: errorMessage } = errorInfo;
+      const { message: errorMessage } = errorInfo;
+      const code = mapBizCode(errorInfo.code, errorMessage);
 
       // 已经有后台Agent服务正在运行
       if (code === AGENT_SERVICE_RUNNING) {
