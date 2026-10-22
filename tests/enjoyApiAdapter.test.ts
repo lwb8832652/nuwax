@@ -48,6 +48,11 @@ describe('rewriteEnjoyApiUrl', () => {
     ).toBe('/admin-api/ai/knowledge/accuracytest/history?kbId=1');
   });
 
+  it('二维码与文件路径映射到开放端', () => {
+    expect(rewriteEnjoyApiUrl('/api/qr/YWJj')).toBe('/app-api/ai/qr/YWJj');
+    expect(rewriteEnjoyApiUrl('/api/file/12')).toBe('/app-api/ai/file/12');
+  });
+
   it('站内通知映射到管理端', () => {
     expect(rewriteEnjoyApiUrl('/api/notify/event/collect/batch')).toBe(
       '/admin-api/ai/notify/event/collect/batch',

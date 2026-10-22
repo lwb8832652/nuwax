@@ -11,6 +11,10 @@
 const API_PREFIX_REWRITE_RULES: Array<[RegExp, string]> = [
   // 默认图标（img src 直接访问，无需鉴权）
   [/^\/api\/logo\//, '/app-api/ai/logo/'],
+  // 文件下载（旧路径 /api/file/{id} → 新文件接口）
+  [/^\/api\/file\//, '/app-api/ai/file/'],
+  // 二维码生成（img 直接访问）
+  [/^\/api\/qr\//, '/app-api/ai/qr/'],
   // 站内通知与事件轮询（需登录态）
   [/^\/api\/notify\//, '/admin-api/ai/notify/'],
   // 开放端（沙箱回调、开放 API）
