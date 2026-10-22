@@ -327,7 +327,14 @@ const responseInterceptors = [
      * 如果响应数据是字符串，直接返回响应对象(用于直接通过fetchContentFromUrl获取的内容)
      * 如果响应数据是对象，但是没有code属性，直接返回响应对象(用于直接通过fetchContentFromUrl获取的内容)
      */
-    if (typeof data !== 'object' || (typeof data === 'object' && !data.code)) {
+    // 注意：yudao 成功码是数字 0，不能用 !data.code 判断（会把 0 当成缺失）
+    const hasCode =
+      typeof data === 'object' &&
+      data !== null &&
+      'code' in data &&
+      data.code !== undefined &&
+      data.code !== null;
+    if (typeof data !== 'object' || !hasCode) {
       return response;
     }
 
