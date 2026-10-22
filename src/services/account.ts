@@ -124,16 +124,22 @@ export async function apiUserInfo(): Promise<RequestResponse<UserInfo>> {
   const res: any = await request(ENJOY_USER_PATH, {
     method: 'GET',
   });
-  // enjoy-cloud：将 yudao 用户结构映射为前端 UserInfo
-  if (isEnjoySuccess(res) && res.data) {
-    const user = res.data;
-    const tenantId = Number(
-      (typeof localStorage !== 'undefined' &&
-        (localStorage.getItem('tenant-id') ||
-          localStorage.getItem('tenantId'))) ||
-        1,
-    );
-    res.data = {
+  const user = res?.data;
+  const ok = res && (res.code === '0000' || String(res.code) === '0');
+  if (!ok || !user) {
+    return res;
+  }
+  const tenantId = Number(
+    (typeof localStorage !== 'undefined' &&
+      (localStorage.getItem('tenant-id') ||
+        localStorage.getItem('tenantId'))) ||
+      1,
+  );
+  // 返回新对象，避免直接改写响应体（只读时赋值会静默失败）
+  return {
+    ...res,
+    code: '0000',
+    data: {
       id: user.id,
       tenantId,
       userName: user.username || '',
@@ -153,9 +159,8 @@ export async function apiUserInfo(): Promise<RequestResponse<UserInfo>> {
         : '',
       created: user.createTime ? new Date(user.createTime).toISOString() : '',
       modified: '',
-    } as UserInfo;
-  }
-  return res;
+    } as UserInfo,
+  } as RequestResponse<UserInfo>;
 }
 
 // 重置密码

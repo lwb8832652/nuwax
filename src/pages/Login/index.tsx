@@ -1,8 +1,13 @@
 import AliyunCaptcha, { AliyunCaptchaRef } from '@/components/AliyunCaptcha';
 import SiteFooter from '@/components/SiteFooter';
-import { ACCESS_TOKEN, EXPIRE_DATE, PHONE } from '@/constants/home.constants';
+import {
+  ACCESS_TOKEN,
+  EXPIRE_DATE,
+  PHONE,
+  USER_INFO,
+} from '@/constants/home.constants';
 import useRequestPromiseBridge from '@/hooks/useRequestPromiseBridge';
-import { apiLogin } from '@/services/account';
+import { apiLogin, apiUserInfo } from '@/services/account';
 import { dict, initI18n, syncLangFromUserInfo } from '@/services/i18nRuntime';
 import { unifiedThemeService } from '@/services/unifiedThemeService';
 import { UserService } from '@/services/userService';
@@ -128,6 +133,18 @@ const Login: React.FC = () => {
           await syncLangFromUserInfo(latestUserInfo);
         } catch (error) {
           console.error('[Login] Sync language after login failed:', error);
+        }
+        // USER_INFO_FALLBACK：迁移后用户信息结构不同，若未落库则兜底写入，保证菜单能加载
+        try {
+          if (!localStorage.getItem(USER_INFO)) {
+            const userRes = await apiUserInfo();
+            const userData = (userRes as any)?.data;
+            if (userData) {
+              localStorage.setItem(USER_INFO, JSON.stringify(userData));
+            }
+          }
+        } catch (error) {
+          console.error('[Login] Fallback save user info failed:', error);
         }
         // 菜单与 i18n 属辅助初始化，失败不应阻断登录跳转
         try {
