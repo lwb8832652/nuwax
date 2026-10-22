@@ -48,6 +48,15 @@ describe('rewriteEnjoyApiUrl', () => {
     ).toBe('/admin-api/ai/knowledge/accuracytest/history?kbId=1');
   });
 
+  it('默认图标映射到开放端', () => {
+    expect(rewriteEnjoyApiUrl('/api/logo/knowledge/111')).toBe(
+      '/app-api/ai/logo/knowledge/111',
+    );
+    expect(rewriteEnjoyApiUrl('/api/logo/workflow/ZLK-测试')).toBe(
+      '/app-api/ai/logo/workflow/ZLK-测试',
+    );
+  });
+
   it('未迁移模块保持原路径', () => {
     expect(rewriteEnjoyApiUrl('/api/user/getLoginInfo')).toBe(
       '/api/user/getLoginInfo',
