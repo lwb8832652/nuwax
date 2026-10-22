@@ -15,6 +15,10 @@ const API_PREFIX_REWRITE_RULES: Array<[RegExp, string]> = [
   [/^\/api\/file\//, '/app-api/ai/file/'],
   // 二维码生成（img 直接访问）
   [/^\/api\/qr\//, '/app-api/ai/qr/'],
+  // 前端基础数据（i18n/租户配置/空间列表），迁移后由 /ai/base 提供
+  [/^\/api\/i18n\/query/, '/admin-api/ai/base/i18n/query'],
+  [/^\/api\/tenant\/config/, '/admin-api/ai/base/tenant/config'],
+  [/^\/api\/space\/list/, '/admin-api/ai/base/space/list'],
   // 站内通知与事件轮询（需登录态）
   [/^\/api\/notify\//, '/admin-api/ai/notify/'],
   // 开放端（沙箱回调、开放 API）

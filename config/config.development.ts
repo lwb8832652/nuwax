@@ -17,5 +17,14 @@ export default defineConfig({
       target: 'http://localhost:8081',
       changeOrigin: true,
     },
+    // 迁移后：AI 模块请求走 enjoy-cloud（48080）
+    '/admin-api': {
+      target: 'http://127.0.0.1:48080',
+      changeOrigin: true,
+    },
+    '/app-api': {
+      target: 'http://127.0.0.1:48080',
+      changeOrigin: true,
+    },
   },
 });
